@@ -1,0 +1,368 @@
+.topic NoContext=0               
+
+ TVDV.EXE    Dateiverwaltung ( Katalogsystem ) Ü
+ ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+
+Programmbeschreibung:
+
+TVDV ist ein Verwaltungsprogramm fr Disketten und deren Dateien.
+Es untersttzt das Auffinden von Dateien jeglicher Art. Dabei ist es
+egal ob eine Diskette oder eine Festplatte katalogisiert wird.
+Das Programm ist nach SAA - Standart geschrieben und untersttzt eine Maus.
+Es kann aber auch mit der Tastatur bedient werden.
+
+Systemanforderungen:
+
+Ab IBM XT aufw„rts, mindestens 512 kByte RAM.
+MS-DOS 3.2 oder h”her.
+
+Da das Programm mit OVL Technik arbeitet w„hre eine Festplatte,
+Smartdrive oder andere Festplatten-Cache-Programme und EMS von Vorteil.
+
+Bet„tigen Sie jetzt die Return - Taste fr "Hilfe ber Hilfe".
+
+ { Hilfe ber Hilfe :AboutHelp} { Inhaltsverzeichnis :Contents}
+
+.topic Import=821
+
+ Daten - Import Ü
+ ßßßßßßßßßßßßßßßß
+
+ { Importieren :Importieren}
+ { Importdaten Prfen :ImportPr}
+ { Import nachtragen :ImportNachtragen}
+
+.topic Editor=820
+
+ Texteditor in TVDV Ü
+ ßßßßßßßßßßßßßßßßßßßß
+
+Dieser Editor ist ein normaler Editor ohne Suchfunktionen.
+Text kann markiert werden, kopiert, verschoben, gespeichert und gel”scht
+werden. Ebenso ist ein Clipboard vorhanden, in das und von dem Text kopiert
+werden kann. Man kann auch einen Text von einer anderen Datei direkt
+einlesen.
+
+Volgende Kommandos kennt der Editor:
+
+ [Ctrl] + [K][B] = Blockbeginn markieren.
+ [Ctrl] + [K][K] = Blockende markieren.
+ [Ctrl] + [K][V] = Block verschieben.
+ [Ctrl] + [K][C] = Block kopieren.
+ [Ctrl] + [K][S] = 
+Block speichern, ist kein Block da, so gilt der ganze Text als Block.
+ [Ctrl] + [K][W] = Block schreiben.
+ [Ctrl] + [K][R] = Block lesen.
+
+.topic AboutHelp=50
+
+ Hilfe ber Hilfe Ü
+ ßßßßßßßßßßßßßßßßßß
+
+Wenn Sie im Programm die Taste [F1] drcken, dann ”ffnet sich,
+soweit vorhanden, ein Hilfebildschirm.
+
+Drcken Sie [Alt] + [F1], dann gelangen Sie in den letzten Hilfebildschirm.
+Dies gilt nur, wenn die Hilfe aktiv ist.
+
+
+Textstellen, die in einer anderen Farbe dargestellt sind, k”nnen durch
+[Tab], [Schift] + [Tab] und mit der Maus ausgew„hlt werden.
+Wenn Sie diese Elemente mit der Maus doppelt anklicken oder [Return] drcken,
+”ffnet sich ein neues Hilfefenster. Es bezieht sich auf die markierte
+Textstelle.
+ 
+Sie kommen mit drcken von [ESC] oder mit einem Mausklick auf das K„stchen
+oben links im Fensterrahmen aus der Hilfe wieder heraus.
+ 
+ { Sonderfunktionen der Maus in der Hilfe :Maus} { Inhaltsverzeichnis :Contents}
+
+.topic Scann = 800
+
+ Men Einlesen Ü
+ ßßßßßßßßßßßßßßß
+
+Mit diesem Befehl k”nnen Sie Disketten oder Platten etc. einlesen.
+Netzwerklaufwerke und {CD ROM's:CDROM} habe ich noch nicht getested.
+ 
+.topic DAS = 801
+
+ Men mehrfaches Einlesen Ü
+ ßßßßßßßßßßßßßßßßßßßßßßßßßß
+
+Hier ist es m”glich nacheinander mehrere Disketten einzulesen.
+Es wird darauf geachted, daá eine Disk nicht zweimal eingelesen wird.
+(Bei fest eingebauten Platten wrde man eine Fehlermeldung erzwingen).
+ 
+.topic Nachtrag = 802
+
+ Men Nachtrag Ü
+ ßßßßßßßßßßßßßßß
+
+Sind Datenbereiche (Disketten oder Platten) veralted, so kann mit
+diesem Menpunkt der alte Datenbereich durch den neu eingelesenen
+berschrieben werden.
+ 
+.topic Dateileichen
+
+Unter Dateileichen verstehe ich solche, die mehrmals vorkommen.
+ 
+.topic Aufreum                = 803
+
+ Men Aufr„um Ü
+ ßßßßßßßßßßßßßß
+
+Soll zuknftig {Dateileichen} finden und ber Benutzerdialog eventuell
+l”schen.
+ 
+.topic Laden                  = 804
+
+ Men Daten laden Ü
+ ßßßßßßßßßßßßßßßßßß
+
+Mit diesem Menpunkt k”nnen Daten vom eingestellten Datendateinamen
+geladen werden. Sind die Dateien nicht vorhanden, so werden Sie
+darauf aufmerksam gemacht.
+ 
+.topic Speichern              = 805
+
+ Men Daten speichern Ü
+ ßßßßßßßßßßßßßßßßßßßßßß
+
+Speichern der geladenen, gescannten oder editierten Daten in eingestellten 
+Datendateinamen. Vorhandene Dateinamen werden berschrieben.
+ 
+.topic DatenAufgeben          = 806
+
+ Men Daten aufgeben Ü
+ ßßßßßßßßßßßßßßßßßßßßß
+
+Daten im Speicher aufgeben. Der verwendete Speicherplatz wird wieder frei.
+ 
+.topic NewFileName            = 807
+
+ Men neuer Dateiname Ü
+ ßßßßßßßßßßßßßßßßßßßßßß
+
+ndern der Dateinamen fr die Daten. Hier ist auf folgendes zu achten:
+
+Nur eingabe von Extender (mit Punkt vorher),
+oder nur einen Dateinamen ohne Extender eingeben
+(hier darf kein Punkt enthalten sein).
+
+Maximale L„ngen:
+ Extender mit Punktÿ=ÿ4 Buchstaben, 
+ Dateinmeÿ=ÿ8 Buchstaben.
+ 
+.topic ChangeDir              = 808
+
+ Men Verzeichnis wechseln Ü
+ ßßßßßßßßßßßßßßßßßßßßßßßßßßß
+
+Entspricht dem DOSÿ-ÿBefehl "CD...".
+ 
+.topic ZeigeDaten             = 809
+
+ Men zeige Daten Ü
+ ßßßßßßßßßßßßßßßßßß
+
+Dateien im zusammenhang der Verzeichnisstrucktur anzeigen. Hier k”nnen
+vorerst nur die Daten angesehen werden, die im Speicher enthalten sind.
+ 
+.topic SucheDaten             = 810
+
+ Men suche Dateien Ü
+ ßßßßßßßßßßßßßßßßßßßß
+
+Suchen nach bestimmten Dateien, wobei auch Dateimasken zugelassen sind.
+Es gilt die DOS-Dateinamen-Konvention. (*,ÿ?)  
+ 
+.topic SucheMehrfache         = 811
+
+ Men suche mehrfache Dateien Ü
+ ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+
+Suchen nach Dateien, die mehrfach vorhanden sind. Vorerst nur anhand gleicher
+Dateinamen.
+ 
+.topic Memory                 = 812
+
+ Men freier Speicher Ü
+ ßßßßßßßßßßßßßßßßßßßßßß
+
+Anzeige von konventionellem Speicher, XMS und EMS.
+
+.topic DEdit                  = 813
+
+ Men Daten editieren Ü
+ ßßßßßßßßßßßßßßßßßßßßßß
+
+Erm”glicht das L”schen, Editieren und Hinzufgen von Daten.
+Z.B. gezieltes l”schen eines Diskbereiches.
+ 
+.topic Pruefen                = 814
+
+ Men prfe Daten Ü
+ ßßßßßßßßßßßßßßßßßß
+
+Sind Sie der Meinung, daá ein Fehler in den Daten ist (falsche Angabe
+des Pfades und/oder Diskettennummer), so k”nnen die Daten mit diesem Befehl 
+untersucht werden.
+
+Auch hier kann nur mit geladenen Daten hantiert werden.
+ 
+.topic Datei                  = 815
+
+ Hauptmen Datei Ü
+ ßßßßßßßßßßßßßßßßß
+
+ { Editor :Editor}
+ { Daten laden :Laden}
+ { Daten speichern :Speichern}
+ { Verzeichnis wechseln :ChangeDir}
+
+.topic DatenAkt               = 816
+
+ Hauptmen Daten Aktualisieren Ü
+ ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+
+ { Importieren :Import}
+ { Einlesen :Scann}
+ { mehrfaches Einlesen :DAS}
+ { Nachtrag :Nachtrag}
+ { Aufr„umen :Aufreum}
+
+.topic Daten                  = 817
+
+ Hauptmen Daten Ü
+ ßßßßßßßßßßßßßßßßß
+
+ { Prfen :Pruefen}
+ { Editieren :DEdit}
+ { Zeigen :ZeigeDaten}
+ { Suchen :SucheDaten}
+ { Suche mehrfache :SucheMehrfache}
+ { Daten aufgeben :Datenaufgeben}
+ { Freier Speicher :Memory}
+
+.topic Cursor                 = 819
+
+ Men Cursor Ü
+ ßßßßßßßßßßßßß
+
+Ist keine Maus vorhanden, so kann mit diesem Befehl der Cursor
+abgeschalted werden.
+
+.topic Einstellungen          = 818
+ 
+ Hauptmen Einstellungen Ü
+ ßßßßßßßßßßßßßßßßßßßßßßßßß
+
+ { Cursor :Cursor}
+ { Andere Dateinamen :NewFileName}
+
+.topic Contents=1000
+
+ Inhaltsverzeichnis Ü
+ ßßßßßßßßßßßßßßßßßßßß
+
+ { Hilfe ber Hilfe :AboutHelp}
+ { Programmbeschreibung :NoContext}
+ { Programm beenden :Beenden}
+ { Men aktivieren :MenuAkt}
+ { Hot Keys :HotKey}
+ { Dateimen :Datei}
+ { Daten aktualisieren :DatenAkt}
+ { Daten :Daten}
+ { Einstellungen :Einstellungen}
+
+.topic Importieren
+
+ Daten Importieren Ü
+ ßßßßßßßßßßßßßßßßßßß
+
+Diese Funktion gibt Ihnen die M”glichkeit Verzeichnisse einzulesen,
+die in Dateien umgeleitet wurden.
+
+Sie k”nnen eine Datei einlesen, die mit dem Befehl
+"Chkdsk /V > 'Dateiname'" oder mit "Dirÿ/Sÿ*.*ÿ>ÿ'Dateiname'" erzeugt wurde.
+Wobei in Version 1 nur der Dir - Befehl untersttzt wird.
+
+.topic ImportPr
+
+ Importdaten Prfen Ü
+ ßßßßßßßßßßßßßßßßßßßß
+
+Dies ist eine Sonderfunktion, die Sie verwenden k”nnen, wenn Sie glauben,
+daá die Importdaten nicht in Ordnung sind.
+
+Achtung:
+
+Diese Funktion l„uft nur korrekt ab, wenn die vom Programm erzeugte
+Datei IMP.TMP noch vorhanden ist!
+
+.topic ImportNachtragen
+
+ Importdaten nachtragen Ü
+ ßßßßßßßßßßßßßßßßßßßßßßßß
+
+Sonderfunktion, um die mit der Funktion {Importieren:Importieren} erzeugten Dateien
+"PUFFER0.*" in die momentan mit {Neue Dateinamen:NewFileName} eingestellten
+Katalogdateien einzutragen.
+
+.topic Beenden
+
+ Programm beenden Ü
+ ßßßßßßßßßßßßßßßßßß
+
+Sie beenden das Programm in dem Men Datei/Beenden, ber Ende in der
+Statuszeile und durch die Tastenkombination [Alt] + [X].
+
+.topic MenuAkt
+
+ Men aktivieren Ü
+ ßßßßßßßßßßßßßßßßß
+
+Das Men wird mit der Maus, mit [Alt] und dem hervorgehobenen
+Buchstaben oder mit [F10] aktiviert.
+
+Ist der Menbalken aktiviert, so kann mit den Pfeiltasten der gewnschte
+Menpunkt ausgew„hlt werden.
+
+.topic HotKey
+
+ Hotkey's Ü
+ ßßßßßßßßßß
+
+  Folgende Tastenkrzel werden in dem Programm verwendet:
+
+  [F1]         = Hilfe aktivieren,  
+  [F2]         = speichern der Daten,
+  [F3]         = laden der Daten,
+  [F10]        = Men aktivieren,    
+  [Alt] + [X]  = beenden des Programms,
+  [Alt] + [F1] = Letztes Hilfefenster, wenn Hilfe aktiv,
+  [Alt] + [F3] = Daten aufgeben.
+
+.topic Maus
+
+ Die Maus in der Hilfe Ü
+ ßßßßßßßßßßßßßßßßßßßßßßß
+
+In der Hilfe haben die Maustasten besondere Funktionen:
+  
+  Linke Maustaste = Ausw„hlen der anders dargestellten Textstellen
+
+  Linke Maustaste (doppeld gedrckt) = Aktivieren eines Hilfefensters
+
+  Mittlere Maustaste = Hilfe beenden
+
+  Rechte Maustaste = Letztes Hilfefenster 
+  
+.topic CDROM
+
+Auf CD ROM's sind unter Umst„nden sehr viele Dateien und Unterverzeichnisse.
+Dieses Programm verwendet bisher nur DOS-Arbeitsspeicher bis 640 kByte.
+Es kann also vorkommen, daá beim Einlesen von CD ROM's der freie 
+Arbeitsspeicher nicht ausreicht.
+ 
