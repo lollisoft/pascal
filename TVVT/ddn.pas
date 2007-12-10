@@ -1,5 +1,5 @@
 Unit DDN; (* Disk - Direckt - Nachtrag *)
-
+{$X+,O+,F+}
 Interface
 
 Uses Video;
