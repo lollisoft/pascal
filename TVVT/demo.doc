@@ -1,0 +1,124 @@
+         Anleitung zu TVDV Diskettenverwaltungsprogramm Demoversion
+         ----------------------------------------------------------
+
+
+Programmbeschreibung: TVDV ist ein Verwaltungsprogramm nach SAA - Standart.
+                      Es unterstÅtzt das Auffinden von Dateien jeglicher art.
+
+                      Das Programm unterstÅtzt eine Maus, es kann aber auch
+                      mit der Tastatur bedient werden.
+
+Systemanforderungen:  Mindestens 512 kB Ram,
+                      mîglichst eine Festplatte,
+                      da das Programm mit OVL Technik 
+                      arbeitet wÑhre Smartdrive und EMS 
+                      von Vorteil.
+
+Verwaltungsdaten:     Die Daten die das Programm erzeugt, werden in sechs
+                      Dateien gespeichert. 
+                         
+                             Struckt.DVD, 
+                             Hilf.DVD,
+                             Zusatz.DVD,
+                             Datei.DVD,
+                             Pfad.DVD und
+                             Label.DVD.
+
+                      Wenn Sie andere Dateinamen haben wollen, so kînnen
+                      Sie folgenderma·en vorgehen:
+
+                         Geben Sie ".DAT" ein (mit Punkt max. 4 Zeichen), 
+                         so erzeugen Sie Dateien mit der Endung ".DAT".
+
+                              Struckt.DAT,
+                              Hilf.DAT,
+                              Zusatz.DAT,
+                              Datei.DAT,
+                              Pfad.DAT und 
+                              Label.DAT.
+
+                         Geben Sie "Katalog" ein (max 8 Buchstaben), 
+                         so erzeugen Sie folgende Dateien:
+
+                              Katalog.DVS,
+                              Katalog.DVH,
+                              Katalog.DVZ,
+                              Katalog.DVD,
+                              Katalog.DVP und
+                              Katalog.DVL.
+
+                         Bitte achten Sie darauf, entweder nur eine Datei - 
+                         endung oder einen Dateinamen ohne Endung anzugeben!
+
+                         Es gelten Åber dies hinaus nur Zeichen der DOS -
+                         Dateikonvention!
+
+Wichtig:              Bitte achten Sie darauf, da· nicht schon andere 
+                      Dateien auf Ihrem DatentrÑger vorhanden sind, die 
+                      den vorgegebenen oder Ihren gewÅnschten Dateinamen
+                      gleichen!
+
+Zusatzinfo:           Die Festplatte und die Disketten, die eingelesen 
+                      werden, mÅssen im Label "DISK" enthalten.
+                      Damit mehrere DatentrÑger auch unterschieden werden
+                      kînnen sollte auch noch eine Nummer folgen:
+                      
+                      z.B.  "DISK-00"  >> Festplatte
+                            "DISK-01"  >> Diskette 1
+                      
+                      Kînnen Sie den Label nicht Ñndern ( CD-ROM ), werden 
+                      Sie nach einem neuen Label gefragt.
+                      Es kann aber sein, da· "DISK" enthalten ist. 
+                      In diesem Fall haben sie in der Demoversion keine 
+                      Mîglichkeit den Namen zu Ñndern.
+                      Ob eine CD-ROM von der Datenmenge eingelesen werden
+                      kann habe ich nicht Testen kînnen.
+
+Speicherplatz:        Es kann nur eine bestimmte Menge eingelesen werden.
+                      Wird der Grenzwert fÅr freien Speicher Åbersritten,
+                      so wird die Aktion abgebrochen.
+
+Copyright:            Es gelten die allgemeinen Vorschriften des Copyright's.
+                      Die Demoversion darf frei kopiert und weitergegeben
+                      werden.
+
+Probleme:             Bei Problemen rufen Sie mich einfach an.
+
+Anregungen:           Haben Sie eine Idee, so scheuen Sie sich nicht, mich
+                      anzuschreiben.
+
+Vollversion:          Sie erhalten mit der Vollversion:
+                      Recht auf Updates zu einem geringen Betrag,
+                      Hilfe bei Problemen mit diesem Programm,
+                      eine Benutzungserlaubnis in schriftlicher
+                      Form und bei Bedarf eine Quittung.
+                      
+                      Der Preis betrÑgt 50.- + NachnahmegebÅhr.
+
+                      Wenn Ihnen mein Programm gefÑllt, wenden Sie sich
+                      bitte schriftlich an mich. Ich mîchte jeden Verkauf
+                      durch eine Bestellung nachweisen kînnen.
+                      Vorerst ist diese Anwendung nicht in GeschÑften etc.
+                      erhÑltlich.
+                                                             
+Haftung (Demo):       Ich Åbernehme keine Haftung im Bezug auf Viren,
+                      da die Diskette nicht unbedingt von mir stammt.
+                      Bitte testen Sie die Diskette vor einer Benutzung
+                      des Programmes!
+
+Funktionssicherheit:  Es kann nicht davon ausgegangen werden, da· ich alle 
+                      Fehler im Programm gefunden habe.
+                      Bitte achten Sie darauf, da· alle relevanten Daten
+                      auf Platte gesichert sind, wenn Sie das Programm
+                      verwenden.
+
+Meine Anschrift:      Lothar Behrens
+                      Quellenweg 1
+                      74889 Sinsheim Ad.
+                      (07261) 4671
+
+
+
+Ich hoffe, da· Ihnen mein Programm zusagt und wÅnsche viel Spa·.
+
+                 mfG.  Lothar Behrens

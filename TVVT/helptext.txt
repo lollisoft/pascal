@@ -1,0 +1,25 @@
+.topic NoContext=0
+ Hilfe-Beispiel ‹
+ ﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂ
+Willkommen bei Turbo Vision. Dieses Beispielprogramm soll Ihnen zeigen,
+wie Sie mit einem kontextsensitiven Hilfesystem in Ihren eigenen Programmen
+arbeiten kînnen.
+
+DrÅcken Sie ESC damit dieser Hilfebildschirm verschwindet.
+
+.topic AboutHelp=50
+
+Hilfe Åber Hilfe
+
+Wenn Sie in einem Turbo Vision-Programm die Taste <F1> drÅcken, dann
+îffnet sich, soweit vorhanden, ein Hilfebildschirm.
+
+.topic Contents=100
+ Inhaltsverzeichnis ‹
+ ﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂﬂ
+Folgende Hilfebildschirme sind verfÅgbar:
+
+{ Hilfe-Beispiel:NoContext}
+{ Hilfe Åber Hilfe:AboutHelp}
+{ Dritter Hilfetitel:AboutHelp}
+{ Vierter Hilfetitel:AboutHelp}
