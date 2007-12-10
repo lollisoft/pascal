@@ -1578,24 +1578,43 @@ END;
 Var Hilf: StrucktListPtrtyp;
 
 BEGIN
+  MessageBox('OpenAllFiles.', nil, mfOkButton);
   OpenAllFiles;
-  
 
+  MessageBox('LadeHilf.', nil, mfOkButton);
   LadeHilf;     (* Als Liste *)
+
+  MessageBox('LadeStruckt.', nil, mfOkButton);
   LadeStruckt;  (* Als Feld  *)
+
+  MessageBox('WandleHilf.', nil, mfOkButton);
   WandleHilf;
+
+  MessageBox('LadeZusatz.', nil, mfOkButton);
   LadeZusatz;   (* Als Feld  *)
+
+  MessageBox('WandleZusatz.', nil, mfOkButton);
   WandleZusatz;
 
-
+  MessageBox('LadeLabel.', nil, mfOkButton);
   LadeLabel;  (* Als Feld  *)
+
+  MessageBox('LadePfad.', nil, mfOkButton);
   LadePfad;   (* Als Feld  *)
+
+  MessageBox('LadeDatei.', nil, mfOkButton);
   LadeDatei;  (* Als Feld  *)
+
+  MessageBox('WandleStruckt.', nil, mfOkButton);
   WandleStruckt;
+
+  MessageBox('WandleDatei.', nil, mfOkButton);
   WandleDatei;
 
 
 (* --- Verketten der Strucktliste --- *)
+
+  MessageBox('Verkette Strukturliste', nil, mfOkButton);
 
   For A := 1 to SAnzahl-1 do
   BEGIN
@@ -1616,6 +1635,7 @@ BEGIN
 
 (* ---    Umwandeln des Restes    --- *)
 
+  MessageBox('Verkette rest.', nil, mfOkButton);
   For A := 1 to ZAnzahl-1 do
   BEGIN
     ZusatzFeld^[A]^.Next := ZusatzFeld^[A+1];
@@ -1698,8 +1718,8 @@ BEGIN
   NoNew := False;
 
 
-  CloseallFiles
-
+  CloseallFiles;
+  MessageBox('Fertig.', nil, mfOkButton);
 
 END;
 
@@ -1935,7 +1955,7 @@ end;
 
 Procedure Wait;
 begin
-  MessageBox(txt, nil, mfNothing + mfOkButton)
+  MessageBox(txt, nil, mfOkButton)
 end;
 
 

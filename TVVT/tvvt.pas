@@ -12,15 +12,15 @@ Uses App,
      Crt,
      Dos,
      Objects,
+     Dialogs,
      Memory,
      GadGets,
      Drivers,
      Views,
      Menus,
-     Dialogs,
      MsgBox,
      Editors,
-   (* For Editor: *)
+   (* Fr Editor: *)
      Colorsel,
      Colors,
      Editor,
@@ -497,7 +497,7 @@ PROCEDURE TDateiverApp.SaveFileAs(WindowNo: WORD; P: PCollection);
   BEGIN
     IF WindowNo > 1 THEN BEGIN
       D := PFileDialog(ValidView(New(PFileDialog, Init(Editor[WindowNo].Name, 'Datei speichern als',
-        '~N~ame', fdCloseButton, 100))));
+        '~N~ame', fdOkButton, 100))));
       If D <> Nil then
       Begin
         If Desktop^.ExecView(D) <> cmCancel then

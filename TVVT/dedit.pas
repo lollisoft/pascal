@@ -100,6 +100,10 @@ Var ADateneditorDialog : pDateneditorDialog;
     LabelSeek: Longint;
 
 
+Procedure InitDEdit;
+
+
+
 PROCEDURE DateneditorDialog;
 Procedure Ton(hz, Time: Integer);
 
@@ -1374,6 +1378,9 @@ BEGIN
     Dispose (Dialog, Done);
   CloseAllFiles
 END;
+
+Procedure InitDEdit;
+
 Begin
   DateiCount := 0;
   PfadCount := 0;
@@ -1384,4 +1391,6 @@ Begin
   IsLabelSelected := False;
   IsPfadSelected := False;
   IsDateiSelected := False
+End;
+
 End.
