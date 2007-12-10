@@ -8,6 +8,7 @@ Program TVDV;
 Uses
    (*  TvGraph,*)
      Overlay,
+     App,
      TvdvCmds,
      HelpCmds,
      HelpFile,
@@ -27,40 +28,47 @@ Uses
      Editor,
      Strings,
      Colors,
-     App,
      TVDVImp,
-     Video,
      CursCont,
      FileFind,
      FileShow,
-     DEdit,
      StdDlg,
      StrTools,
      DDN,
      EMS,
      XMS,
-     XHeap;
+     XHeap,
+     DEdit,
+     Video;
 
 
-(*{$O Dos     }*)
-(*{$O Objects }*)
-(*{$O Video   }
-{$O BDF     }
-{$O TvdvImp }
-{$O Labhist }
-{$O Memory  }
-{$O FileFind}
-{$O CursCont}
-{$O FileShow}
-{$O MsgBox  }
-{$O StdDlg  }
-{$O App     }
-{$O Editors }
-{$O Views   }
-{$O Menus   }
+{$O App }
+{$O TvdvCmds }
+{$O HelpCmds }
+{$O HelpFile }
+{$O Memory }
+{$O GadGets }
+{$O Views }
+{$O Menus }
 {$O Dialogs }
-{$O DEdit   }
-*)
+{$O MsgBox }
+{$O LabHist }
+{$O Editors }
+{$O Editor }
+{$O Strings }
+{$O Colors }
+{$O TVDVImp }
+{$O CursCont }
+{$O FileFind }
+{$O FileShow }
+{$O StdDlg }
+{$O DDN }
+{$O DEdit }
+{$O Video }
+
+(*{$O StrTools }*)
+(*{$O Dos }*)
+(*{$O Objects }*)
 
 Type
 
@@ -467,7 +475,7 @@ PROCEDURE TDateiverApp.SaveFileAs(WindowNo: WORD; P: PCollection);
   BEGIN
     IF WindowNo > 1 THEN BEGIN
       D := PFileDialog(ValidView(New(PFileDialog, Init(Editor[WindowNo].Name, 'Datei speichern als',
-        '~N~ame', fdCloseButton, 100))));
+        '~N~ame', fdOkButton, 100))));
       If D <> Nil then
       Begin
         If Desktop^.ExecView(D) <> cmCancel then
@@ -1881,17 +1889,20 @@ END;
 
 Procedure LadeDateien;
 BEGIN
-  CursorAus;
+  (*CursorAus;*)
   if StrucktList = nil then
     if TestFiles then
+    Begin
+      MessageBox('Lade Dateien.', nil, mfOkButton);
       Video.LadeDateien
+    End
     else
       MessageBox('Es sind keine Dateien unter diesem Namen vorhanden!',
              nil, mfError + mfOkButton)
 
   else MessageBox('Es sind noch Daten im Arbeitsbereich!',
              nil, mfError + mfOkButton);
-  CursorEin;
+  (*CursorEin;*)
 END;
 
 Procedure SpeichereDateien;
@@ -2350,8 +2361,9 @@ Var DateiverApp : TDateiverApp;
 
 BEGIN
 
-(*  OvrInit('TVDV.OVR');
+  OvrInit('TVDV.OVR');
   OvrSetBuf(64 * 1024);
+
   If OvrResult <> ovrOk then
   Begin
     Writeln('Overlay init failed.');
@@ -2363,7 +2375,10 @@ BEGIN
     Writeln('Kein EMS - Treiber da!');
     Readln
   End;
-*)
+
+  InitDEdit;
+
+
   EMSSF := False;
   EMSLF := False;
   EMSPF := False;
