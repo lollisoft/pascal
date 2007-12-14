@@ -205,7 +205,12 @@ type
   PMemo = ^TMemo;
   TMemo = object(TEditor)
     constructor Load(var S: TStream);
+{$IFNDEF FPC}
     function DataSize: Word; virtual;
+{$ENDIF}
+{$IFDEF FPC}
+    function DataSize: DWord; virtual;
+{$ENDIF}
     procedure GetData(var Rec); virtual;
     function GetPalette: PPalette; virtual;
     procedure HandleEvent(var Event: TEvent); virtual;
@@ -1626,7 +1631,12 @@ begin
   else S.Seek(S.GetPos + Length);
 end;
 
+{$IFNDEF FPC}
 function TMemo.DataSize: Word;
+{$ENDIF}
+{$IFDEF FPC}
+function TMemo.DataSize: DWord;
+{$ENDIF}
 begin
   DataSize := BufSize + SizeOf(Word);
 end;

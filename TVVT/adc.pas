@@ -2,7 +2,7 @@ Unit ADC;
 
 Interface
 
-uses crt, Video;
+uses crt, Vid;
 
 const bit: array[1..8] of byte = (1,2,4,8,16,32,64,128);
       adr= $280;

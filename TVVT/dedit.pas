@@ -11,7 +11,7 @@ Uses Crt,
      Views,
      Dialogs,
 {     Editors,  }
-     Video,
+     Vid,
      Filefind,
      StrTools;
 
@@ -905,7 +905,7 @@ begin
   A := 0;
 (* Strucktlistenzeiger soll auf Zeiger mit gefundenem Label zeigen: *)
 
-  
+
 
   (* Laufe die Strucktliste durch und l”sche die Daten: *)
 
@@ -924,8 +924,8 @@ begin
     Else
       Wait('Falsches Element in Strucktliste!');
     end
-    
-    
+
+
   until (Lauf^.StrucktData.art = 1) or
         (Lauf = Nil);
   CopyMinWork(2);
@@ -1098,7 +1098,7 @@ Begin
 
     Else
     Begin
-      
+
       If PlatteSpeichertyp = 0 then
       Begin
         APfadCollection^.DeleteAll;

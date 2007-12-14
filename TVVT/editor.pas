@@ -61,7 +61,13 @@ TYPE
     PROCEDURE Store (VAR S: TStream);
     PROCEDURE SetData (VAR Rec); VIRTUAL;
     PROCEDURE GetData (VAR Rec); VIRTUAL;
+{$IFNDEF FPC}
     FUNCTION DataSize: WORD; VIRTUAL;
+{$ENDIF}
+{$IFDEF FPC}
+    FUNCTION DataSize: DWORD; VIRTUAL;
+{$ENDIF}
+
     PROCEDURE DeleteBlock;
     PROCEDURE GetBlock( VAR P: PCollection );
     PROCEDURE PutBlock(Block: PCollection; At: TPoint);
@@ -204,7 +210,12 @@ PROCEDURE TEdit.SetData (VAR Rec);
     Move(Rec, Anchor, SizeOf(Anchor));
   END;
 
+{$IFNDEF FPC}
 FUNCTION TEdit.DataSize: WORD;
+{$ENDIF}
+{$IFDEF FPC}
+FUNCTION TEdit.DataSize: DWORD;
+{$ENDIF}
   BEGIN
     DataSize := SizeOf(Anchor);
   END;
@@ -1387,7 +1398,7 @@ DESTRUCTOR TEdit.Done;
 Var R: TRect;
 Begin
   TWindow.SetState(AState, Enable);
-  
+
   If AState And sfSelected = 1 then
   Begin
     Write(chr(7));

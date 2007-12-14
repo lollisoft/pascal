@@ -26,7 +26,7 @@ Uses App,
      Editor,
      Strings,
      StrTools,
-     Video,
+     Vid,
      CursCont,
      StdDlg,
 
