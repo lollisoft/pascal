@@ -11,7 +11,7 @@ Uses Crt,
      App,
 (*     Editors,*)
      Views,
-     Video,
+     Vid,
      Dialogs(*,     StrTools*);
 
 

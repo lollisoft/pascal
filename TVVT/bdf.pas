@@ -155,7 +155,7 @@ Function SearchPfadLine(Pfad: String): Longint;
 Function GetDirElement(Stelle: Longint): String;
 
 Implementation
-Uses Video, Crt;
+Uses Vid, Crt;
 
 
 Function GetDirElement;

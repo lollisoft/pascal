@@ -1,6 +1,6 @@
 Program Dateiverwaltung;
 
-Uses Crt, Dos, Video;
+Uses Crt, Dos, Vid;
 
 
 Procedure Freigabe;

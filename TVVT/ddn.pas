@@ -2,7 +2,7 @@ Unit DDN; (* Disk - Direckt - Nachtrag *)
 {$X+,O+,F+}
 Interface
 
-Uses Video;
+Uses Vid;
 
 Type   DataDifDatatyp      = Record
                                Stelle: Longint;

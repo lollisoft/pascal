@@ -1,5 +1,5 @@
 Program Plot;
-Uses Crt, Graph, Pasmouse, Video, Curscont, ADC;
+Uses Crt, Graph, Pasmouse, Vid, Curscont, ADC;
 
 
 

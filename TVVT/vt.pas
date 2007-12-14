@@ -13,7 +13,7 @@ Uses Crt,
      Views,
      Dialogs,
      DEdit,
-     Video,
+     Vid,
      Filefind,
      Strings,
      StrTools;

@@ -7,7 +7,9 @@ Program TVDV;
 {$W+}
 Uses
    (*  TvGraph,*)
+{$IFNDEF FPC}
      Overlay,
+{$ENDIF}
      App,
      TvdvCmds,
      HelpCmds,
@@ -39,9 +41,9 @@ Uses
      XMS,
      XHeap,
      DEdit,
-     Video;
+     Vid;
 
-
+{$IFNDEF FPC}
 {$O App }
 {$O TvdvCmds }
 {$O HelpCmds }
@@ -65,6 +67,7 @@ Uses
 {$O DDN }
 {$O DEdit }
 {$O Video }
+{$ENDIF}
 
 (*{$O StrTools }*)
 (*{$O Dos }*)
@@ -98,12 +101,12 @@ Type
     Procedure   InitStatusLine;                 Virtual;
     Procedure   OutOfMemory;                    Virtual;
   END;
-    
+
 
 
 
 var
-    
+
     Laufwerk     : String[12];
 
     ColorFile    : ColorFiletyp;
@@ -142,7 +145,7 @@ PROCEDURE ProgramminformationDialog;
 BEGIN
   R.Assign (13, 2, 62, 20);
   Dialog := New (pDialog, Init (R, 'Programminformation'));
- 
+
 {$IFDEF DEMO}
 
 
@@ -158,36 +161,36 @@ BEGIN
 
   R.Assign (10, 4, 37, 5);
   Dialog^.Insert (New (pStaticText, Init (R, 'Katalogsystem fÅr Disketten')));
- 
+
   R.Assign (16, 5, 31, 6);
   Dialog^.Insert (New (pStaticText, Init (R, 'und Festplatten')));
- 
+
   R.Assign (13, 7, 34, 8);
   Dialog^.Insert (New (pStaticText, Init (R, 'Copyright (c) 1993 by')));
- 
+
   R.Assign (14, 10, 28, 11);
   Dialog^.Insert (New (pStaticText, Init (R, 'Lothar Behrens')));
- 
+
   R.Assign (14, 11, 26, 12);
   Dialog^.Insert (New (pStaticText, Init (R, 'Quellenweg 1')));
- 
+
   R.Assign (14, 12, 34, 13);
   Dialog^.Insert (New (pStaticText, Init (R, 'W-74889 Sinsheim Ad.')));
- 
+
   R.Assign (14, 13, 26, 14);
   Dialog^.Insert (New (pStaticText, Init (R, '(07261) 4671')));
- 
+
   R.Assign (18, 15, 28, 17);
   Dialog^.Insert (New (pButton, Init (R, ' ~O~K ', 10, 1)));
- 
+
   Dialog^.SelectNext (FALSE);
- 
+
   Code := Desktop^.ExecView (Application^.ValidView (Dialog));
   IF Code <> cmCancel THEN BEGIN
     { cmCancel muss ev ersetzt werden }
     { Code auswerten }
   END;
-  IF Dialog <> NIL THEN 
+  IF Dialog <> NIL THEN
     Dispose (Dialog, Done);
 END;
 
@@ -354,7 +357,7 @@ BEGIN
   DisableCommands([cmDEdit]);
 {$EndIf}
 
-  
+
   GetExtent(R);
   R.A.X := R.B.X - 9;
   R.B.Y := R.A.Y + 1;
@@ -411,7 +414,7 @@ PROCEDURE TDateiverApp.NewEditor(Name: STRING);
     IF Name = ''
       THEN Editor[WNo].Ed := New(PEditorWindow, Init(R, WNo, 'Clipboard', Nil,
                                                edBase+10*WNo))
-     ELSE IF (Ext = '.txt') THEN BEGIN 
+     ELSE IF (Ext = '.txt') THEN BEGIN
        Editor[WNo].Ed := New(PEditorWindow, Init(R, WNo, Name, ReadFile(Name),
                                            edBase+10*WNo));
        Editor[WNo].Name := Name;
@@ -846,7 +849,7 @@ begin
               If M[x].s^.StrucktData.LabelList^.LabelData.Anzahl = 0 then
                 Dispose(M[x].s^.StrucktData.LabelList);
 
-              
+
               M[x].s^.StrucktData.LabelList := labeladress;
               Hilf1 := M[x].s
             end
@@ -899,11 +902,11 @@ begin
             end
             Else
               Wait('DateiData.Anzahl ist <= 0')
-            
+
           end
       Else Wait('Element ist ungÅltig');
     end;
-    
+
     If M[x].s = Nil then Exit;
     M[x].s := M[x].s^.Next
   end;
@@ -1409,7 +1412,7 @@ begin
   A := 0;
 (* Strucktlistenzeiger soll auf Zeiger mit gefundenem Label zeigen: *)
 
-  
+
 
   (* Laufe die Strucktliste durch und lîsche die Daten: *)
 
@@ -1428,8 +1431,8 @@ begin
     Else
       Wait('Falsches Element in Strucktliste!');
     end
-    
-    
+
+
   until (Lauf^.StrucktData.art = 1) or
         (Lauf = Nil);
 end;
@@ -1612,7 +1615,7 @@ begin
 
   SetAllNil;
 
-  
+
 
   Dateifilename   := Df;
   Pfadfilename    := Pf;
@@ -1699,7 +1702,7 @@ begin
   end; (* Von While M1... *)
 
   HilfLauf := M[2].h;
-  
+
   CopyMInWork(2);
 
 
@@ -1959,7 +1962,7 @@ PROCEDURE SuchmaskenVoreinstellungDialog(Var SuchMaske: String12);
 TYPE
     SuchmaskenVoreinstellungData = RECORD
       TextLen0: WORD;
-      TextRec0: ARRAY [0..12] OF CHAR; 
+      TextRec0: ARRAY [0..12] OF CHAR;
     END;
 
 Type LaengenTyp = Record
@@ -1983,18 +1986,18 @@ Type LaengenTyp = Record
 BEGIN
   R.Assign (20, 5, 64, 14);
   Dialog := New (pDialog, Init (R, 'Suchmasken - Voreinstellung'));
- 
+
   R.Assign (16, 3, 28, 4);
   View := New (pMemo, Init (R, NIL, NIL, NIL, 12));
   Dialog^.Insert (View);
   R.Assign (15, 2, 22, 3);
   Dialog^.Insert (New (pLabel, Init (R, 'Maske:', View)));
- 
+
   R.Assign (17, 6, 25, 8);
   Dialog^.Insert (New (pButton, Init (R, '~O~K', 10, 1)));
- 
+
   Dialog^.SelectNext (FALSE);
- 
+
   { Datenrecord initialisieren ! }
   FillChar (Data, SizeOf (SuchmaskenVoreinstellungData), 0);
 
@@ -2004,7 +2007,7 @@ BEGIN
 
   Data.TextLen0 := Length(SuchMaske);
 
-  Dialog^.SetData (Data); 
+  Dialog^.SetData (Data);
 
   Code := Desktop^.ExecView (Application^.ValidView (Dialog));
   IF Code <> cmCancel THEN BEGIN
@@ -2021,7 +2024,7 @@ BEGIN
 
 
   END;
-  IF Dialog <> NIL THEN 
+  IF Dialog <> NIL THEN
     Dispose (Dialog, Done);
 END;
 

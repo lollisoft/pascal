@@ -2,7 +2,7 @@ Unit TVDVImp;
 {$O+,F+}
 Interface
 
-Uses App, Views, Drivers, Video, Dos, LabHist, StdDlg, MsgBox, BDF;
+Uses App, Views, Drivers, Vid, Dos, LabHist, StdDlg, MsgBox, BDF;
 
 Const MemWasLo: Boolean = False;
 

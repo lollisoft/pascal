@@ -2,7 +2,7 @@ Unit Ser1;
 {$F+}
 Interface
 
-uses Video, Dos, Printer, Objects, Drivers, Memory, Views, Menus, Dialogs,
+uses Vid, Dos, Printer, Objects, Drivers, Memory, Views, Menus, Dialogs,
      StdDlg, MsgBox, App, Buffers, Editors,
 
 
