@@ -6,7 +6,8 @@ Interface
 
 
 
-Uses App, Views, Drivers, TVDVDATA, Dos, LabHist, StdDlg, MsgBox, BDF, Strings;
+Uses App, Views, Drivers, TVDVDATA,
+Dos, LabHist, StdDlg, MsgBox, Strings;
 
 
 

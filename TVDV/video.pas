@@ -35,7 +35,6 @@ Uses Crt,
      TVDVData;
 
 
-
 type
 
 
@@ -860,7 +859,6 @@ Var  TreePointer: XPointer;  (* Wird verwendet, wenn NoNew True ist.    *)
 
 
 
-Procedure Wait(txt : string);
 
 Procedure NewArray(Var Pointer; ElementSize: Integer; Anzahl: Longint);
 
@@ -893,7 +891,6 @@ Function  TestFiles:Boolean;
 Procedure CloseAllFiles;
 
 
-Function  UpDate(term: String):String;
 
 Procedure List(pfad:string);
 
@@ -923,7 +920,6 @@ Procedure Halt;
 
 
 
-Procedure CursorAus;
 
 Procedure SaveCursor;
 
@@ -931,7 +927,6 @@ Procedure OrgCursor;
 
 Procedure PruefeDaten(Wo: String);
 
-Function GetString(Zahl: Longint): String;
 
 Procedure SpeichereDatei(DateiName : string12;
                          var  Lauf : DateiListPtrtyp;
@@ -989,26 +984,8 @@ BEGIN
 END;
 
 
-Procedure Wait;
-begin
-  MessageBox(txt, nil, mfOkButton)
-end;
 
 
-Function UpDate;
-var    i    : integer;
-      ch    : char;
-      UpTerm: string;
-
-begin
-  UpTerm := '';
-  for i := 1 to Length(term) do
-  begin
-    ch := upcase(term[i]);
-    if ch <> ' ' then UpTerm := UpTerm + ch
-  end;
-  UpDate := UpTerm
-end;
 
 Procedure SpeichereSuch;
 var Help : ZusatzListPtrtyp;
@@ -1465,12 +1442,6 @@ begin
 end;
 
 
-Function GetString;
-Var Help : String;
-Begin
-  Str(Zahl, Help);
-  GetString := Help
-End;
 
 
 
@@ -5150,10 +5121,6 @@ BEGIN
   assign(ZusatzDatafile,Zusatzfilename);
 END;
 
-Procedure CursorAus;
-begin
-  Inline($B4/$01/$B9/$00/$0F/$CD/$10);
-end;
 
 
 end.

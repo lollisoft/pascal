@@ -445,6 +445,7 @@ Var
       SArg: String;
 
 
+Procedure Wait(txt : string);
 
 
 
@@ -1110,9 +1111,12 @@ Function AskYesNo(Ask: String): PDialog;
 
 Function  GetFName: String;
 
+Procedure CursorAus;
 
 
 
+Function  UpDate(term: String):String;
+Function GetString(Zahl: Longint): String;
 
 
 
@@ -1124,10 +1128,32 @@ Implementation
 Var   TreePointer: XPointer;  (* Wird verwendet, wenn NoNew True ist.    *)
                              (* Dh. wenn der Baum nur balangsiert wird. *)
 
+Procedure CursorAus;
+begin
+  Inline($B4/$01/$B9/$00/$0F/$CD/$10);
+end;
 
 
+Procedure Wait;
+begin
+  MessageBox(txt, nil, mfOkButton)
+end;
 
 
+Function UpDate;
+var    i    : integer;
+      ch    : char;
+      UpTerm: string;
+
+begin
+  UpTerm := '';
+  for i := 1 to Length(term) do
+  begin
+    ch := upcase(term[i]);
+    if ch <> ' ' then UpTerm := UpTerm + ch
+  end;
+  UpDate := UpTerm
+end;
 
 
 Function GetFName: String;
@@ -1263,6 +1289,12 @@ BEGIN
 END;
 
 
+Function GetString;
+Var Help : String;
+Begin
+  Str(Zahl, Help);
+  GetString := Help
+End;
 
 
 
