@@ -13,7 +13,8 @@ Uses Crt,
      Views,
      Dialogs,
      DEdit,
-     Vid,
+     MsgBox,
+     Video,
      Filefind,
      Strings,
      StrTools;
@@ -283,9 +284,9 @@ Var DayofWeek, Tag, Monat, Jahr: Word;
 
 Begin
   GetDate(Jahr, Monat, Tag, DayofWeek);
-  Vokabel^.Datum := GetString(Tag) +   '.' +
-                    GetString(Monat) + '.' +
-                    GetString(Jahr);
+  Vokabel^.Datum := LONGINTtoSTRING(Tag, 10, 10) +   '.' +
+                    LONGINTtoSTRING(Monat, 10, 10) + '.' +
+                    LONGINTtoSTRING(Jahr, 10, 10);
   Vokabel^.Tested := False;
 End;
 
@@ -324,7 +325,7 @@ Begin
 
   If DZeile = 0 then
   Begin
-    Zeile := 'Seite: ' + GetString(DSeite);
+    Zeile := 'Seite: ' + LONGINTtoSTRING(DSeite, 10, 10);
     While Length(Zeile) < 75 do
     Zeile := ' ' + Zeile;
 
@@ -394,11 +395,11 @@ Begin
   (* Diese Routine ist nicht korreckt geschrieben. In Verbindung *)
   (* mit der direckten Anwendung von Search ist alles wieder Ok. *)
 
-  If UpDate(String(Key1^)) < UpDate(PVokabel(Key2)^.Vokabel^.Wort) then
+  If DownStr(String(Key1^)) < DownStr(PVokabel(Key2)^.Vokabel^.Wort) then
     Compare := - 1;
-  If UpDate(String(Key1^)) = UpDate(PVokabel(Key2)^.Vokabel^.Wort) then
+  If DownStr(String(Key1^)) = DownStr(PVokabel(Key2)^.Vokabel^.Wort) then
     Compare := 0;
-  If UpDate(String(Key1^)) > UpDate(PVokabel(Key2)^.Vokabel^.Wort) then
+  If DownStr(String(Key1^)) > DownStr(PVokabel(Key2)^.Vokabel^.Wort) then
     Compare := 1;
 End;
 
@@ -952,11 +953,11 @@ Begin
           ReDraw
         End
         Else
-          Wait('FÅr dieses Wortpaar besteht keine öbersetzung!' + Chr(13) +
+	  MessageBox('FÅr dieses Wortpaar besteht keine öbersetzung!' + Chr(13) +
                'WÑhlen Sie in den Listboxen ein Vokabelpaar aus.' + Chr(13) +
-               'Versuchen Sie es dann nochmal.')
+               'Versuchen Sie es dann nochmal.', nil, mfOkButton)
       End
-      Else Wait('Fehler in der Datenstrucktur!');
+      Else 	  MessageBox('Fehler in der Datenstrucktur!', nil, mfOkButton);
 
       Dispose(EVokabel, Done);
       Dispose(DVokabel, Done)

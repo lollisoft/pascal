@@ -1,4 +1,4 @@
-Unit BDF; (* Build Data Files *)
+Unit bdf; (* Build Data Files *)
 {$F+,O+,X+}
 
 (*****************************************************)

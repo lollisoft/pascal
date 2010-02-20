@@ -8,8 +8,7 @@ Program TVVT;
 Uses App,
      TVVTCmds,
      HelpCmds,
-     (*HelpFile,*)
-     WHelp,
+     HelpFile,
      Crt,
      Dos,
      Objects,
@@ -22,12 +21,12 @@ Uses App,
      MsgBox,
      Editors,
    (* FÅr Editor: *)
-     (*Colorsel,*)
-     (*Colors,*)
+     Colorsel,
+     Colors,
      Editor,
      Strings,
      StrTools,
-     Vid,
+     Video,
      CursCont,
      StdDlg,
      VT,
@@ -55,7 +54,7 @@ Type
     Constructor Init;
     Destructor  Done;                           Virtual;
     Procedure   Idle;                           Virtual;
-
+    
     Procedure   InitClipBoard;
     Procedure   FileOpen;
     PROCEDURE   NewEditor(Name: STRING);
@@ -72,12 +71,12 @@ Type
     Procedure   VokabelnSpeichern;              Virtual;
     Procedure   VokabelnLaden;                  Virtual;
   END;
-
+    
 
 
 
 var
-
+    
     Laufwerk     : String[12];
     ColorFile    : ColorFiletyp;
     ColorDat     : PPalette;
@@ -168,33 +167,33 @@ BEGIN
 
   R.Assign (9, 4, 39, 5);
   Dialog^.Insert (New (pStaticText, Init (R, '       Vokabeltrainer         ')));
-
+ 
   R.Assign (12, 7, 34, 8);
   Dialog^.Insert (New (pStaticText, Init (R, 'Copyright (c) 1994 by')));
-
+ 
   R.Assign (14, 10, 28, 11);
   Dialog^.Insert (New (pStaticText, Init (R, 'Lothar Behrens')));
-
+ 
   R.Assign (14, 11, 26, 12);
   Dialog^.Insert (New (pStaticText, Init (R, 'Quellenweg 1')));
-
+ 
   R.Assign (14, 12, 34, 13);
   Dialog^.Insert (New (pStaticText, Init (R, 'W-74889 Sinsheim Ad.')));
-
+ 
   R.Assign (14, 13, 26, 14);
   Dialog^.Insert (New (pStaticText, Init (R, '(07261) 4671')));
-
+ 
   R.Assign (18, 15, 28, 17);
   Dialog^.Insert (New (pButton, Init (R, ' ~O~K ', 10, 1)));
-
+ 
   Dialog^.SelectNext (FALSE);
-
+ 
   Code := Desktop^.ExecView (Application^.ValidView (Dialog));
   IF Code <> cmCancel THEN BEGIN
     { cmCancel muss ev ersetzt werden }
     { Code auswerten }
   END;
-  IF Dialog <> NIL THEN
+  IF Dialog <> NIL THEN 
     Dispose (Dialog, Done);
 END;
 
@@ -233,7 +232,7 @@ BEGIN
   TApplication.Init;
 
 
-
+  
 
 
   ColorDat := Application^.GetPalette;
@@ -391,7 +390,7 @@ BEGIN
   Dispose(AEDTransCollection, Done);
   Dispose(ADeutschCollection, Done);
   Dispose(AEnglischCollection, Done);
-
+  
 
 
   ReWrite(ColorFile);
@@ -435,7 +434,7 @@ PROCEDURE TDateiverApp.NewEditor(Name: STRING);
     IF Name = ''
       THEN Editor[WNo].Ed := New(PEditorWindow, Init(R, WNo, 'Clipboard', Nil,
                                                edBase+10*WNo))
-     ELSE IF (Ext = '.txt') THEN BEGIN
+     ELSE IF (Ext = '.txt') THEN BEGIN 
        Editor[WNo].Ed := New(PEditorWindow, Init(R, WNo, Name, ReadFile(Name),
                                            edBase+10*WNo));
        Editor[WNo].Name := Name;
@@ -771,7 +770,7 @@ BEGIN
   END;
 
 
-
+  
   If WNo > 1 then EnableCommands ([cmEditorSave, cmEditorSaveAs])
   else            DisableCommands([cmEditorSave, cmEditorSaveAs]);
 

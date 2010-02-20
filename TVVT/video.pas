@@ -1,4 +1,4 @@
-Unit Vid;
+Unit Video;
 
 {$X+,O+,F+}
 Interface
