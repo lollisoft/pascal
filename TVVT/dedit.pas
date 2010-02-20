@@ -11,7 +11,7 @@ Uses Crt,
      Views,
      Dialogs,
 {     Editors,  }
-     Vid,
+     Video,
      Filefind,
      StrTools;
 
