@@ -1,5 +1,5 @@
 {$X+}
-UNIT MyStrings;
+UNIT MyString;
 
 INTERFACE
 
