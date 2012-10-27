@@ -294,9 +294,9 @@ var
      ziffer,
      ende             : Char;
      mask,
-     pfad,
-     befehl,
-     extender,
+     pfad			  : DirStr;
+     befehl			  : NameStr;
+     extender		  : ExtStr;
      lab              : String;
      DiskNr           : String12;
      srec,
@@ -410,7 +410,7 @@ Procedure Dir(Var Name: String);
 Procedure CopyMinWork(x:byte);
 Procedure CopyWorkinM(x:byte);
 Procedure TestMaskenSyntax(Var Maske: String);
-Function  PasstInMaske(Maske, Name: String12):Boolean;
+Function  PasstInMaske(Maske, Name: PathStr):Boolean;
 Procedure NewFileName(Name: String; Var FileName: String);
 Procedure Initfiles;
 Procedure SetAllNil;
@@ -1806,7 +1806,24 @@ END;
 Procedure TestMaskenSyntax(Var Maske: String);
 var Ext : String[4];
 
-Procedure BearbeiteString(var Mask: String);
+Procedure BearbeiteString(var Mask: NameStr);
+
+BEGIN
+  (* L”sche '?' direckt vor dem '*' *)
+
+    repeat
+      If Mask[Pos('*', Mask)-1] = '?' then
+        System.delete(Mask, Pos('*', Mask)-1, 1)
+    until Mask[Pos('*', Mask)-1] <> '?';
+
+    (* Nach erstem '*' abschneiden, wenn noch Zeichen da sind: *)
+
+    If Pos('*', Mask) <> 0 then
+      If Length(Mask) > Pos('*', Mask) then
+       System.delete(Mask, Pos('*', Mask)+1, Length(Mask)-Pos('*', Mask))
+END;
+
+Procedure BearbeiteExtender(var Mask: ExtStr);
 
 BEGIN
   (* L”sche '?' direckt vor dem '*' *)
@@ -1831,17 +1848,17 @@ BEGIN
   Fsplit(Maske, Pfad, Befehl, Extender);
 
   BearbeiteString(Befehl);
-  BearbeiteString(Extender);
+  BearbeiteExtender(Extender);
   Maske := Befehl+Extender
 END;
 
-Function PasstinMaske(Maske, Name: String12):Boolean;
+Function PasstinMaske(Maske, Name: PathStr):Boolean;
 var Extender,
-    Extender1,
+    Extender1: ExtStr;
     Befehl,
-    Befehl1,
+    Befehl1  : NameStr;
     Pfad,
-    Pfad1    : String;
+    Pfad1    : DirStr;
     Befehlistgleich,
     Extenderistgleich : Boolean;
 

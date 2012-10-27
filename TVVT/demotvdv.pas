@@ -19,7 +19,8 @@ Uses Overlay,
      LabHist,
      Editors,
      App,
-     Vid,
+     (*     Vid, *)
+
      CursCont,
      FileFind,
      FileShow,

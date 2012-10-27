@@ -10,7 +10,7 @@ Uses Crt,
      Memory,
      Views,
      Dialogs,
-     Vid,
+     TvvtData,
      VT,
      Objects,
      StrTools;

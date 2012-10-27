@@ -92,7 +92,7 @@ Unit bdf; (* Build Data Files *)
 
 
 Interface
-Uses Overlay;
+Uses Overlay, Dialogs;
 
 Const Counter : Integer = 0;
       MemWasLo: Boolean = False;
@@ -155,8 +155,12 @@ Function SearchPfadLine(Pfad: String): Longint;
 Function GetDirElement(Stelle: Longint): String;
 
 Implementation
-Uses Vid, Crt;
+Uses TvvtData, Crt, MsgBox;
 
+Procedure Wait(txt : string);
+begin
+  MessageBox(txt, nil, mfOkButton)
+end;
 
 Function GetDirElement;
 Var D: Importtyp;

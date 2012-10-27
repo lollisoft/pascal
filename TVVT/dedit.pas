@@ -1,5 +1,5 @@
 Unit DEDIT;
-{$O+ $F+}
+{$X+ $O+ $F+}
 Interface
 
 Uses Crt,
@@ -696,7 +696,9 @@ Var Lauf    : StrucktListPtrtyp;
 (* Dieses Unterprogramm soll den Datenbereich, der zu einem Label *)
 (* geh”hrt, entfernen.                                            *)
 
-var p, l : String;
+var 
+	p : String;
+	l : String12;
     VorDatei: String;
 
 Procedure LoescheElement(Var Anfang,

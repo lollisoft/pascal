@@ -14,23 +14,24 @@ Uses App,
      Objects,
      Dialogs,
      Memory,
-     GadGets,
      Drivers,
      Views,
      Menus,
-     MsgBox,
      Editors,
    (* FÅr Editor: *)
      Colorsel,
-     Colors,
-     Editor,
      Strings,
      StrTools,
      Video,
      CursCont,
-     StdDlg,
      VT,
-     VTEST;
+	 VTEST,
+
+     StdDlg,
+     GadGets,
+     Editor
+     (*MsgBox,
+     Colors*);
 
 
 
