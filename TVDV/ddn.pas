@@ -1,5 +1,6 @@
 Unit DDN; (* Disk - Direckt - Nachtrag *)
 
+{$O+,F+}
 Interface
 
 Uses TVDVDATA, MsgBox;

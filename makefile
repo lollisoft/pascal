@@ -1,6 +1,6 @@
 include Q:\\develop\\Projects\\PASCAL\\makefile.turbo
 
-all: TV TVISION GADGETS TVVT TVDV
+all: TV TVISION GADGETS TVVT TVDV OVRDEMO
 
 TV: dummy
 		$(MAKE) -C Q:\\develop\\Projects\\PASCAL\\tv
@@ -17,4 +17,8 @@ TVVT: GADGETS TVISION TV
 TVDV: GADGETS TVISION TV
 		$(MAKE) -C $@
 
+OVRDEMO: GADGETS TVISION TV
+		$(MAKE) -C Q:\\develop\\Tools\\TP\\DEMOS
+		
+		
 dummy:

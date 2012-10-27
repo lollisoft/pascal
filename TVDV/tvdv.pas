@@ -6,7 +6,7 @@ Program TVDV;
 
 {$M 65520,8192,655360}
 
-(*{$X+,S+,O+,F+}*)
+{$X+,S+,O+,F+}
 
 {$G-}
 
@@ -47,32 +47,6 @@ Uses
      EMS,
      XMS,
      XHeap;
-
-
-
-
-(*
-{$O Dos     }
-{$O Objects }
-
-{$O Video   }
-
-
-{$O TvdvImp }
-{$O Labhist }
-{$O Memory  }
-{$O FileFind}
-{$O CursCont}
-{$O FileShow}
-{$O MsgBox  }
-{$O StdDlg  }
-{$O App     }
-{$O Editors }
-{$O Views   }
-{$O Menus   }
-{$O Dialogs }
-{$O DEdit   }
-*)
 
 Type
   ColorFiletyp         = File of TPalette;
@@ -4788,13 +4762,54 @@ Begin
 
 End;
 
+{$O TvdvImp }
+
+{$O FileFind}
+{$O CursCont}
+{$O FileShow}
+{$O Labhist}
+{$O GadGets}
+{$O HelpFile}
+{$O Memory}
+{$O MsgBox}
+{$O Dialogs}
+{$O Views}
+{$O Menus}
+{$O App}
+{$O LabHist}
+{$O Editors}
+{$O StdDlg}
+{$O DDN}
+
+
+
+(*
+{$O DEdit     Geht nicht}
+{$O TVDVDATA  Geht nicht}
+{$O TvdvCmds  Geht nicht}
+{$O HelpCmds  Geht nicht}
+{$O Crt       Geht nicht}
+{$O Drivers   Geht nicht}
+{$O Editor    Geht nicht}
+{$O Strings   Geht nicht}
+{$O Colors    Geht nicht}
+{$O StrTools  Geht nicht}
+
+{$O Objects   Runtime Error 208}
+{$O Dos       Runtime Error 208}
+
+
+{$O EMS		  ?}
+{$O XMS       ?}
+{$O XHeap     ?}
+*)
 (* Hauptprogramm: *)
 Var DateiverApp : TDateiverApp;
 Begin
-(*
+
   Writeln('Init TVDV.OVR');
   OvrInit('TVDV.OVR');
-  OvrSetBuf(64 * 1024);
+  (*OvrSetBuf(64 * 1024);*)
   If OvrResult <> ovrOk then
   Begin
     Writeln('Overlay init failed.');
@@ -4806,7 +4821,7 @@ Begin
     Writeln('Kein EMS - Treiber da!');
     Readln
   End;
-*)
+
   EMSSF := False;
   EMSLF := False;
   EMSPF := False;
