@@ -1,0 +1,2 @@
+cmHeini = $8000;
+cmHugo = 123;
