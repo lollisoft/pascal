@@ -22,23 +22,23 @@ Uses App,
      Colorsel,
      Strings,
      StrTools,
-     Video,
+     TvvtData,
      CursCont,
      VT,
 	 VTEST,
 
      StdDlg,
      GadGets,
-     Editor
-     (*MsgBox,
-     Colors*);
+     Editor,
+	 Colors,
+	 MsgBox;
 
 
 
 Const
 
     FileName           : String12 = '*.*';
-    VFileName          : String12 = 'Vokabel';
+    VFileName          : String = 'Vokabel';
 
 
 Type
@@ -49,7 +49,7 @@ Type
   TDateiverApp         = Object(TApplication)
     Heap        : PHeapView;
     Editor: ARRAY[1..9] OF RECORD
-      Ed: PEditorWindow;
+      Ed: PEditWindow;
       Name: STRING;
     END;
     Constructor Init;
@@ -58,7 +58,7 @@ Type
     
     Procedure   InitClipBoard;
     Procedure   FileOpen;
-    PROCEDURE   NewEditor(Name: STRING);
+    PROCEDURE   NewEditor(Name: FNameStr);
     FUNCTION    GetFile(Arg: STRING): PCollection;
     PROCEDURE   SendFile(WindowNo, cmBase: WORD);
     PROCEDURE   SaveFile (WindowNo: WORD; P: PCollection );
@@ -87,7 +87,7 @@ var
 (* Editor: *)
 
     EDCommand, WindowNo: WORD;
-    ClipWindow: PEditorWindow;
+    ClipWindow: PEditWindow;
 
 function CalcHelpName: PathStr;
 var
@@ -402,7 +402,7 @@ END;
 
 (* FÅr Editor: *)
 
-FUNCTION ReadFile(Name: STRING): PCollection;
+FUNCTION ReadFile(Name: String): PCollection;
   VAR
     P: PCollection;
     ALine: STRING;
@@ -422,10 +422,13 @@ FUNCTION ReadFile(Name: STRING): PCollection;
   END;
 
 
-PROCEDURE TDateiverApp.NewEditor(Name: STRING);
+PROCEDURE TDateiverApp.NewEditor(Name: FNameStr);
   VAR
     R: TRect;
-    Dir, FName, Ext: STRING;
+    Dir: DirStr;
+    FName: NameStr;
+    Ext: ExtStr;
+    (*Dir, FName, Ext: STRING;*)
   BEGIN
     Inc(WNo);
 
@@ -433,16 +436,13 @@ PROCEDURE TDateiverApp.NewEditor(Name: STRING);
     FSplit(Name, Dir, FName, Ext);
     Ext := DownStr(Ext);
     IF Name = ''
-      THEN Editor[WNo].Ed := New(PEditorWindow, Init(R, WNo, 'Clipboard', Nil,
-                                               edBase+10*WNo))
+      THEN Editor[WNo].Ed := New(PEditWindow, Init(R, 'Clipboard', WNo))
      ELSE IF (Ext = '.txt') THEN BEGIN 
-       Editor[WNo].Ed := New(PEditorWindow, Init(R, WNo, Name, ReadFile(Name),
-                                           edBase+10*WNo));
+       Editor[WNo].Ed := New(PEditWindow, Init(R, Name, WNo));
        Editor[WNo].Name := Name;
       END
       ELSE IF (Ext<>'.exe') AND (Ext<>'.com') AND (Ext<>'.bak') THEN BEGIN
-        Editor[WNo].Ed := New(PLineEditor, Init(R, WNo, Name, ReadFile(Name),
-                                                128, edBase+10*WNo));
+        Editor[WNo].Ed := New(PEditWindow, Init(R, Name, WNo));
         Editor[WNo].Name := Name;
        END
        ELSE Exit;
@@ -452,7 +452,10 @@ PROCEDURE TDateiverApp.NewEditor(Name: STRING);
 PROCEDURE TDateiverApp.InitClipBoard;
   VAR
     R: TRect;
-    Dir, FName, Ext: STRING;
+    (*Dir, FName, Ext: STRING;*)
+    Dir: DirStr;
+    FName: NameStr;
+    Ext: ExtStr;
     Name: String;
   BEGIN
     Name := '';
@@ -461,8 +464,7 @@ PROCEDURE TDateiverApp.InitClipBoard;
     FSplit(Name, Dir, FName, Ext);
     Ext := DownStr(Ext);
 
-    Editor[WNo].Ed := New(PEditorWindow, Init(R, WNo, 'Clipboard', Nil,
-                                               edBase+10*WNo));
+    Editor[WNo].Ed := New(PEditWindow, Init(R, 'Clipboard', WNo));
 
     ClipWindow := Editor[WNo].Ed;
     if ClipWindow <> nil then
@@ -505,7 +507,7 @@ PROCEDURE TDateiverApp.SaveFileAs(WindowNo: WORD; P: PCollection);
         Begin
           D^.GetFileName(FileName);
           Editor[WindowNo].Name := FileName;
-          Editor[WindowNo].Ed^.NewTitle(FileName);
+          (*Editor[WindowNo].Ed^.NewTitle(FileName);*)
 
           Assign(TF,Editor[WindowNo].Name);
           Rewrite(TF);
@@ -579,16 +581,16 @@ Var R: TRect;
         WindowNo := Event.Command MOD 100 DIV 10;
         EDCommand := Event.Command MOD 10;
         CASE EDCommand OF
-          cmEdSave: SaveFile(WindowNo, Event.InfoPtr);
-          cmEdSaveAs: SaveFileAs(WindowNo, Event.InfoPtr);
+          cmEditorSave: SaveFile(WindowNo, Event.InfoPtr);
+          cmEditorSaveAs: SaveFileAs(WindowNo, Event.InfoPtr);
           cmEdSaveAndExit: SaveFile(WindowNo, Event.InfoPtr);
           cmEdRead: SendFile(WindowNo,edBase);
           cmEdExit: Dispose(Editor[WindowNo].Ed, Done);
           ELSE HandleBroadCast := False;
         END;
         CASE Event.Command OF
-          edBase + cmEdSave: SaveFile(WindowNo, Event.InfoPtr);
-          edBase + cmEdSaveAs: SaveFileAs(WindowNo, Event.InfoPtr);
+          edBase + cmEditorSave: SaveFile(WindowNo, Event.InfoPtr);
+          edBase + cmEditorSaveAs: SaveFileAs(WindowNo, Event.InfoPtr);
           ELSE HandleBroadCast := False;
         END;
        END
@@ -742,7 +744,7 @@ BEGIN
                                 End;
         cmEditorSaveAs        : Begin
                                   Event.What := evBroadCast;
-                                  Event.Command := edBase + cmEdSaveAs;
+                                  Event.Command := edBase + cmEditorSaveAs;
                                   PutEvent(Event);
                                   Exit
                                   (*IF NOT HandleBroadCast THEN
@@ -755,9 +757,9 @@ BEGIN
         cmChangeDir           : ChangeDir;
 
         cmIfCursor            : BEGIN
-                                  IfCursor := Not(IfCursor);
+(*                                  IfCursor := Not(IfCursor);
                                   CursorAus
-                                END;
+*)                                END;
 
 (* Editor: *)
         cmFileOpen            : FileOpen;
