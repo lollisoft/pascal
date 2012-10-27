@@ -4327,11 +4327,11 @@ Begin
 
 
         cmIfCursor            : Begin
-
+(*
                                   IfCursor := Not(IfCursor);
 
                                   CursorAus
-
+*)
                                 End;
 
         cmColors              : Begin
