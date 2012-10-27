@@ -9,6 +9,6 @@ INCLUDE=/I Q:\\develop\\Tools\\TP\\TVISION
 
 LINK=/L
 
-#/$O+ /$F+ /$R- /$X+ /$B- /$v-
+SWITCHES=#/$$O+ /$$F+ /$$R- /$$X+ /$$B- /$$v- /$$S-
 
-COMPILE=tpc $(TPUS) $(OUTPUT) $(INCLUDE) $(DEBUG) $(BUILDALLUNITS) $(LINK) 
+COMPILE=tpc $(TPUS) $(OUTPUT) $(INCLUDE) $(DEBUG) $(BUILDALLUNITS) $(LINK)
