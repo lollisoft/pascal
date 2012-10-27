@@ -11,7 +11,7 @@ TVISION: dummy
 GADGETS: dummy
 		$(MAKE) -C Q:\\develop\\Tools\\TP\\TVDEMOS
 
-TVVT: GADGETS
+TVVT: GADGETS TVISION TV
 		$(MAKE) -C $@
 
 dummy:
