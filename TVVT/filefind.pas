@@ -1,5 +1,5 @@
 Unit FileFind;
-{$O+ $F+ }
+{$X+ $O+ $F+ $S-}
 Interface
 
 Uses Crt,
@@ -11,7 +11,7 @@ Uses Crt,
      App,
 (*     Editors,*)
      Views,
-     Vid,
+	 TvvtData,
      Dialogs(*,     StrTools*);
 
 
@@ -419,15 +419,16 @@ PROCEDURE GetDatenDialog;
   VAR
     R: tRect;
     Code: INTEGER;
-    Dialog: pGetDatenDialog;
+    D: ^TView;
 BEGIN
   R.Assign (1, 0, 79, 17);
-  Dialog := New (pGetDatenDialog, Init (R, ''));
+  D := New (pGetDatenDialog, Init (R, ''));
 
-  DeskTop^.ExecView (Application^.ValidView (Dialog));
-
-  IF Dialog <> NIL THEN
-    Dispose (Dialog, Done);
+  IF Application^.ValidView (D) <> NIL THEN
+  begin
+	DeskTop^.ExecView (D);
+    Dispose (D, Done);
+  end;
 END;
 
 

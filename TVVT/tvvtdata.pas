@@ -1,4 +1,4 @@
-Unit Video;
+Unit TvvtData;
 
 {$X+,O+,F+}
 Interface
@@ -411,7 +411,7 @@ Procedure CopyMinWork(x:byte);
 Procedure CopyWorkinM(x:byte);
 Procedure TestMaskenSyntax(Var Maske: String);
 Function  PasstInMaske(Maske, Name: PathStr):Boolean;
-Procedure NewFileName(Name: String; Var FileName: String);
+Procedure NewFileName(Name: String; Var FileName: String12);
 Procedure Initfiles;
 Procedure SetAllNil;
 Procedure MachBinBaum(Var p: GlobalListPtrtyp;

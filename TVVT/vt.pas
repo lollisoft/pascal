@@ -1,4 +1,5 @@
 Unit VT; (* Vokabeltrainer *)
+{$X+ $O+ $F+}
 
 Interface
 

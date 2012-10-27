@@ -29,7 +29,7 @@ Uses
      Colors,   *)
      App,
 (*     TVDVImp,*)
-     Vid,
+(*     Vid, *)
 (*     CursCont, *)
      FileFind,
 (*     FileShow,*)
