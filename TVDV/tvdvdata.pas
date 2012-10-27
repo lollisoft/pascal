@@ -1,5 +1,7 @@
 Unit TVDVDATA;  (* Kapselung der Daten, die Dateien etc. betreffen. *)
 
+{$F+,I-,O+,S-,V-,X+}
+
 Interface
 
 Uses Objects,
