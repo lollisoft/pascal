@@ -31,7 +31,9 @@ Uses App,
      GadGets,
      Editor,
 	 Colors,
-	 MsgBox;
+	 MsgBox,
+	 
+	 IdleKey;
 
 
 
@@ -866,7 +868,9 @@ Var DateiverApp : TDateiverApp;
 
 
 BEGIN
-
+  (* http://www.delphigroups.info/2/ac/3804.html *)
+  InitIdleKey;
+  
   EMSSF := False;
   EMSLF := False;
   EMSPF := False;
@@ -888,6 +892,8 @@ BEGIN
   DateiverApp.Run;
   DateiverApp.Done;
 
-  OrgCursor
+  OrgCursor;
+  
+  UninitIdleKey
 
 END.
