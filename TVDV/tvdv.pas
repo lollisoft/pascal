@@ -46,7 +46,9 @@ Uses
      DDN,
      EMS,
      XMS,
-     XHeap;
+     XHeap,
+	 
+	 IdleKey;
 
 Type
   ColorFiletyp         = File of TPalette;
@@ -4755,11 +4757,10 @@ End;
 PROCEDURE TDateiverApp.Idle;
 
 Begin
-
+  (* http://www.delphigroups.info/2/ac/3804.html *)
+  asm    int $28   end;
   TApplication.Idle;
-
   Heap^.Update;
-
 End;
 
 {$O TvdvImp }
@@ -4806,10 +4807,11 @@ End;
 (* Hauptprogramm: *)
 Var DateiverApp : TDateiverApp;
 Begin
-
+  (* http://www.delphigroups.info/2/ac/3804.html *)
+  InitIdleKey;
   Writeln('Init TVDV.OVR');
   OvrInit('TVDV.OVR');
-  (*OvrSetBuf(64 * 1024);*)
+  OvrSetBuf(64 * 1024);
   If OvrResult <> ovrOk then
   Begin
     Writeln('Overlay init failed.');
@@ -4819,9 +4821,9 @@ Begin
   If OvrResult = OvrNoEMSDriver then
   Begin
     Writeln('Kein EMS - Treiber da!');
-    Readln
+    (*Readln*)
   End;
-
+  
   EMSSF := False;
   EMSLF := False;
   EMSPF := False;
@@ -4840,5 +4842,6 @@ Begin
   DateiverApp.Run;
   DateiverApp.Done;
 
-  OrgCursor
+  OrgCursor;
+  UninitIdleKey
 End.
