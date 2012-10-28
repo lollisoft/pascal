@@ -1,6 +1,11 @@
 include Q:\\develop\\Projects\\PASCAL\\makefile.turbo
 
-all: TV TVISION GADGETS TVVT TVDV OVRDEMO
+all: IDLEKEY.EXE TV TVISION GADGETS TVVT TVDV OVRDEMO
+
+all: TVVT.EXE
+
+IDLEKEY.EXE: IDLEKEY\\IDLEKEY.PAS
+		$(COMPILE) IDLEKEY\\IDLEKEY $(SWITCHES)
 
 TV: dummy
 		$(MAKE) -C Q:\\develop\\Projects\\PASCAL\\tv
