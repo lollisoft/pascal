@@ -4821,7 +4821,7 @@ Begin
   If OvrResult = OvrNoEMSDriver then
   Begin
     Writeln('Kein EMS - Treiber da!');
-    (*Readln*)
+    Readln
   End;
   
   EMSSF := False;
