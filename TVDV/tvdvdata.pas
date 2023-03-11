@@ -1208,15 +1208,15 @@ BEGIN
 
 
 
-    R.Assign(48, 3, 58, 5);
+    R.Assign(20, 3, 35, 5);
 
     Insert(New(PButton, Init(R, '~Y~es', cmOk, bfDefault)));
 
-    Inc(R.A.X, 12); Inc(R.B.X, 12);
+    Inc(R.A.X, 16); Inc(R.B.X, 16);
 
     Insert(New(PButton, Init(R, '~N~o', cmNo, bfNormal)));
 
-    Inc(R.A.X, 12); Inc(R.B.X, 12);
+    Inc(R.A.X, 16); Inc(R.B.X, 16);
 
     Insert(New(PButton, Init(R, '~A~bbrechen', cmCancel, bfNormal)));
 
@@ -4190,12 +4190,6 @@ Begin
 
 End;
 
-Procedure Data.SpeichereDateien;
-
-Begin
-
-End;
-
 Procedure Data.DiskAutoScann;
 
 Begin
@@ -5086,6 +5080,19 @@ end;
 
 
 
+Procedure Data.SpeichereDateien;
+	
+Begin
+
+     MessageBox('Data.SpeichereDateien aufgerufen', Nil, mfOkButton);
+
+(*
+	SpeichereDatei;
+	SpeicherePfad;
+	SpeichereLabel;
+	SpeichereSuch;
+*)
+End;
 
 
 Procedure Data.SetAllNil;
