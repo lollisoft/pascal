@@ -1,29 +1,27 @@
-include Q:\\develop\\Projects\\PASCAL\\makefile.turbo
+include Q:\develop\Projects\PASCAL\makefile.turbo
 
-all: IDLEKEY.EXE TV TVISION GADGETS TVVT TVDV OVRDEMO
+all: IDLEKEY TV TVDV #OVRDEMO
 
-all: TVVT.EXE
-
-IDLEKEY.EXE: IDLEKEY\\IDLEKEY.PAS
-		$(COMPILE) IDLEKEY\\IDLEKEY $(SWITCHES)
+IDLEKEY: dummy
+		$(MAKE) -C $@
 
 TV: dummy
-		$(MAKE) -C Q:\\develop\\Projects\\PASCAL\\tv
+		$(MAKE) -C $@
 
 TVISION: dummy
-		$(MAKE) -C Q:\\develop\\Tools\\TP\\TVISION
+		$(MAKE) -C $@
 
 GADGETS: dummy
-		$(MAKE) -C Q:\\develop\\Tools\\TP\\TVDEMOS
-
-TVVT: GADGETS TVISION TV
 		$(MAKE) -C $@
 
-TVDV: GADGETS TVISION TV
+TVVT: dummy
 		$(MAKE) -C $@
 
-OVRDEMO: GADGETS TVISION TV
-		$(MAKE) -C Q:\\develop\\Tools\\TP\\DEMOS
+TVDV: dummy
+		$(MAKE) -C $@
+
+OVRDEMO: dummy
+		$(MAKE) -C $@
 		
 		
 dummy:
