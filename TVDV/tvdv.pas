@@ -45,9 +45,9 @@ Uses
      StrTools,
      DDN,
      EMS,
-     XMS,
+     {XMS,}
      XHeap,
-	 
+
 	 IdleKey;
 
 Type
@@ -1222,8 +1222,11 @@ Begin
   New(Info);
 
   Repeat
-
+(*
     info^ := PData^.GetLaufwerk;
+*)
+
+    info^ := 'B';
 
     If ExecDialog(ReadString('Welches Laufwerk'), Info) = cmCancel then Exit;
 
@@ -1237,9 +1240,9 @@ Begin
 
   PData^.SetLaufwerk(Info^);
 
-  Dispose(Info);
+  Mask := Info^ + ':\*.*';
 
-  Mask := (*PData^.GetLaufwerk +*) 'c:\*.*';
+  Dispose(Info);
 
   N := Mask;
 
