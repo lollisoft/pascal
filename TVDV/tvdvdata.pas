@@ -5329,7 +5329,7 @@ begin
 
     begin
 
-      Wait('Diskette leer!');
+      Wait('Diskette leer! - ' + Pfad + Befehl + Extender);
 
       DirStatus := False
 
