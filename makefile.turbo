@@ -1,14 +1,16 @@
-OUTPUT=/EQ:\\develop\\Tools\\TP\\tpu
+OUTPUT=/EC:\\TP\\Builds
 TPUS=/UQ:\\develop\\Tools\\TP\\tvision
 
 DEBUG=/V /GD
 
 BUILDALLUNITS=/B
 
-INCLUDE=/I Q:\\develop\\Tools\\TP\\TVISION
+INC=/IQ:\\Develop\\Projects\\PASCAL\\INCLUDE
 
 LINK=/L
 
 SWITCHES=#/$$O+ /$$F+ /$$R- /$$X+ /$$B- /$$v- /$$S-
 
-COMPILE=tpc $(TPUS) $(OUTPUT) $(INCLUDE) $(DEBUG) $(BUILDALLUNITS) $(LINK)
+
+
+COMPILE=tpc $(TPUS) $(OUTPUT) $(INC) $(DEBUG) $(BUILDALLUNITS) $(LINK)
