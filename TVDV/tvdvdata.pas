@@ -1,65 +1,29 @@
 Unit TVDVDATA;  (* Kapselung der Daten, die Dateien etc. betreffen. *)
-
 {$F+,I-,O+,S-,V-,X+}
-
 Interface
-
-Uses Objects,
-
-     LabHist,
-     MsgBox,
-     Dialogs,
-     TvdvCmds,
-     HelpCmds,
-     HelpFile,
-     Crt,
-     Dos,
-     Memory,
-     GadGets,
-     Drivers,
-     Views,
-     Menus,
-     Editors,
+Uses Objects, LabHist, MsgBox, Dialogs, TvdvCmds, HelpCmds,
+     HelpFile, Crt, Dos, Memory, GadGets, Drivers, Views,
+     Menus, Editors, Strings, Colors, App, CursCont, StdDlg,
+     StrTools, EMS, XMS, XHeap,
    (* FÅr Editor: *)
-     Editor,
-     Strings,
-     Colors,
-     App,
-     CursCont,
-     StdDlg,
-     StrTools,
-     EMS,
-     XMS,
-     XHeap;
-
+     Editor;
 (****************************)
-
 (* Deklarationen aus Video: *)
-
 (****************************)
-
-
-
-
 
 Const Counter : Integer = 0;
-
       MemWasLo: Boolean = False;
 
 Type
 (*************************************************************)
-(*                                                           *)
 (* Globale Datentypen werden z. B. beim Sortieren verwendet. *)
-(*                                                           *)
 (*************************************************************)
     String12            = String[12];
-
     LabelDatatyp        = Record
                             Bal       : Shortint;
                             Anzahl    : Byte;
                             LabelName : String12
                           end;
-
      GlobalListPtrtyp = ^GlobalListtyp;
      GlobalListXPtrtyp = Record
                            Ptr    : GlobalListPtrtyp;
@@ -96,234 +60,92 @@ Type
                           Ptr    : LabelListPtrtyp;
                           BlockNr: Word
                         End;
-
      LabelListtyp     = record
-
                             Links,
-
                             Rechts    : LabelListXPtrtyp;
-
                             LabelData : LabelDatatyp
-
                           end;
-
-
-
      PfadDatatyp      = Record
-
                             Bal       : Shortint;
-
                             Anzahl    : Byte;
-
                             PfadName  : String[70]
-
                           end;
-
-
-
-
-
      PfadListPtrtyp  = ^PfadListtyp;
-
-
-
      PfadListXPtrtyp = Record
-
                          Ptr    : PfadListPtrtyp;
-
                          BlockNr: Word
-
                        End;
-
-
-
      PfadListtyp      = record
-
                             Links,
-
                             Rechts    : PfadListXPtrtyp;
-
                             PfadData  : PfadDatatyp
-
                           end;
-
-
-
      DateiListPtrtyp = ^DateiListtyp;
-
-
-
      DateiListXPtrtyp = Record
-
                           Ptr    : DateiListPtrtyp;
-
                           BlockNr: Word
-
                         End;
-
-
-
-     arttyp               = byte;   (* Label, Pfad, Datei *)
-
-
+     arttyp             = byte;   (* Label, Pfad, Datei *)
      StrucktDatatyp     = record
-
                             case art : arttyp of
-
                               1 : (LabelList   : LabelListXPtrtyp);
-
                               2 : (PfadList    : PfadListXPtrtyp);
-
                               3 : (DateiList   : DateiListXPtrtyp);
-
                               4 : (DLabelList : Longint);
-
                               5 : (DPfadList  : Longint);
-
                               6 : (DDateiList : Longint);
-
                           end;
-
-
-
-
-
      StrucktListPtrtyp  = ^StrucktListtyp;
-
-
-
      StrucktListXPtrtyp = Record
-
                             Ptr    : StrucktListPtrtyp;
-
                             BlockNr: Word
-
                           End;
-
-
-
      StrucktListtyp      = record
-
                                Back,
-
                                Next        : StrucktListXPtrtyp;
-
                                StrucktData : StrucktDatatyp
-
                              end;
-
-
-
      ZusatzListPtrtyp   = ^ZusatzListtyp;
-
-
-
      ZusatzListXPtrtyp  = Record
-
                             Ptr    : ZusatzListPtrtyp;
-
                             BlockNr: Word
-
                           End;
-
-
-
      ZusatzDatatyp         = record
-
                                sl,
-
                                sp  : StrucktListXPtrtyp
-
                              end;
-
-
-
      ZusatzListtyp       = record
-
                                Back,
-
                                Next: ZusatzListXPtrtyp;
-
                                ZusatzData: ZusatzDatatyp
-
                              end;
-
-
-
      DateiDatatyp       = record
-
                             Bal      : Shortint;
-
                             Anzahl   : byte;
-
                             DateiName: String12;
-
                             Loc      : ZusatzListXPtrtyp
-
                           end;
-
-
-
-
-
-
-
-
-
      HilfDatatyp           = record
-
                                case art : arttyp of
-
                                  1 : (LabelList : StrucktListXPtrtyp);
-
                                  2 : (PfadList  : StrucktListXPtrtyp);
-
                                  3 : (DLabelList : Longint);
-
                                  4 : (DPfadList  : Longint)
-
                                end;
-
-
-
      HilfListPtrtyp     = ^HilfListtyp;
-
-
-
      HilfListXPtrtyp  = Record
-
                           Ptr    : HilfListPtrtyp;
-
                           BlockNr: Word
-
                         End;
-
-
-
      HilfListtyp         = record
-
                                Back,
-
                                Next     : HilfListXPtrtyp;
-
                                HilfData : HilfDatatyp
-
                              end;
-
-
-
-
-
-
-
      DateiListtyp     = record
-
                             Links,
-
                             Rechts           : DateiListXPtrtyp;
-
                             DateiData        : DateiDatatyp
-
                           end;
 
      sltyp             = record
@@ -334,8 +156,6 @@ Type
                             s2,
                             s3   : String
                           end;
-
-
     Importtyp           = String;
     ImportFiletyp       = File Of Importtyp;
     ImportDirTreePtrtyp = ^ImportDirTreetyp;
@@ -364,560 +184,207 @@ Type
 
 Type GetDateiElementtyp = Function(Stelle: Longint): String;
 Var  GetDateiElement : GetDateiElementtyp;
-
-
 Type  TreePtrtyp = ^Treetyp;
-
-
-
       TreeXPtrtyp = Record
-
                       Ptr    : TreePtrtyp;
-
                       BlockNr: Word
-
                     End;
-
-
-
       Treetyp    = Record
-
                      Rechts,
-
                      Links  : TreeXPtrtyp;
-
                      Zeiger,
-
                      Stelle : Longint;
-
                      Bal    : Shortint
-
                    End;
-
-
-
-
-
 Var
       MsgRes       : Word;
-
-
       ImportFile   : ImportFiletyp;
-
       ImportData   : Importtyp;
-
       ImportDirTree: ImportDirTreeXPtrtyp;
-
-
-
       HelpTreesOnFile: Boolean;
-
-
-
-      Df,
-
-      Pf,
-
-      Lf,
-
-      Sf,
-
-      Hf,
-
-      Zf: String;
-
-
-
+      Df, Pf, Lf,
+      Sf, Hf, Zf: String;
       LabelTree,
-
       PfadTree,
-
       DateiTree : TreeXPtrtyp;
-
-
-
       DateiDif,
-
       PfadDif,
-
       LabelDif  : Boolean;
-
-
-
       SArg: String;
-
-
 Procedure Wait(txt : string);
-
-
-
 Procedure BuildDataFiles(Counter: Integer);
-
 Procedure Suche(Tree: ImportDirTreeXPtrtyp; Var Result: XPointer);
-
 Function SearchPfadLine(Pfad: String): Longint;
-
 Function GetDirElement(Stelle: Longint): String;
-
-
 Const
-
       NoNew: Boolean          = False;
-
       Dateifilename: string   = 'Datei.dvd';
-
       Pfadfilename: string    = 'Pfad.dvd';
-
       Labelfilename: String   = 'Label.dvd';
-
       Strucktfilename: string = 'Struckt.dvd';
-
       Hilffilename: string    = 'Hilf.dvd';
-
       Zusatzfilename: string  = 'Zusatz.dvd';
-
-
-
       FileName           : String12 = '.DVD';
-
       ImportFileName     : String12 = '.DIR';
-
-
-
-
-
-
-
-
-
 Type
-
-
-
-
-
-
-
-
-
-
-
 (* Noch nicht einwandfrei
-
    ( nicht ersichtlich, wieviele jeweils vorhanden sind ) *)
-
-
-
      Mediumtyp            = record
-
                                n         : String;
-
                                z, ez     : ZusatzListXPtrtyp;
-
                                s, es, as : StrucktListXPtrtyp;
-
                                h, eh, ah : HilfListXPtrtyp;
-
                                l         : LabelListXPtrtyp;
-
                                p         : PfadListXPtrtyp;
-
                                d         : DateiListXPtrtyp;
-
                                DateiDif,
-
                                PfadDif,
-
                                LabelDif,
-
                                na        : Boolean
-
                              end;
 
      MediumFeldtyp       = array ['A'..'J'] of Mediumtyp;
-
-
-
 (* Dynamische Felder in denen jedes Element auf ein spezifischen   *)
-
 (* Datensatz eines Listenelementes zeigt.                          *)
-
-
-
      SPointerArray         = Array [1..1] of StrucktListXPtrtyp;
-
      LPointerArray         = Array [1..1] of LabelListXPtrtyp;
-
      PPointerArray         = Array [1..1] of PfadListXPtrtyp;
-
      DPointerArray         = Array [1..1] of DateiListXPtrtyp;
-
      ZPointerArray         = Array [1..1] of ZusatzListXPtrtyp;
-
-
-
 (* Dynamisches Feld, das Zeigeroperationen auf alle Åbrigen Felder *)
-
 (* zulÑsst.                                                        *)
-
-
-
      GPointerArray         = Array [1..1] of GlobalListXPtrtyp;
-
-
-
 (* Die Zeiger zu den dynamischen Feldern:                          *)
-
-
-
      StrucktFeldXPtrtyp  = ^SPointerArray;
-
      LabelFeldXPtrtyp    = ^LPointerArray;
-
      PfadFeldXPtrtyp     = ^PPointerArray;
-
      DateiFeldXPtrtyp    = ^DPointerArray;
-
      ZusatzFeldXPtrtyp   = ^ZPointerArray;
-
      GlobalFeldXPtrtyp   = ^GPointerArray;
-
-
-
-
-
-
-
 (* Hilfsvariabeln, die fÅr das Einblenden der verketteten *)
-
 (* Struckturen verwendet wird. Bsp. x^.y^.z^.Data         *)
-
-
-
-
-
      ListenDataXtyp= Record
-
                        Element: Listentyp;
-
                        XPtr   : ListenXPtrtyp
-
                      End;
-
-
-
      DateiDataXtyp = Record
-
                        DateiData: DateiDatatyp;
-
                        XPtr     : DateiListXPtrtyp
-
                      End;
-
-
-
      PfadDataXtyp  = Record
-
                        PfadData : PfadDatatyp;
-
                        XPtr     : PfadListXPtrtyp
-
                      End;
-
-
-
      LabelDataXtyp = Record
-
                        LabelData: LabelDatatyp;
-
                        XPtr     : LabelListXPtrtyp
-
                      End;
-
-
-
      StrucktDataXtyp = Record
-
                          StrucktData: StrucktDatatyp;
-
                          XPtr       : StrucktListXPtrtyp
-
                        End;
-
-
-
      HilfDataXtyp = Record
-
                          HilfData: HilfDatatyp;
-
                          XPtr    : HilfListXPtrtyp
-
                        End;
-
-
-
      ZusatzDataXtyp = Record
-
                          ZusatzData: ZusatzDatatyp;
-
                          XPtr      : ZusatzListXPtrtyp
-
                        End;
-
-
 var
-
      StrucktFeld : StrucktFeldXPtrtyp;
-
      EMSSF       : Boolean;
-
      LabelFeld   : LabelFeldXPtrtyp;
-
      EMSLF       : Boolean;
-
      PfadFeld    : PfadFeldXPtrtyp;
-
      EMSPF       : Boolean;
-
      DateiFeld   : DateiFeldXPtrtyp;
-
      EMSDF       : Boolean;
-
      ZusatzFeld  : ZusatzFeldXPtrtyp;
-
      EMSZF       : Boolean;
-
-
-
      DelLabelFeld : LabelFeldXPtrtyp;
-
      EMSDLF       : Boolean;
-
      DelPfadFeld  : PfadFeldXPtrtyp;
-
      EMSDPF       : Boolean;
-
      DelDateiFeld : DateiFeldXPtrtyp;
-
      EMSDDF       : Boolean;
-
-
-
-
-
-
-
-
-
      DirStatus   : Boolean;
-
      Maske       : String;
-
      zhilf       : integer;
-
      Stelle,
-
      Anzahl,
-
      Deleted,   (* Elemente, die nicht gespeichert werden *)
-
      SAnzahl,
-
      LAnzahl,
-
      PAnzahl,
-
      DAnzahl,
-
      ZAnzahl          : Longint;
-
-
-
      N                : String;
-
      A, B             : Longint;
-
      Raus,
-
      ch,
-
      cha              : Char;
-
      MediumFeld       : MediumFeldtyp;
-
      M                : Array [1..2] of Mediumtyp;
-
      Nachgetragen,
-
      w                : Boolean;
-
      ziffer,
-
      ende             : Char;
-
      mask             : String;
-
 var  pfad             : DirStr;
-
 var  befehl           : NameStr;
-
 var  extender         : ExtStr;
-
      lab              : String;
-
      DiskNr           : String12;
-
      srec,
-
      sr               : Searchrec;
-
      s                : Real;
-
      attr             : Byte;
-
-
-
      Labelzeiger,
-
      Pfadzeiger       : StrucktListXPtrtyp;
-
-
-
-
-
-
-
      ZusatzList,
-
      ZusatzListend    : ZusatzListXPtrtyp;
-
-
-
      LabelList,
-
      Labeladress      : LabelListXPtrtyp;
-
-
-
      PfadList,
-
      Pfadadress       : PfadListXPtrtyp;
-
-
-
      DateiList,
-
      Dateiadress      : DateiListXPtrtyp;
-
-
-
      HilfList,
-
      HilfListend,
-
      HHilf,
-
      AltHilf          : HilfListXPtrtyp;
-
-
-
      StrucktList,
-
      StrucktListend,
-
      AltStruckt       : StrucktListXPtrtyp;
-
-
-
      StrucktData      : StrucktDatatyp;
-
      HilfData         : HilfDatatyp;
-
-
-
      StrucktDatafile  : StrucktFiletyp;
-
      HilfDatafile     : HilfFiletyp;
-
      LabelDatafile    : LabelFiletyp;
-
      PfadDatafile     : PfadFiletyp;
-
      DateiDatafile    : DateiFiletyp;
-
      ZusatzDatafile   : ZusatzFiletyp;
-
-
-
      StrucktDataPufferfile  : StrucktFiletyp;
-
      HilfDataPufferfile     : HilfFiletyp;
-
      PfadDataPufferfile     : PfadFiletyp;
-
      LabelDataPufferfile    : LabelFiletyp;
-
      DateiDataPufferfile    : DateiFiletyp;
-
      ZusatzDataPufferfile   : ZusatzFiletyp;
-
-
-
-
-
 (* Feld, das benîtigt wird, um auf Zeiger aller Felder zugreifen zu kînnen. *)
-
 (* Dieses Feld dient zur allgemeinen Umwandlungshilfe *)
-
 (* Dies ist der Zeiger dazu:   *)
-
-
-
      GlobalFeldXPtr  : GlobalFeldXPtrtyp;
-
-
-
 (* Globale Zeigerverkettung: *)
-
-
-
      GlobalListPtr  : GlobalListXPtrtyp;
-
-
-
      Regs           : Registers;
-
      CursorSave     : Word;
-
-
-
-
-
-
-
-
-
-
-
 (* FileImport: *)
-
 Var
-
     Name         : String;
     TextFile     : Text;
     IOError      : ShortInt;
-
-
-
-
-
-
-
 (* Deklarationen von Video - Ende! *)
-
-
-
-
 
 Type TData = ^Data;
 

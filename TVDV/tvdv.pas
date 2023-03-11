@@ -1,54 +1,15 @@
 Program TVDV;
-
 (*{$DEFINE DEMO}*)
-
-
-
 {$M 65520,8192,655360}
-
 {$X+,S+,O+,F+}
-
 {$G-}
-
 {$W+}
-
 Uses
-
    (*  TvGraph,*)    (* Grafikbildschirm *)
-     TVDVDATA,
-     TVCURSOR,
-     Overlay,
-     TvdvCmds,
-     HelpCmds,
-     HelpFile,
-     Crt,
-     Dos,
-     Objects,
-     Memory,
-     GadGets,
-     Drivers,
-     Views,
-     Menus,
-     Dialogs,
-     MsgBox,
-     LabHist,
-     Editors,
-     Editor,
-     Strings,
-     Colors,
-     App,
-     TVDVImp,
-     FileFind,
-     FileShow,
-     DEdit,
-     StdDlg,
-     StrTools,
-     DDN,
-     EMS,
-     XMS,
-     XHeap,
-
-	 IdleKey;
+     TVDVDATA, TVCURSOR, Overlay, TvdvCmds, HelpCmds, HelpFile, Crt, Dos, Objects,
+     Memory, GadGets, Drivers, Views, Menus, Dialogs, MsgBox, LabHist,
+     Editors, Editor, Strings, Colors, App, TVDVImp, FileFind, FileShow,
+     DEdit, StdDlg, StrTools, DDN, EMS, XMS, XHeap, IdleKey;
 
 Type
   ColorFiletyp         = File of TPalette;
@@ -4163,116 +4124,42 @@ End;
 
 Procedure Memory;
 
-Var LMem : Longint;
-
-    SMem,
-
-    EMem,
-
-    XMem : Word;
-
-    PA,
-
-    PT   : Word;
-
-
-
-
+Var LMem 			: Longint;
+    SMem, EMem, XMem: Word;
+    PA, PT   		: Word;
 
 Function GetVersion: String;
-
 Begin
-
   GetVersion := EMS.GetVersion
-
 End;
 
-
-
-
-
 Begin
-
   EMem := 0;
-
-  XMem := 0;
-
-
-
   LMem := System.MemAvail;
 
-
-
   If EMS.TestEMMDriver then
-
     EMS.EMMPageCount(EMem, PT)
-
-
-
   Else EMem := 0;
 
-
-
   XMem := 0;
-
   If XMS.Result = 0 then
-
     XMem := XMS.MemAvail
-
-
-
   Else XMem := 0;
 
-
-
-
-
-
-
-  MsgRes := MessageBox('          Speicherplatz:' +
-
-             Chr(13) +
-
-             Chr(13) +
-
-             '   Konventionell  : ' + GetString(System.MemAvail) + ' Byte.' +
-
-             Chr(13) +
-
-             Chr(13) +
-
-             '   EMS ' + GetVersion + '        : ' + GetString(PT) + ' Seiten.' +
-
-             Chr(13) +
-
-             Chr(13) +
-
-             '   EMS VerfÅgbar  : ' + GetString(EMem) + ' Seiten.' +
-
-             Chr(13) +
-
-             Chr(13) +
-
-             '   XMS            : ' +
-
-              GetString(XMem) + ' kByte.',
-
+  MsgRes := MessageBox('          Speicherplatz:' + Chr(13) + Chr(13) +
+             '   Konventionell  : ' + GetString(System.MemAvail) + ' Byte.' + Chr(13) + Chr(13) +
+             '   EMS ' + GetVersion + '        : ' + GetString(PT) + ' Seiten.' + Chr(13) + Chr(13) +
+             '   EMS VerfÅgbar  : ' + GetString(EMem) + ' Seiten.' + Chr(13) + Chr(13) +
+             '   XMS            : ' + GetString(XMem) + ' kByte.',
              Nil, mfInformation + mfOkButton);
-
-
-
 End;
 
 
 
 procedure ShowClip;
-
 Begin
-
   ClipWindow^.Select;
-
   ClipWindow^.Show;
-
 End;
 
 (* Begin von TDareiverApp.HandleEvent: *)
@@ -4286,427 +4173,193 @@ Begin
   TApplication.HandleEvent(Event);
 
   case Event.What of
-
     evCommand:
-
     Begin
-
       GetExtent(R);
-
       Dec(R.B.Y, 2);
-
-
-
       case Event.Command of
-
-
-
       (* FÅr Editor: *)
-
-
-
         cmFileOpen            : FileOpen;
-
-
-
         cmIfCursor            : Begin
 (*
                                   IfCursor := Not(IfCursor);
-
                                   CursorAus
 *)
                                 End;
-
         cmColors              : Begin
-
                                   ColorDialog;
-
                                   DeskTop^.ReDraw
-
                                 End;
-
         cmTile                : DeskTop^.Tile(R);
-
         cmCascade             : DeskTop^.Cascade(R);
-
         cmShowClip            : ShowClip;
-
         cmEditorSave          : Begin
-
                                   Event.What := evBroadCast;
-
                                   Event.Command := edBase + cmEdSave;
-
                                   PutEvent(Event);
-
                                   IF NOT HandleBroadCast then
-
                                     ClearEvent(Event);
-
                                 End;
 
         cmEditorSaveAs        : Begin
-
                                   Event.What := evBroadCast;
-
                                   Event.Command := edBase + cmEdSaveAs;
-
                                   PutEvent(Event);
-
                                   IF NOT HandleBroadCast then
-
                                     ClearEvent(Event);
-
                                 End;
-
-
-
 (*******************************************************************)
-
-
-
         cmProgramminfo        : ProgrammInformationDialog;
-
         cmMemory              : Memory;
-
         cmChangeDir           : ChangeDir;
-
-
-
         cmScann               : Scann;
-
         cmDatenAufgeben       : PData^.DatenAufgeben;
-
         cmImport              : FileImport;
-
         cmIN                  : PData^.ImportNachtrag;
-
         cmIP                  : PData^.ImportPruefen;
-
         cmNachtrag            : PData^.Nachtrag;
-
         cmAufreum             : PData^.Aufreum;
-
         cmLaden               : PData^.LadeDateien;
-
         cmSpeichern           : PData^.SpeichereDateien;
-
         cmPruefen             : (*PruefeDaten('Teste Daten');*) Begin End;
-
         cmNewFileName         :
                                 Begin
                                      PData^.NewFileName('Dateiname fÅr Daten ?', FileName);
                                 End;
 
         cmDEdit               : DateneditorDialog;
-
         cmZeigeDaten          : ZeigeDaten;
-
         cmMaske               : Begin
                                      SuchmaskenVoreinstellungDialog(FN);
                                      SM := FN;
                                 End;
-
-
-
-
-
 {$IFDEF DEMO}
-
-        cmDiskAutoScann       : Begin
-
-                                  (* DiskAutoScann; *)
-
-                                  Wait('Dies ist die Demoversion');
-
-                                End;
-
+        cmDiskAutoScann       : Wait('Dies ist die Demoversion');
 {$ELSE}
-
         cmDiskAutoScann       : DiskAutoScann;
-
 {$EndIF}
-
 {$IFDEF DEMO}
-
-        cmSucheDaten          : Begin
-
-                                  (* SucheDaten(SM); *)
-
-                                  Wait('Dies ist die Demoversion');
-
-                                End;
-
+        cmSucheDaten          : Wait('Dies ist die Demoversion');
 {$ELSE}
-
         cmSucheDaten          : SucheDaten(SM);
-
 {$EndIF}
-
 {$IFDEF DEMO}
-
-        cmSucheMehrfache      : Begin
-
-                                  (* SucheMehrfache(SM); *)
-
-                                  Wait('Dies ist die Demoversion');
-
-                                End;
-
+        cmSucheMehrfache      : Wait('Dies ist die Demoversion');
 {$ELSE}
-
         cmSucheMehrfache      : SucheMehrfache(SM);
-
 {$EndIF}
-
         cmMaske               : SuchmaskenVoreinstellungDialog(SM);
-
-
-
       else
-
         Exit
-
       End;
-
     End;
-
     evBroadCast: IF NOT HandleBroadCast then ClearEvent(Event);
-
   else
-
     Exit
-
   End;
-
-
-
   If WNo > 1 then EnableCommands ([cmEditorSave,
-
                                    cmEditorSaveAs,
-
                                    cmTile,
-
                                    cmCascade,
-
                                    cmNext,
-
                                    cmPrev])
-
   else            DisableCommands([cmEditorSave,
-
                                    cmEditorSaveAs,
-
                                    cmTile,
-
                                    cmCascade,
-
                                    cmNext,
-
                                    cmPrev]);
 
-
-
   If StrucktList.Ptr <> Nil then
-
   Begin
-
     EnableCommands([cmPruefen,
-
                     cmSpeichern,
-
                     cmDatenAufgeben,
-
                     cmZeigeDaten,
-
                     cmNachtrag,
-
                     cmAufreum ]);
-
-
-
     DisableCommands([cmScann,
-
                      cmImport,
-
                      cmLaden,
-
                      cmDiskAutoScann])
-
   End
-
-
-
   else
-
   Begin
-
     DisableCommands([cmPruefen,
-
                      cmSpeichern,
-
                      cmDatenAufgeben,
-
                      cmZeigeDaten,
-
                      cmNachtrag,
-
                      cmAufreum]);
-
-
-
     EnableCommands( [cmScann,
-
                      cmImport,
-
                      cmLaden,
-
                      cmDiskAutoScann])
-
   End;
-
-
-
   ClearEvent(Event);
-
 End;
 
-
-
 Procedure TDateiverApp.InitMenuBar;
-
 Var R: TRect;
-
 Begin
-
   GetExtent(R);
-
   R.B.Y := R.A.Y + 1;
-
   MenuBar := New(PMenuBar, Init(R, NewMenu(
-
     NewSubMenu('',                                                 hcNoContext, NewMenu(
-
       NewItem('~I~nfo', '',              kbNoKey, cmProgramminfo,                hcNoContext, Nil)),
-
-
-
     NewSubMenu('Da~t~ei',                                           hcDatei, NewMenu(
-
       NewSubMenu('~E~ditor',                                        hcEditor, NewMenu(
-
         NewItem('~L~aden...',        '', kbNoKey, cmFileOpen,       hcEditor,
-
         NewItem('~S~peichern',       '', kbNoKey, cmEditorSave,     hcEditor,
-
         NewItem('Speichern ~a~ls',   '', kbNoKey, cmEditorSaveAs,   hcEditor,
-
         NewLine(
-
         NewItem('~C~lipboard',       '', kbNoKey, cmShowClip,       hcEditor,
-
         Nil)))))),
-
       NewItem('~L~aden',           'F3', kbF3,    cmLaden, hcLaden,
-
       NewItem('~S~peichern',       'F2', kbF2,    cmSpeichern,      hcSpeichern,
-
       NewLine(
-
       NewItem('~V~erzeichnis Ñndern','', kbNoKey, cmChangeDir,      hcChangeDir,
-
       NewItem('~B~eEnden',      'Alt-X', kbAltX,  cmQuit,           hcNoContext,
-
       nil))))))),
-
-
-
     NewSubMenu('Daten ~A~ktualisieren',                             hcDatenAkt, NewMenu(
-
       NewSubMenu('~D~atenimport',                                   hcImport, NewMenu(
-
         NewItem('~I~mportieren',        '', kbNoKey, cmImport,      hcImport,
-
         NewItem('Importdaten ~P~rÅfen', '', kbNoKey, cmIP,          hcImport,
-
         NewItem('Import ~N~achtragen',  '', kbNoKey, cmIN,          hcImport,
-
         Nil)))),
-
       NewItem('~E~inlesen',          '', kbNoKey, cmScann,          hcScann,
-
       NewItem('~M~ehrfach einlesen', '', kbNoKey, cmDiskAutoScann,  hcDAS,
-
       NewLine(
-
       NewItem('~N~achtrag',          '', kbNoKey, cmNachtrag,       hcNachtrag,
-
       NewItem('~A~ufreum',           '', kbNoKey, cmAufreum,        hcAufreum,
-
       nil))))))),
-
-
-
     NewSubMenu('~D~aten',                                           hcDaten, NewMenu(
-
       NewItem('Daten im Speicher ~P~rÅfen', '', kbNoKey, cmPruefen,        hcPruefen,
-
       NewItem('~E~dit Daten',               '', kbNoKey, cmDEDIT,          hcDEdit,
-
       NewItem('~Z~eigen',                   '', kbNoKey, cmZeigeDaten,     hcZeigeDaten,
-
       NewItem('~S~uchen',                   '', kbNoKey, cmSucheDaten,     hcSucheDaten,
-
       NewItem('Suche ~M~ehrfache',          '', kbNoKey, cmSucheMehrfache, hcSucheMehrfache,
-
       NewLine(
-
       NewItem('~D~aten aufgeben  ',
-
                                'Alt-F3', kbAltF3, cmDatenAufgeben,  hcDatenAufgeben,
-
       NewItem('~F~reier Speicher',   '', kbNoKey, cmMemory,         hcMemory,
-
       nil))))))))),
-
-
-
     NewSubMenu('~E~instellungen',                                   hcEinstellungen, NewMenu(
-
       NewSubMenu('~F~enster',                                       hcEditor, NewMenu(
-
         NewItem('~N~Ñchstes Fenster','', kbNoKey, cmNext,           hcEditor,
-
         NewItem('~L~etztes Fenster', '', kbNoKey, cmPrev,           hcEditor,
-
         NewLine(
-
         NewItem('~T~ile',            '', kbNoKey, cmTile,           hcNoContext,
-
         NewItem('C~a~scade',         '', kbNoKey, cmCascade,        hcNoContext,
-
         Nil)))))),
-
       NewItem('~F~arben',            '', kbNoKey, cmColors,         hcNoContext,
-
       NewItem('~C~ursor Ein/Aus',    '', kbNoKey, cmIfCursor,       hcNoContext,
-
       NewItem('~N~eue Dateinamen',   '', kbNoKey, cmNewFileName,    hcNewFileName,
-
       nil))))),
-
-
-
     NewSubMenu('~H~ilfe', hcNoContext, NewMenu(
-
       NewItem('~H~ilfe - MenÅ',      '', kbNoKey, cmHelpContents, hcContents,
-
       nil)),
-
-
-
     nil)))))))));
-
 End;
 
 
@@ -4718,48 +4371,25 @@ Var
   R: TRect;
 
 Begin
-
   GetExtent(R);
-
   R.A.Y := R.B.Y - 1;
-
   New(StatusLine, Init(R,
-
     NewStatusDef(0, $FFFF,
-
       NewStatusKey('~F1~ Hilfe', kbF1, cmHelp,
-
       NewStatusKey('~Alt-X~ Ende', kbAltX, cmQuit,
-
       NewStatusKey('~F2~ Speichern', kbF2, cmSpeichern,
-
       NewStatusKey('~F3~ Laden', kbF3, cmLaden,
-
       NewStatusKey('~Alt-F3~ Daten aufgeben', kbAltF3, cmDatenAufgeben,
-
       NewStatusKey('~F10~ Menu', kbF10, cmMenu,
-
       nil)))))),
-
     nil)));
-
-
-
 End;
-
-
 
 Procedure TDateiverApp.OutOfMemory;
-
 Begin
-
   MsgRes := MessageBox('Nicht genug Speicher fÅr diese Operation.',
-
     nil, mfError + mfOkButton);
-
 End;
-
-
 
 PROCEDURE TDateiverApp.Idle;
 
