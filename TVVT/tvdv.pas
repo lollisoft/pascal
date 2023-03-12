@@ -41,32 +41,43 @@ Uses
      XMS,
      XHeap,
      DEdit,
-     Vid;
+     Video;
 
 {$IFNDEF FPC}
-{$O App }
-{$O TvdvCmds }
-{$O HelpCmds }
-{$O HelpFile }
-{$O Memory }
-{$O GadGets }
-{$O Views }
-{$O Menus }
-{$O Dialogs }
-{$O MsgBox }
-{$O LabHist }
-{$O Editors }
-{$O Editor }
-{$O Strings }
-{$O Colors }
-{$O TVDVImp }
-{$O CursCont }
-{$O FileFind }
-{$O FileShow }
-{$O StdDlg }
-{$O DDN }
-{$O DEdit }
-{$O Video }
+{$O TvdvImp }
+{$O CursCont}
+{$O FileShow}
+{$O Labhist}
+{$O GadGets}
+{$O HelpFile}
+{$O Memory}
+{$O MsgBox}
+{$O Dialogs}
+{$O Views}
+{$O Menus}
+{$O App}
+{$O LabHist}
+{$O Editors}
+{$O StdDlg}
+{$O DDN}
+(*
+{$O FileFind}
+{$O DEdit     Geht nicht}
+{$O TVDVDATA  Geht nicht}
+{$O TvdvCmds  Geht nicht}
+{$O HelpCmds  Geht nicht}
+{$O Crt       Geht nicht}
+{$O Drivers   Geht nicht}
+{$O Editor    Geht nicht}
+{$O Strings   Geht nicht}
+{$O Colors    Geht nicht}
+{$O StrTools  Geht nicht}
+{$O Objects   Runtime Error 208}
+{$O Dos       Runtime Error 208}
+{$O EMS		  ?}
+{$O XMS       ?}
+{$O XHeap     ?}
+*)
 {$ENDIF}
 
 (*{$O StrTools }*)
@@ -155,7 +166,7 @@ BEGIN
 {$ELSE}
 
   R.Assign (10, 2, 38, 3);
-  Dialog^.Insert (New (pStaticText, Init (R, 'TVDV fÅr DOS - Vollversion !')));
+  Dialog^.Insert (New (pStaticText, Init (R, 'TVDV fÅr DOS - Voll geil !')));
 
 {$ENDIF}
 
@@ -406,7 +417,9 @@ END;
 PROCEDURE TDateiverApp.NewEditor(Name: STRING);
   VAR
     R: TRect;
-    Dir, FName, Ext: STRING;
+	Dir: DirStr;
+    FName: NameStr;
+    Ext: ExtStr;
   BEGIN
     R.Assign(0,0,80,23);
     FSplit(Name, Dir, FName, Ext);
@@ -432,7 +445,9 @@ PROCEDURE TDateiverApp.NewEditor(Name: STRING);
 PROCEDURE TDateiverApp.InitClipBoard;
   VAR
     R: TRect;
-    Dir, FName, Ext: STRING;
+	Dir: DirStr;
+    FName: NameStr;
+    Ext: ExtStr;
     Name: String;
   BEGIN
     Name := '';
@@ -591,7 +606,7 @@ end;
 
 Procedure Scanner;
 var ch    : char;
-    LName : String12;
+    LName : String;
     Lauf  : StrucktListPtrtyp;
 BEGIN
   LabelHistList := Nil;
@@ -636,7 +651,7 @@ END;
 Procedure DiskAS;
 
 var  Ch            : char;
-     LName         : String12;
+     LName         : String;
 
 BEGIN
   LabelHistList := Nil;
@@ -1013,7 +1028,7 @@ end;
 
 
 
-Procedure LoescheLabel(var l: String12);
+Procedure LoescheLabel(var l: String);
 begin
   l := Lauf^.StrucktData.LabelList^.LabelData.LabelName;
   Dec(Lauf^.StrucktData.LabelList^.LabelData.Anzahl);
@@ -1287,7 +1302,7 @@ begin
 end;
 
 
-Procedure LoescheLabel(var l: String12);
+Procedure LoescheLabel(var l: String);
 begin
   l := Lauf^.StrucktData.LabelList^.LabelData.LabelName;
   Dec(Lauf^.StrucktData.LabelList^.LabelData.Anzahl);
@@ -1940,7 +1955,7 @@ BEGIN
 END;
 
 
-Procedure SucheMehrfache(Var SM: String12);
+Procedure SucheMehrfache(Var SM: String);
 BEGIN
   Mehrfache := True;
 
@@ -1958,7 +1973,7 @@ END;
 
 
 
-PROCEDURE SuchmaskenVoreinstellungDialog(Var SuchMaske: String12);
+PROCEDURE SuchmaskenVoreinstellungDialog(Var SuchMaske: String);
 TYPE
     SuchmaskenVoreinstellungData = RECORD
       TextLen0: WORD;
@@ -2030,7 +2045,7 @@ END;
 
 
 
-Procedure SucheDaten(Var SM: String12);
+Procedure SucheDaten(Var SM: String);
 Begin
   ExecView(New(PFileFindWindow, Init(SM)));
 
@@ -2104,7 +2119,7 @@ end;
 
 (* BEGIN von TDareiverApp.HandleEvent: *)
 
-Const SM: String12 = '*.*'; (* SuchmaskenVoreinstellung *)
+Const SM: String = '*.*'; (* SuchmaskenVoreinstellung *)
 
 Var Regs: Registers;
 
@@ -2126,8 +2141,10 @@ BEGIN
         cmFileOpen            : FileOpen;
 
         cmIfCursor            : BEGIN
+(*
                                   IfCursor := Not(IfCursor);
                                   CursorAus
+*) 
                                 END;
         cmColors              : Begin
                                   ColorDialog;

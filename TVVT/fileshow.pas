@@ -2,7 +2,7 @@ Unit FileShow;
 {$O+,F+}
 Interface
 
-Uses Vid,
+Uses Video,
      App,
      Views,
      Objects,
