@@ -322,6 +322,7 @@ Var DZeile: Integer;
 
 Procedure DruckZeile(Vokabel: PVokabel); Far;
 Var Zeile: String;
+Var A    : Integer;
 Begin
 
   If DZeile = 0 then
@@ -802,6 +803,7 @@ End;
 
 
 Procedure SearchDETranslate;
+Var A    : Integer;
 Begin
   DETranslate := - 1;
 
@@ -819,6 +821,7 @@ Begin
 End;
 
 Procedure SearchEDTranslate;
+Var A    : Integer;
 Begin
   EDTranslate := - 1;
 

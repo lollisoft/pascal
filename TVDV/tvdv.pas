@@ -59,6 +59,8 @@ Var
     EDCommand, WindowNo: WORD;
     ClipWindow: PEditorWindow;
 
+Var DateiverApp : TDateiverApp;
+
 Function CalcHelpName: PathStr;
 Var
   EXEName: PathStr;
@@ -515,6 +517,12 @@ Var R: TRect;
   
 Function HandleBroadCast: BOOLEAN;
     Begin
+	  IF Event.Command = cmHeapUpdate THEN
+	  BEGIN
+	    HandleBroadCast := True;
+		{Heap^.Update;} { NTVDM-CPU illegal operation, with EMS it crashes similarly }
+	  END;
+
       IF Event.Command DIV 100 * 100 = edBase then Begin
         HandleBroadCast := True;
         WindowNo := Event.Command MOD 100 DIV 10;
@@ -592,7 +600,7 @@ Begin
   N := Mask;
   if System.MemAvail > 1024 then
   Begin
-    PData^.SetHeapView(Heap);
+    PData^.SetApplication(DateiverApp);
     PData^.Scanner
   End
   Else
@@ -617,7 +625,7 @@ Begin
   Mask := Info^ + ':\*.*';
   Dispose(Info);
   N := Mask;
-  PData^.SetHeapView(Heap);
+  PData^.SetApplication(DateiverApp);
   PData^.DiskAS
 End;
 (***********************************************)
@@ -2015,7 +2023,6 @@ End;
 {$O XHeap     ?}
 *)
 (* Hauptprogramm: *)
-Var DateiverApp : TDateiverApp;
 Begin
   (* http://www.delphigroups.info/2/ac/3804.html *)
   InitIdleKey;

@@ -1,6 +1,6 @@
 include Q:\develop\Projects\PASCAL\makefile.turbo
 
-all: IDLEKEY TV TVDV #OVRDEMO
+all: IDLEKEY TV TVVT TVDV #OVRDEMO
 
 IDLEKEY: dummy
 		$(MAKE) -C $@
