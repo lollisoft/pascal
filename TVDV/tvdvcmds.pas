@@ -41,6 +41,7 @@ CONST
     cmIN                     = 156;
     cmColors                 = 157;
     cmWindowListItemSelected = 158;
+	cmHeapUpdate			 = 159;
 
 { FileFind }
 

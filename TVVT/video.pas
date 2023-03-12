@@ -431,7 +431,7 @@ Function GetString(Zahl: Longint): String;
 
 
 Implementation
-Uses {DynAr,} BDF;
+Uses DynAr, BDF;
 
 var ms, mx, my : Word;
 

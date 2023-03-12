@@ -386,10 +386,10 @@ Var
 (* Deklarationen von Video - Ende! *)
 Type TData = ^Data;
      Data  = Object(TObject)
-			   AppHeap        : PHeapView;
+			   App         : TApplication;
                Laufwerk     : String[12];
 			   
-Procedure SetHeapView(Heap        : PHeapView);
+Procedure SetApplication(Application        : TApplication);
                
 Procedure GetStruckt (var Ende, cut: StrucktListXPtrtyp);
                
@@ -633,11 +633,9 @@ BEGIN
   ExecDialog := Result;
 END;
 
-Procedure Data.SetHeapView(Heap        : PHeapView);
+Procedure Data.SetApplication(Application        : TApplication);
 Begin
-(*
-	AppHeap := Heap;
-*)
+	App := Application;
 End;
 
 Procedure Data.NewFileName;
@@ -1449,7 +1447,7 @@ Procedure Data.List;
 var sr          : searchrec;
     h           : Integer;
 begin
-  if AppHeap <> NIL Then AppHeap^.Update;
+  Message(App.Owner, evBroadcast, cmHeapUpdate, NIL);
   If System.MemAvail < 80000 then
   Begin
     MemWasLo := True;

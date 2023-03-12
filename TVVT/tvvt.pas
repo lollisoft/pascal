@@ -1,6 +1,5 @@
 Program TVVT;
 (*{$DEFINE DEMO}*)
-
 {$M 65520,8192,655360}
 {$X+,S+,O+,F+}
 {$G-}
@@ -51,7 +50,7 @@ Type
   TDateiverApp         = Object(TApplication)
     Heap        : PHeapView;
     Editor: ARRAY[1..9] OF RECORD
-      Ed: PEditWindow;
+      Ed: PEditorWindow;
       Name: STRING;
     END;
     Constructor Init;
@@ -60,7 +59,7 @@ Type
     
     Procedure   InitClipBoard;
     Procedure   FileOpen;
-    PROCEDURE   NewEditor(Name: FNameStr);
+    PROCEDURE   NewEditor(Name: STRING);
     FUNCTION    GetFile(Arg: STRING): PCollection;
     PROCEDURE   SendFile(WindowNo, cmBase: WORD);
     PROCEDURE   SaveFile (WindowNo: WORD; P: PCollection );
@@ -89,7 +88,7 @@ var
 (* Editor: *)
 
     EDCommand, WindowNo: WORD;
-    ClipWindow: PEditWindow;
+    ClipWindow: PEditorWindow;
 
 function CalcHelpName: PathStr;
 var
@@ -424,32 +423,33 @@ FUNCTION ReadFile(Name: String): PCollection;
   END;
 
 
-PROCEDURE TDateiverApp.NewEditor(Name: FNameStr);
-  VAR
+Procedure TDateiverApp.NewEditor(Name: STRING);
+  Var
     R: TRect;
     Dir: DirStr;
     FName: NameStr;
     Ext: ExtStr;
-    (*Dir, FName, Ext: STRING;*)
-  BEGIN
-    Inc(WNo);
-
+  Begin
     R.Assign(0,0,80,23);
     FSplit(Name, Dir, FName, Ext);
-    Ext := DownStr(Ext);
+    {Ext := DownStr(Ext);}
     IF Name = ''
-      THEN Editor[WNo].Ed := New(PEditWindow, Init(R, 'Clipboard', WNo))
-     ELSE IF (Ext = '.txt') THEN BEGIN 
-       Editor[WNo].Ed := New(PEditWindow, Init(R, Name, WNo));
+      then Editor[WNo].Ed := New(PEditorWindow, Init(R, WNo, 'Clipboard', Nil,
+                                               edBase+10*WNo))
+     ELSE IF (Ext = '.txt') then Begin
+       Editor[WNo].Ed := New(PEditorWindow, Init(R, WNo, Name, ReadFile(Name),
+                                           edBase+10*WNo));
        Editor[WNo].Name := Name;
-      END
-      ELSE IF (Ext<>'.exe') AND (Ext<>'.com') AND (Ext<>'.bak') THEN BEGIN
-        Editor[WNo].Ed := New(PEditWindow, Init(R, Name, WNo));
+      End
+      ELSE IF (Ext<>'.exe') AND (Ext<>'.com') AND (Ext<>'.bak') then Begin
+        Editor[WNo].Ed := New(PLineEditor, Init(R, WNo, Name, ReadFile(Name),
+                                                128, edBase+10*WNo));
         Editor[WNo].Name := Name;
-       END
+       End
        ELSE Exit;
     DeskTop^.Insert(Editor[WNo].Ed);
-  END;
+    Inc(WNo);
+  End;
 
 PROCEDURE TDateiverApp.InitClipBoard;
   VAR
@@ -466,7 +466,8 @@ PROCEDURE TDateiverApp.InitClipBoard;
     FSplit(Name, Dir, FName, Ext);
     Ext := DownStr(Ext);
 
-    Editor[WNo].Ed := New(PEditWindow, Init(R, 'Clipboard', WNo));
+    Editor[WNo].Ed := New(PEditorWindow, Init(R, WNo, 'Clipboard', Nil,
+                                               edBase+10*WNo));
 
     ClipWindow := Editor[WNo].Ed;
     if ClipWindow <> nil then
