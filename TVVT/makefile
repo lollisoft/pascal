@@ -1,7 +1,10 @@
 include Q:\\develop\\Projects\\PASCAL\\makefile.turbo
 
-all: TVVT.EXE
+all: TVVT.EXE TVDV.EXE
 
 TVVT.EXE: TVVT.PAS
 		$(COMPILE) LABHIST.PAS $(SWITCHES)
 		$(COMPILE) TVVT.PAS $(SWITCHES)
+
+TVDV.EXE: TVDV.PAS
+		$(COMPILE) TVDV.PAS $(SWITCHES)

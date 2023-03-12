@@ -1,13 +1,8 @@
 Unit TVDVImp;
-
 {$O+,F+}
-
 Interface
 
-
-
-Uses App, Views, Drivers, TVDVDATA,
-Dos, LabHist, StdDlg, MsgBox, Strings;
+Uses App, Views, Drivers, TVDVDATA, Dos, LabHist, StdDlg, MsgBox, Strings;
 
 
 

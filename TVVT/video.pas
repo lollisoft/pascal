@@ -28,9 +28,9 @@ const Dateifilename: string   = 'Datei.dvd';
       Hilffilename: string    = 'Hilf.dvd';
       Zusatzfilename: string  = 'Zusatz.dvd';
 
-      FileName           : String12 = '.DVD';
+      FileName           : String = '.DVD';
 
-      ImportFileName     : String12 = '.DIR';
+      ImportFileName     : String = '.DIR';
 
 
 

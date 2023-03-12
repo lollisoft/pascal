@@ -2,7 +2,7 @@ Unit TVDVImp;
 {$O+,F+}
 Interface
 
-Uses App, Views, Drivers, Vid, Dos, LabHist, StdDlg, MsgBox, BDF;
+Uses App, Views, Drivers, Video, Dos, LabHist, StdDlg, MsgBox, BDF;
 
 Const MemWasLo: Boolean = False;
 
@@ -403,6 +403,7 @@ Procedure Dir;
 Label Exit1;
 Var Info : ^String;
     F    : File;
+    MsgRes       : Word;
 begin
   MemWasLo := False;
   Counter := 0;
@@ -475,7 +476,7 @@ begin
 
     else
     begin
-      MessageBox('ImportDatei nicht in Ordnung!', nil, mfOkButton);
+      MsgRes := MessageBox('ImportDatei nicht in Ordnung!', nil, mfOkButton);
       DirStatus := False
     end
   end
@@ -483,7 +484,7 @@ begin
   else
 
   begin
-    MessageBox('Diskette hat einen ungÅltigen Label!',
+    MsgRes := MessageBox('Diskette hat einen ungÅltigen Label!',
         Nil, mfError + mfOkButton);
         Name := '';
     DirStatus := False

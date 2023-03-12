@@ -19,7 +19,7 @@ Uses Overlay,
      LabHist,
      Editors,
      App,
-     (*     Vid, *)
+     Video,
 
      CursCont,
      FileFind,
