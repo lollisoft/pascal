@@ -1,6 +1,6 @@
 This is a migration from my old CVS PASCAL repository.
 
-Be warned, this is very old code from DOS times. Using Turbo Pascal 6.0 and Turbo Vision 1.0 included in that version.
+Be warned, this is very old code from DOS times. Using Turbo Pascal 6.0 and Turbo Vision 1.0 used in that version.
 
 Build the code with an unix style make command. The relevant and wotking applications get built into C:\TP\Builds and the project
 should be placed on C:\Q\Develop\Projects\Pascal and the C:\Q should be subst Q: C:\Q.
