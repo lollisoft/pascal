@@ -1,5 +1,5 @@
 Unit Video;
-
+{$M 65520,65520,655360}
 {$X+,O+,F+}
 Interface
 
@@ -2748,13 +2748,32 @@ begin
   UpDate := UpTerm
 end;
 
+function FileExists (FileName: String): Boolean; 
+{ Boolean function that returns True if the file exists; otherwise, it returns 
+False. Closes the file if it exists. } 
+var 
+F: file; 
+begin 
+{$I-} 
+Assign(F, FileName); 
+Reset(F); 
+Close(F); 
+{$I+} 
+FileExists := (IOResult = 0) and (FileName <> ''); 
+end; {FileExists} 
+
+type PSearchRec = ^searchrec;
 
 Procedure List;
-var sr          : searchrec;
-    h           : Integer;
+
+var sr: PSearchRec;
+
+var h           : Integer;
 begin
+  New(sr);
   If System.MemAvail < 80000 then
   Begin
+    Wait('Clean up memory');
     MemWasLo := True;
 
     Df := Dateifilename;
@@ -2789,7 +2808,7 @@ begin
     SetAllNil;
 
   End;
-
+  
   if (pfad[Length(pfad)] <> ':') or w then pfad := pfad + '\';
 
   SpeicherePfad(Pfad, PfadList, PfadDif, NoNew);
@@ -2817,12 +2836,12 @@ begin
 
 
 
-  FindFirst(pfad+mask,attr,sr);
+  FindFirst(pfad+mask,attr,sr^);
   while DosError = 0 do
   begin
-    if (sr.attr and (directory + VolumeID)) = 0 then
+    if (sr^.attr and (directory + VolumeID)) = 0 then
     begin
-      SpeichereDatei(sr.name, DateiList, DateiDif, NoNew);
+      SpeichereDatei(sr^.name, DateiList, DateiDif, NoNew);
 
       (* Neues Element in Strucktliste erzeugen: *)
 
@@ -2835,17 +2854,26 @@ begin
 
       SpeichereSuch(Labelzeiger,Pfadzeiger,Dateiadress)
     end;
-    FindNext(sr)
+    FindNext(sr^)
   end;
 
-  FindFirst(pfad+'*.*',attr,sr);
+  FindFirst(pfad+'*.*',attr,sr^);
   while DosError = 0 do
   begin
-    if (sr.attr and Directory) <> 0 then
-      if sr.name <> '.' then
-        if sr.name <> '..' then list(pfad+sr.name);
-    FindNext(sr)
-  end
+    if (sr^.attr and Directory) <> 0 then
+	Begin
+      if sr^.name <> '.' then
+	  Begin
+		if sr^.name <> '..' then
+	    Begin
+          if Length(pfad+sr^.name) < 200 then
+		    list(pfad+sr^.name)
+        End
+	  End
+	End;
+	FindNext(sr^)
+  end;
+  Dispose(sr)
 end;
 
 
@@ -2892,6 +2920,7 @@ begin
     Info := Nil;
     If ExecDialog(AskYesNo('Label „ndern ?'), Info) = cmOk then
     Begin
+  Wait('Try to change label');
       DoneSysError;
       DoneEvents;
       DoneVideo;
@@ -2912,6 +2941,7 @@ begin
     End
   End;
 
+  Wait('LabelInLabelHistList');
   If LabelInLabelHistList(Lab) then
   Begin
     Name := Lab;
@@ -2921,6 +2951,7 @@ begin
   (* Sicherstellen, daá nur Disketten mit korrektem Label *)
   (* eingelesen werden: *)
 
+  Wait('Check Label');
   if pos('DISK',Lab) <> 0 then
   begin
 
@@ -2942,6 +2973,8 @@ begin
       HilfListend^.HilfData.LabelList := Pointer(StrucktListend);
 
       Labelzeiger := StrucktListend;
+
+	  Wait('Call list');
 
       list(UpDate(pfad))
     end

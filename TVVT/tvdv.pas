@@ -1,7 +1,7 @@
 Program TVDV;
 (*{$DEFINE DEMO}*)
 
-{$M 65520,8192,655360}
+{$M 65520,65520,655360}
 {$X+,S+,O+,F+}
 {$G-}
 {$W+}
@@ -643,7 +643,10 @@ BEGIN
   N := Mask;
 
   if System.MemAvail > 1024 then
-    Scanner
+  Begin
+    Wait('Start scanning');
+	Scanner
+  End
   Else
     Wait('Speicherplatz reicht nicht mehr aus fÅr diese Aufgabe!')
 END;
@@ -2064,6 +2067,7 @@ Var LMem : Longint;
     XMem : Word;
     PA,
     PT   : Word;
+    R: TRect;
 
 
 Function GetVersion: String;
@@ -2090,8 +2094,10 @@ BEGIN
   Else XMem := 0;
 
 
+  R.Assign(0, 0, 40, 15);
+  R.Move((Desktop^.Size.X - R.B.X) div 2, (Desktop^.Size.Y - R.B.Y) div 2);
 
-  MessageBox('          Speicherplatz:' +
+  MessageBoxRect(R, '          Speicherplatz:' +
              Chr(13) +
              Chr(13) +
              '   Konventionell  : ' + GetString(System.MemAvail) + ' Byte.' +
@@ -2398,16 +2404,15 @@ BEGIN
 
   InitDEdit;
 
+  EMSSF := True;
+  EMSLF := True;
+  EMSPF := True;
+  EMSDF := True;
+  EMSZF := True;
 
-  EMSSF := False;
-  EMSLF := False;
-  EMSPF := False;
-  EMSDF := False;
-  EMSZF := False;
-
-  EMSDLF := False;
-  EMSDPF := False;
-  EMSDDF := False;
+  EMSDLF := True;
+  EMSDPF := True;
+  EMSDDF := True;
 
 
 

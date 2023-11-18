@@ -6,7 +6,7 @@ Program Dateiver;
 
 
 Uses Crt, Dos, Objects, Drivers, Views, Menus, Dialogs,
-     StdDlg, MsgBox, LabHist, Editors, App, Vid, CursCont;
+     StdDlg, MsgBox, LabHist, Editors, App, Video, CursCont;
 
 Const
     cmScann                     = 101;

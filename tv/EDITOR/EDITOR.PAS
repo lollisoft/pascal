@@ -4,8 +4,8 @@ UNIT Editor;
 INTERFACE
 
 USES
-  StrTools, App, Memory, Dialogs, Drivers, Objects, Views,
-  Strings;
+  StrTools, App, Memory, Dialogs, Drivers, Views,
+  Strings, Objects;
 
 CONST
   cmEdExit          = 0;   { Editor beendet, nichts sichern, nicht l”schen }

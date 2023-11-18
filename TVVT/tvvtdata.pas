@@ -1,6 +1,10 @@
 Unit TvvtData;
 
 {$X+,O+,F+}
+{$M 65520,65520,655360}
+
+
+
 Interface
 
 Uses Crt,

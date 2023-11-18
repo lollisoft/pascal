@@ -1,5 +1,7 @@
 Unit TVDVDATA;  (* Kapselung der Daten, die Dateien etc. betreffen. *)
 {$F+,I-,O+,S-,V-,X+}
+{$M 65520,65520,655360}
+
 Interface
 Uses Objects, LabHist, MsgBox, Dialogs, TvdvCmds, HelpCmds,
      HelpFile, Crt, Dos, Memory, GadGets, Drivers, Views,
@@ -1779,6 +1781,7 @@ Begin
   LName := '';
   if Nachgetragen = True then
   Begin
+    Message(App.Owner, evBroadcast, cmHeapUpdate, NIL);
     Dir(LName);
     if DirStatus then
     Nachgetragen := False
@@ -2205,7 +2208,6 @@ end;
 
 Procedure Data.SpeichereDateien;
 Begin
-     MessageBox('Data.SpeichereDateien aufgerufen', Nil, mfOkButton);
 (*
 	SpeichereDatei;
 	SpeicherePfad;
@@ -2275,6 +2277,9 @@ begin
     Lab := Info^;
     Dispose(Info);
     Info := Nil;
+
+	Wait('Call list');
+
     If ExecDialog(AskYesNo('Label „ndern ?'), Info) = cmOk then
     Begin
       DoneSysError;
