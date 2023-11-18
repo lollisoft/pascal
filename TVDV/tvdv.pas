@@ -1736,6 +1736,7 @@ Procedure Memory;
 Var LMem 			: Longint;
     SMem, EMem, XMem: Word;
     PA, PT   		: Word;
+    R: TRect;
 
 Function GetVersion: String;
 Begin
@@ -1751,7 +1752,9 @@ Begin
   If XMS.Result = 0 then
     XMem := XMS.MemAvail
   Else XMem := 0;
-  MsgRes := MessageBox('          Speicherplatz:' + Chr(13) + Chr(13) +
+  R.Assign(0, 0, 40, 15);
+  R.Move((Desktop^.Size.X - R.B.X) div 2, (Desktop^.Size.Y - R.B.Y) div 2);
+  MsgRes := MessageBoxRect(R, '          Speicherplatz:' + Chr(13) + Chr(13) +
              '   Konventionell  : ' + GetString(System.MemAvail) + ' Byte.' + Chr(13) + Chr(13) +
              '   EMS ' + GetVersion + '        : ' + GetString(PT) + ' Seiten.' + Chr(13) + Chr(13) +
              '   EMS VerfÅgbar  : ' + GetString(EMem) + ' Seiten.' + Chr(13) + Chr(13) +
