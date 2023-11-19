@@ -1,6 +1,10 @@
 include Q:\\develop\\Projects\\PASCAL\\makefile.turbo
 
-all: TVVT.EXE TVDV.EXE
+all: TVVT.EXE TVDV.EXE existdir.exe
+
+existdir.exe: existdir.pas
+		$(COMPILE) existdir.pas $(SWITCHES)
+
 
 TVVT.EXE: TVVT.PAS
 		$(COMPILE) LABHIST.PAS $(SWITCHES)

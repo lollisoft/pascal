@@ -405,7 +405,7 @@ Procedure OpenAllFiles;
 
 
 Function  UpDate(term: String):String;
-Procedure List(pfad:string);
+Procedure List(pfad:string; subpath:string);
 Procedure Dir(Var Name: String);
 Procedure CopyMinWork(x:byte);
 Procedure CopyWorkinM(x:byte);
@@ -2773,7 +2773,6 @@ begin
   New(sr);
   If System.MemAvail < 80000 then
   Begin
-    Wait('Clean up memory');
     MemWasLo := True;
 
     Df := Dateifilename;
@@ -2854,9 +2853,50 @@ begin
 
       SpeichereSuch(Labelzeiger,Pfadzeiger,Dateiadress)
     end;
+	
+	  If System.MemAvail < 80000 then
+  Begin
+    MemWasLo := True;
+
+    Df := Dateifilename;
+    Pf := Pfadfilename;
+    Lf := Labelfilename;
+    Sf := Strucktfilename;
+    Hf := Hilffilename;
+    Zf := Zusatzfilename;
+
+    Dateifilename   := 'Puffer' + GetString(Counter) + '.DVD';
+    Pfadfilename    := 'Puffer' + GetString(Counter) + '.DVP';
+    Labelfilename   := 'Puffer' + GetString(Counter) + '.DVL';
+    Strucktfilename := 'Puffer' + GetString(Counter) + '.DVS';
+    Hilffilename    := 'Puffer' + GetString(Counter) + '.DVH';
+    Zusatzfilename  := 'Puffer' + GetString(Counter) + '.DVZ';
+
+    Inc(Counter);
+
+    InitFiles;
+
+    SpeichereDateien;
+
+    Dateifilename   := DF;
+    Pfadfilename    := PF;
+    Labelfilename   := LF;
+    Strucktfilename := SF;
+    Hilffilename    := HF;
+    Zusatzfilename  := ZF;
+
+    InitFiles;
+
+    SetAllNil;
+
+  End;
+
+	
     FindNext(sr^)
   end;
-
+  Dispose(sr);
+  New(sr);
+  sr^.name := '';
   FindFirst(pfad+'*.*',attr,sr^);
   while DosError = 0 do
   begin
@@ -2866,8 +2906,10 @@ begin
 	  Begin
 		if sr^.name <> '..' then
 	    Begin
-          if Length(pfad+sr^.name) < 200 then
-		    list(pfad+sr^.name)
+		  if sr^.name <> subpath then 
+			list(pfad+sr^.name, sr^.name)
+		  else 
+		  Wait('Warnung: gleiche Verzsichnis in tieferer Ebene gefunden.')
         End
 	  End
 	End;
@@ -2976,7 +3018,7 @@ begin
 
 	  Wait('Call list');
 
-      list(UpDate(pfad))
+      list(UpDate(pfad), '')
     end
 
     else
