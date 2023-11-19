@@ -3,7 +3,10 @@ Unit Multi;
 {$X+,O+,F+}
 Interface
 
-Uses Crt,
+Uses 
+{$IFDEF USECRT}
+     Crt,
+{$ENDIF}
      App,
      Dos,
      LabHist,

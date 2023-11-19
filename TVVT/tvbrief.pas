@@ -5,11 +5,16 @@
 {   Copyright (c) 1990 by Borland International  }
 {                                                }
 {************************************************}
+{$DEFINE NOMEMTOP}
 
 program TVEdit;
 
+{$DEFINE BP7}
+
+{$IFNDEF BP7}
 {$M 8192,8192,655360}
 {$X+,S-}
+{$ENDIF}
 
 { This program demonstrates the use of the Buffers and Editors
   units. See also BUFFERS.DOC and EDITORS.DOC in the \TP\DOC
@@ -275,12 +280,16 @@ begin
   DoneEvents;
   DoneVideo;
   DoneMemory;
+{$IFNDEF NOMEMTOP}
   SetMemTop(Ptr(BufHeapPtr, 0));
+{$ENDIF}
   PrintStr('Type EXIT to return to TVEDIT...');
   SwapVectors;
   Exec(GetEnv('COMSPEC'), '');
   SwapVectors;
+{$IFNDEF NOMEMTOP}
   SetMemTop(Ptr(BufHeapEnd, 0));
+{$ENDIF}
   InitMemory;
   InitVideo;
   InitEvents;

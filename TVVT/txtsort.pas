@@ -1,5 +1,4 @@
 Program TXTSort;
-{$M 65520,0,655360}
 Uses Crt, Video1;
 
 

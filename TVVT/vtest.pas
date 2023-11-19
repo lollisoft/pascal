@@ -2,7 +2,10 @@ Unit VTest;
 
 Interface
 
-Uses Crt,
+Uses 
+{$IFDEF USECRT}
+    Crt,
+{$ENDIF}
      Dos,
      App,
      TVVTCmds,

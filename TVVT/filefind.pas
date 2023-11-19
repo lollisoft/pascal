@@ -2,7 +2,10 @@ Unit FileFind;
 {$X+ $O+ $F+ $S-}
 Interface
 
-Uses Crt,
+Uses 
+{$IFDEF USECRT}
+     Crt,
+{$ENDIF}
      BDF,
      TvdvCmds,
      Drivers,

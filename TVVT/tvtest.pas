@@ -1,7 +1,6 @@
 Program TVtest;
 (*{$DEFINE DEMO}*)
 
-{$M 65520,8192,655360}
 {$X+,S+,O+,F+}
 {$G-}
 {$W+}

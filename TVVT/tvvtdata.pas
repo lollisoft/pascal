@@ -1,13 +1,16 @@
 Unit TvvtData;
-
 {$X+,O+,F+}
-{$M 65520,65520,655360}
+
+{$DEFINE NOMEMTOP}
 
 
 
 Interface
 
-Uses Crt,
+Uses 
+{$IFDEF USECRT}
+    Crt,
+{$ENDIF}
      App,
      Drivers,
      GadGets,
@@ -384,7 +387,6 @@ Procedure GetStruckt (var Ende, cut: StrucktListPtrtyp);
 Procedure GetHilf (var Ende, cut: HilfListPtrtyp);
 Procedure SpeichereSuch(lp, pp: StrucktListPtrtyp;
                              dp: DateiListPtrtyp);
-Procedure Writexy(x,y : byte; txt : string);
 Procedure SpeichereLabel(LabelName : string12;
                          var  Lauf : LabelListPtrtyp;
                          var  dif  : Boolean;
@@ -872,7 +874,6 @@ End;
 Procedure Halt;
 Begin
   OrgCursor;
-  Clrscr;
   System.Halt
 End;
 
@@ -1967,12 +1968,6 @@ END;
 
 
 
-Procedure writexy;
-begin
-  gotoxy(x,y);
-  write(txt)
-end;
-
 
 Procedure Wait;
 begin
@@ -2649,7 +2644,6 @@ begin
   begin
     writeln;
     write('Index-Datei kann nicht ge”ffnet werden !');
-    delay(1000);
     Halt
   end
   (*$I+*)
@@ -2664,7 +2658,6 @@ begin
   begin
     writeln;
     write('Pfad-Datei kann nicht ge”ffnet werden !');
-    delay(1000);
     halt
   end
   (*$I+*)
@@ -2693,7 +2686,6 @@ begin
   begin
     writeln;
     write('Zusatz-Datei kann nicht ge”ffnet werden !');
-    delay(1000);
     halt
   end
   (*$I+*)
@@ -2707,7 +2699,6 @@ begin
   begin
     writeln;
     write('Hilf-Datei kann nicht ge”ffnet werden !');
-    delay(1000);
     halt
   end
   (*$I+*)
@@ -2722,7 +2713,6 @@ begin
   begin
     writeln;
     write('Struckt-Datei kann nicht ge”ffnet werden !');
-    delay(1000);
     halt
   end
   (*$I+*)
@@ -2730,11 +2720,7 @@ end;
 
 Procedure Fehler;
 begin
-  gotoxy(1,24);
-  write(txt);
-  ch := upcase(readkey);
-  gotoxy(1,24);
-  clreol
+  Wait(txt);
 end;
 
 Function UpDate;
@@ -2900,14 +2886,18 @@ begin
       DoneEvents;
       DoneVideo;
       DoneMemory;
+{$IFNDEF NOMEMTOP}
       SetMemTop (HeapPtr);
+{$ENDIF}
       SwapVectors;
 
       Writeln('Žndere Label mit Dos - Befehl:');
       Exec(GetEnv('COMSPEC'), '/C Label A:' + Lab);
 
       SwapVectors;
+{$IFNDEF NOMEMTOP}
       SetMemTop (HeapEnd);
+{$ENDIF}
       InitMemory;
       InitVideo;
       InitEvents;

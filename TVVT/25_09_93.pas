@@ -1,7 +1,6 @@
 Program Dateiver;
 
 
-{$M 65520,8192,655360}
 {$X+,S+}
 
 

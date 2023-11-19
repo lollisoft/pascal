@@ -8,6 +8,7 @@
 (* (c) rr, 04.09.1991, 18.09.1991, 22.09.1991, 23.09.1991           *)
 (* ---------------------------------------------------------------- *)
 UNIT FileWin;
+{$DEFINE NOMEMTOP}
 
 INTERFACE
 
@@ -885,13 +886,17 @@ PROCEDURE TFileApplication.HandleEvent (VAR Event : TEvent);
     DoneEvents;
     DoneVideo;
     DoneMemory;
+{$IFNDEF NOMEMTOP}
     SetMemTop (HeapPtr);
+{$ENDIF}
     SwapVectors;
 
     Exec (Prog, CmdLine);
 
     SwapVectors;
+{$IFNDEF NOMEMTOP}
     SetMemTop (HeapEnd);
+{$ENDIF}
     InitMemory;
     InitVideo;
     InitEvents;

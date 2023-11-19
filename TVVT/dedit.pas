@@ -2,7 +2,10 @@ Unit DEDIT;
 {$X+ $O+ $F+}
 Interface
 
-Uses Crt,
+Uses 
+{$IFDEF USECRT}
+     Crt,
+{$ENDIF}
      App,
      Objects,
      TvdvCmds,
@@ -105,16 +108,8 @@ Procedure InitDEdit;
 
 
 PROCEDURE DateneditorDialog;
-Procedure Ton(hz, Time: Integer);
 
 Implementation
-
-Procedure Ton(Hz, Time: Integer);
-Begin
-  Sound(Hz);
-  Delay(Time);
-  NoSound
-End;
 
 
 Constructor TWindowListBox.Init(var Bounds: TRect;
@@ -858,10 +853,12 @@ begin
       (* Anzahl ist gr”áer als 1 und in Loc steht der gesuchte Eintrag: *)
       If LocHelp^.Next = Nil then
       Begin
+        Wait('DateiData.Loc ist letztes Element, weiterrcken nicht m”glich!');
+{$IFDEF USECRT}
         Clrscr;
-        Writeln('DateiData.Loc ist letztes Element, weiterrcken nicht m”glich!');
         Writeln('Anzahl: ', Lauf^.StrucktData.DateiList^.DateiData.Anzahl);
         Writeln('Datei : ', Lauf^.StrucktData.DateiList^.DateiData.DateiName);
+{$ENDIF}
         Halt
       End;
       Lauf^.StrucktData.DateiList^.DateiData.Loc := LocHelp^.Next;
@@ -1012,7 +1009,6 @@ Begin
   Else
   (* PfadListBox entleeren und Pfade eintragen, die zu diesem Label geh. *)
   Begin
-    Ton(2000, 500);
     IsLabelSelected := True
   End
 End;
@@ -1028,7 +1024,6 @@ Begin
   (* Pfad auf den richtigen Eintrag setzen und in LabelDateiListBox den *)
   (* passenden Label anzeigen.                                          *)
   Begin
-    Ton(1500, 500);
     IsDateiSelected := True
   End
 End;
@@ -1043,7 +1038,6 @@ Begin
   Else
   (* LabelDateiListBox mit Dateinamen fllen, die zu dem Pfad geh”ren. *)
   Begin
-    Ton(1000, 500);
     IsPfadSelected := True
   End
 End;
@@ -1209,7 +1203,6 @@ Begin
 
           If PfadFocus in [0, APfadListBox^.List^.Count - 1] then
           Begin
-            Ton(100, 100);
             If PfadFocus = 0 then
               If APfadListBox^.Anfang > 0 then
               Begin
@@ -1252,7 +1245,6 @@ Begin
 
           If LabelDateiFocus in [0, ALabelDateiListBox^.List^.Count - 1] then
           Begin
-            Ton(100, 100);
             If LabelDateiFocus = 0 then
               If ALabelDateiListBox^.Anfang > 0 then
               Begin
@@ -1296,7 +1288,6 @@ Begin
 
           If LabelDateiFocus in [0, ALabelDateiListBox^.List^.Count - 1] then
           Begin
-            Ton(100, 100);
             If LabelDateiFocus = 0 then
               If DateiSeek > 0 then
 

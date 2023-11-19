@@ -1,20 +1,23 @@
 Program TVDV;
-(*{$DEFINE DEMO}*)
-
 {$M 65520,65520,655360}
-{$X+,S+,O+,F+}
-{$G-}
-{$W+}
+(*{$DEFINE DEMO}*)
+(*{$DEFINE USEOVERLAY}*)
+(*{$DEFINE USEEMS}*)
+(*{$DEFINE USEXMS}*)
+(*{$DEFINE XHEAP}*)
+(*{$DEFINE USECRT}*)
 Uses
    (*  TvGraph,*)
-{$IFNDEF FPC}
+{$IFDEF USEOVERLAY}
      Overlay,
 {$ENDIF}
      App,
      TvdvCmds,
      HelpCmds,
      HelpFile,
+{$IFDEF USECRT}
      Crt,
+{$ENDIF}
      Dos,
      Objects,
      Memory,
@@ -28,7 +31,7 @@ Uses
      Editors,
    (* FÅr Editor: *)
      Editor,
-     Strings,
+     EStrings,
      Colors,
      TVDVImp,
      CursCont,
@@ -37,13 +40,19 @@ Uses
      StdDlg,
      StrTools,
      DDN,
+{$IFDEF USEEMS}
      EMS,
+{$ENDIF}
+{$IFDEF USEXMS}
      XMS,
+{$ENDIF}
+{$IFDEF XHEAP}
      XHeap,
+{$ENDIF}
      DEdit,
      Video;
 
-{$IFNDEF FPC}
+{$IFDEF OVERLAY}
 {$O TvdvImp }
 {$O CursCont}
 {$O FileShow}
@@ -105,7 +114,9 @@ Type
     PROCEDURE   SendFile(WindowNo, cmBase: WORD);
     PROCEDURE   SaveFile (WindowNo: WORD; P: PCollection );
     PROCEDURE   SaveFileAs (WindowNo: WORD; P: PCollection );
+{$IFDEF USECRT}
     Function    GetPalette: PPalette;           Virtual;
+{$ENDIF}
     Procedure   GetEvent(Var Event: tEvent);    Virtual;
     Procedure   HandleEvent(Var Event: TEvent); Virtual;
     Procedure   InitMenuBar;                    Virtual;
@@ -121,7 +132,9 @@ var
     Laufwerk     : String[12];
 
     ColorFile    : ColorFiletyp;
+{$IFDEF USECRT}
     ColorDat     : PPalette;
+{$ENDIF}
     S            : TStream;
 
 
@@ -205,6 +218,7 @@ BEGIN
     Dispose (Dialog, Done);
 END;
 
+{$IFDEF USECRT}
 FUNCTION TDateiverApp.GetPalette: PPalette;
 CONST
   CNewColor = CColor + CHelpColor;
@@ -215,6 +229,7 @@ CONST
 BEGIN
   GetPalette := @P[AppPalette];
 END;
+{$ENDIF}
 
 PROCEDURE TDateiverApp.GetEvent (VAR Event : TEvent);
 VAR
@@ -327,6 +342,7 @@ BEGIN
 
   TApplication.Init;
 
+{$IFDEF USECRT}
   ColorDat := Application^.GetPalette;
   Assign(ColorFile, GetFName + '.COL');
   If (LastMode <> Mono) and
@@ -343,6 +359,7 @@ BEGIN
     End;
     {$I+}
   End;
+{$ENDIF}
 
   RegisterHelpFile;
 
@@ -406,9 +423,11 @@ FUNCTION ReadFile(Name: STRING): PCollection;
 
 Destructor TDateiverApp.Done;
 Begin
+{$IFDEF USECRT}
   ReWrite(ColorFile);
   Write(ColorFile, ColorDat^);
   Close(ColorFile);
+{$ENDIF}
   TApplication.Done
 END;
 
@@ -644,7 +663,6 @@ BEGIN
 
   if System.MemAvail > 1024 then
   Begin
-    Wait('Start scanning');
 	Scanner
   End
   Else
@@ -1390,10 +1408,13 @@ begin
       (* Anzahl ist grî·er als 1 und in Loc steht der gesuchte Eintrag: *)
       If LocHelp^.Next = Nil then
       Begin
+		Wait('DateiData.Loc ist letztes Element, weiterrÅcken nicht mîglich!');
+{$IFDEF USECRT}
         Clrscr;
         Writeln('DateiData.Loc ist letztes Element, weiterrÅcken nicht mîglich!');
         Writeln('Anzahl: ', Lauf^.StrucktData.DateiList^.DateiData.Anzahl);
         Writeln('Datei : ', Lauf^.StrucktData.DateiList^.DateiData.DateiName);
+{$ENDIF}
         Halt
       End;
       Lauf^.StrucktData.DateiList^.DateiData.Loc := LocHelp^.Next;
@@ -1875,18 +1896,26 @@ BEGIN
   Begin
     Wait('Nicht genug Speicher vorhanden.');
     CursorAus;
+{$IFDEF USEOVERLAY}
     OvrClearBuf;
+{$ENDIF}
     Nachtr1;
+{$IFDEF USEOVERLAY}
     OvrSetBuf(50 * 1024);
+{$ENDIF}
     CursorEin;
   End
   Else
   Begin
     Wait('Genug Speicher vorhanden.');
     CursorAus;
+{$IFDEF USEOVERLAY}
     OvrClearBuf;
+{$ENDIF}
     Nachtr;
+{$IFDEF USEOVERLAY}
     OvrSetBuf(50 * 1024);
+{$ENDIF}
     CursorEin;
   End;
   (*DatenAufgeben*)
@@ -2069,11 +2098,13 @@ Var LMem : Longint;
     PT   : Word;
     R: TRect;
 
-
+{$IFDEF USEEMS}
 Function GetVersion: String;
 Begin
   GetVersion := EMS.GetVersion
 End;
+{$ENDIF}
+
 
 
 BEGIN
@@ -2082,16 +2113,20 @@ BEGIN
 
   LMem := System.MemAvail;
 
+{$IFDEF USEEMS}
   If EMS.TestEMMDriver then
     EMS.EMMPageCount(EMem, PT)
 
   Else EMem := 0;
+{$ENDIF}
 
   XMem := 0;
+{$IFDEF USEXMS}
   If XMS.Result = 0 then
     XMem := XMS.MemAvail
 
   Else XMem := 0;
+{$ENDIF}
 
 
   R.Assign(0, 0, 40, 15);
@@ -2100,17 +2135,24 @@ BEGIN
   MessageBoxRect(R, '          Speicherplatz:' +
              Chr(13) +
              Chr(13) +
-             '   Konventionell  : ' + GetString(System.MemAvail) + ' Byte.' +
+             '   Konventionell  : ' + GetString(System.MemAvail) + ' Byte.'
+{$IFDEF USEEMS}
+			 +
              Chr(13) +
              Chr(13) +
              '   EMS ' + GetVersion + '        : ' + GetString(PT) + ' Seiten.' +
              Chr(13) +
              Chr(13) +
-             '   EMS VerfÅgbar  : ' + GetString(EMem) + ' Seiten.' +
+             '   EMS VerfÅgbar  : ' + GetString(EMem) + ' Seiten.'
+{$ENDIF}
+{$IFDEF USEXMS}
+			 +
              Chr(13) +
              Chr(13) +
              '   XMS            : ' +
-              GetString(XMem) + ' kByte.',
+              GetString(XMem) + ' kByte.'
+{$ENDIF}
+			 ,
              Nil, mfInformation + mfOkButton);
 
 END;
@@ -2386,7 +2428,7 @@ Var DateiverApp : TDateiverApp;
 
 
 BEGIN
-
+{$IFDEF USEOVERLAY}
   OvrInit('TVDV.OVR');
   OvrSetBuf(64 * 1024);
 
@@ -2401,9 +2443,12 @@ BEGIN
     Writeln('Kein EMS - Treiber da!');
     Readln
   End;
+{$ENDIF}
+
 
   InitDEdit;
 
+{$IFDEF USEEMS}
   EMSSF := True;
   EMSLF := True;
   EMSPF := True;
@@ -2413,6 +2458,7 @@ BEGIN
   EMSDLF := True;
   EMSDPF := True;
   EMSDDF := True;
+{$ENDIF}
 
 
 

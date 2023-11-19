@@ -1,5 +1,4 @@
 Program Gruppen;
-{$M 65520,0,655360}
 Uses Crt, Dirs;
 
 Const Z : Integer = 0;

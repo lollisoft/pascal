@@ -13,8 +13,11 @@ Program Text_search(Input,Output);
             Pfad und Dateinamen bei vorhandensein.
 
 *************************************************************}
-USES Dos, Crt;
-{$M 65520,8192,655360}
+USES  
+{$IFDEF USECRT}
+    Crt,
+{$ENDIF}
+	Dos;
 
 {#########################################################}
 {#                     Hauptprogramm                     #}

@@ -89,10 +89,16 @@ Unit bdf; (* Build Data Files *)
 (* gebracht                                          *)
 (*****************************************************)
 
+{$DEFINE NOOVERLAY}
+{$DEFINE NOMEMTOP}
 
 
 Interface
-Uses Overlay, Dialogs;
+Uses 
+{$IFNDEF NOOVERLAY}
+    Overlay,
+{$ENDIF}
+	Dialogs;
 
 Const Counter : Integer = 0;
       MemWasLo: Boolean = False;
@@ -155,7 +161,11 @@ Function SearchPfadLine(Pfad: String): Longint;
 Function GetDirElement(Stelle: Longint): String;
 
 Implementation
-Uses TvvtData, Crt, MsgBox;
+Uses TvvtData, 
+{$IFDEF USECRT}
+     Crt,
+{$ENDIF}
+MsgBox;
 
 Procedure Wait(txt : string);
 begin
@@ -349,12 +359,12 @@ Begin
   If Not DateiVorh then
   Begin
     Inc(ErrCount);
-    Writexy(1, 4, 'Fehler! (' + GetString(ErrCount) + ')')
+    Wait('Fehler! (' + GetString(ErrCount) + ')')
   End;
   If Not PfadFound then
   Begin
     Inc(PfadNF);
-    Writexy(1, 5, 'Pfad nicht gefunden! (' + GetString(PfadNF) + ')')
+    Wait('Pfad nicht gefunden! (' + GetString(PfadNF) + ')')
   End;
 
   Seek(StrucktDataPufferFile, StrucktPos);
@@ -651,12 +661,12 @@ Begin
   If Not DateiVorh then
   Begin
     Inc(ErrCount);
-    Writexy(1, 4, 'Fehler! (' + GetString(ErrCount) + ') ' + DateiName)
+    Wait('Fehler! (' + GetString(ErrCount) + ') ' + DateiName)
   End;
   If Not PfadFound then
   Begin
     Inc(PfadNF);
-    Writexy(1, 5, 'Pfad nicht gefunden! (' + GetString(PfadNF) + ')')
+    Wait('Pfad nicht gefunden! (' + GetString(PfadNF) + ')')
   End
 End;
 

@@ -3,7 +3,10 @@ Unit VT; (* Vokabeltrainer *)
 
 Interface
 
-Uses Crt,
+Uses 
+{$IFDEF USECRT}
+    Crt,
+{$ENDIF}
      Dos,
      Printer,
      App,

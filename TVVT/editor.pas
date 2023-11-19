@@ -12,7 +12,7 @@ USES
 
   StrTools, App, Memory, Dialogs, Drivers, Objects, Views,
 
-  Strings,
+  EStrings,
   TVBCmds;
 
 
