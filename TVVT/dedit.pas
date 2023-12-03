@@ -42,6 +42,9 @@ TYPE
 
     (* FÅr Dateien oder Labels anzeigen: *)
 
+    Page                       : Longint;
+    Pagesize                   : Integer;
+
     LabelString                : String12;
     Showtyp,
     PlatteSpeichertyp          : Integer;
@@ -356,20 +359,28 @@ End;
 
 Procedure tDateneditorDialog.InitDateiData;
 Var Lauf: StrucktListPtrtyp;
+    Count: Integer;
 Begin
+  Count := 0;
+  Pagesize := 100;
   Lauf := StrucktList;
   While Lauf <> Nil do
   Begin
     Case Lauf^.StrucktData.Art of
       3 : Begin
-            PLabelCollection(ALabelDateiListBox^.List)^.
-              Insert(@Lauf^.StrucktData.DateiList^.
-              DateiData.DateiName);
-            ALabelDateiListBox^.SetRange(ALabelDateiListBox^.List^.Count)
+            If Count < Pagesize Then
+            Begin
+              Count := Count + 1;
+              PLabelCollection(ALabelDateiListBox^.List)^.
+                Insert(@Lauf^.StrucktData.DateiList^.
+                DateiData.DateiName);
+            End;
           End;
     End;
     Lauf := Lauf^.Next
   End;
+  {ALabelDateiListBox^.SetRange(ALabelDateiListBox^.List^.Count);}
+  ALabelDateiListBox^.SetRange(Count);
   ALabelDateiListBox^.Options := ALabelDateiListBox^.Options or ofSelectable;
   ALabelDateiListBox^.FocusItem(0);
   ALabelDateiListBox^.TopItem := 0;
