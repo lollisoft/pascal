@@ -375,7 +375,7 @@ Procedure NewArray(Var Pointer; ElementSize: Integer; Anzahl: Longint);
 Procedure DisposeArray(Var Pointer; ElementSize: Integer; Anzahl: Longint);
 
 Procedure Fehler(txt:string ; var ch:char);
-Procedure GetMedium(ch: char);
+{Procedure GetMedium(ch: char);}
 Procedure SpeichereDatei(DateiName : string12;
                          var  Lauf : DateiListPtrtyp;
                          var  dif  : Boolean;
@@ -1275,58 +1275,7 @@ BEGIN
   HilfUmlenken;      (* Wandelt Zeiger aus der Hilfliste um in Longint.  *)
   ZusatzFeldBauen;
   DateiUmlenken;
-{
-  Wait('ZÑhle Elemente in BÑumen',0);
-  Anzahl := 0;
-  ZaehleElemente(GlobalBaumPtrtyp(LabelList));
-  LAnzahl := Anzahl;
 
-  Anzahl := 0;
-  ZaehleElemente(GlobalBaumPtrtyp(PfadList));
-  PAnzahl := Anzahl;
-
-  Anzahl := 0;
-  ZaehleElemente(GlobalBaumPtrtyp(DateiList));
-  DAnzahl := Anzahl;
-
-  Wait('Mache aus BÑumen Listen',0);
-  BaumToList(GlobalBaumPtrtyp(LabelList));
-  BaumToList(GlobalBaumPtrtyp(PfadList));
-  BaumToList(GlobalBaumPtrtyp(DateiList));
-
-  Wait('öberprÅfe die Anzahl der Elemente',0);
-  Anzahl := 0;
-  GlobalList := GlobalListPtrtyp(DateiList);
-  While GlobalList <> Nil do
-  Begin
-    If GlobalList^.Anzahl > 0 then Inc(Anzahl);
-    GlobalList := GlobalList^.Next
-  End;
-  If DAnzahl <> Anzahl then Wait('DAnzahl <> Anzahl nach BaumToList!',0);
-
-  Anzahl := 0;
-  GlobalList := GlobalListPtrtyp(PfadList);
-  While GlobalList <> Nil do
-  Begin
-    If GlobalList^.Anzahl > 0 then Inc(Anzahl);
-    GlobalList := GlobalList^.Next
-  End;
-  If PAnzahl <> Anzahl then Wait('PAnzahl <> Anzahl nach BaumToList!',0);
-
-  Anzahl := 0;
-  GlobalList := GlobalListPtrtyp(LabelList);
-  While GlobalList <> Nil do
-  Begin
-    If GlobalList^.Anzahl > 0 then Inc(Anzahl);
-    GlobalList := GlobalList^.Next
-  End;
-  If LAnzahl <> Anzahl then Wait('LAnzahl <> Anzahl nach BaumToList!',0);
-
-  Halt;
-
-  StrucktUmlenken;
-
-}
   (* Felder abspeichern: *)
 
   OpenallFiles;
@@ -1991,7 +1940,7 @@ var AnyPointer : ^Integer Absolute Pointer;
 begin
   freemem(AnyPointer,ElementSize * Anzahl);
 end;
-
+{
 Procedure GetMedium;
 var Help : Mediumtyp;
 begin
@@ -2030,7 +1979,7 @@ begin
     N := Help.n;
     Raus := ch
 end;
-
+}
 
 
 Procedure SpeichereDatei;
