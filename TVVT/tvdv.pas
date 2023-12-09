@@ -27,7 +27,7 @@ Uses
      Menus,
      Dialogs,
      MsgBox,
-     LabHist,
+     LabHist, { A list of labeled disks that has already read in. Used in Scann or DiskAS to detect overwrite }
      Editors,
    (* FÅr Editor: *)
      Editor,
