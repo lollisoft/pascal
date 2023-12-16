@@ -1,5 +1,12 @@
 Program TVVT;
 (*{$DEFINE DEMO}*)
+(*{$DEFINE USEOVERLAY}*)
+(*{$DEFINE USEEMS}*)
+(*{$DEFINE USEXMS}*)
+(*{$DEFINE XHEAP}*)
+(*{$DEFINE IDLEKEY}*)
+
+
 {$X+,S+,O+,F+}
 {$G-}
 {$W+}
@@ -7,7 +14,9 @@ Uses App,
      TVVTCmds,
      HelpCmds,
      HelpFile,
+{$IFDEF USECRT}
      Crt,
+{$ENDIF}
      Dos,
      Objects,
      Dialogs,
@@ -18,20 +27,20 @@ Uses App,
      Editors,
    (* FÅr Editor: *)
      Colorsel,
-     Strings,
+     EStrings,
      StrTools,
      TvvtData,
      CursCont,
      VT,
-	 VTEST,
-
+     VTEST,
      StdDlg,
      GadGets,
      Editor,
 	 Colors,
-	 MsgBox,
-	 
-	 IdleKey;
+{$IFDEF IDLEKEY}
+	 IdleKey,
+{$ENDIF}
+	 MsgBox;
 
 
 
@@ -55,7 +64,7 @@ Type
     Constructor Init;
     Destructor  Done;                           Virtual;
     Procedure   Idle;                           Virtual;
-    
+
     Procedure   InitClipBoard;
     Procedure   FileOpen;
     PROCEDURE   NewEditor(Name: STRING);
@@ -64,7 +73,9 @@ Type
     PROCEDURE   SaveFile (WindowNo: WORD; P: PCollection );
     PROCEDURE   SaveFileAs (WindowNo: WORD; P: PCollection );
 
+{$IFDEF USECRT}
     Function    GetPalette: PPalette;           Virtual;
+{$ENDIF}
     Procedure   HandleEvent(Var Event: TEvent); Virtual;
     Procedure   InitMenuBar;                    Virtual;
     Procedure   InitStatusLine;                 Virtual;
@@ -77,7 +88,7 @@ Type
 
 
 var
-    
+
     Laufwerk     : String[12];
     ColorFile    : ColorFiletyp;
     ColorDat     : PPalette;
@@ -168,19 +179,19 @@ BEGIN
 
   R.Assign (9, 4, 39, 5);
   Dialog^.Insert (New (pStaticText, Init (R, '       Vokabeltrainer         ')));
- 
+
   R.Assign (12, 7, 34, 8);
   Dialog^.Insert (New (pStaticText, Init (R, 'Copyright (c) 1994 by')));
- 
+
   R.Assign (14, 10, 28, 11);
   Dialog^.Insert (New (pStaticText, Init (R, 'Lothar Behrens')));
- 
+
   R.Assign (14, 11, 26, 12);
   Dialog^.Insert (New (pStaticText, Init (R, 'Redacted 1')));
- 
+
   R.Assign (14, 12, 34, 13);
   Dialog^.Insert (New (pStaticText, Init (R, 'W-12345 Redacted')));
- 
+
   R.Assign (14, 13, 26, 14);
   Dialog^.Insert (New (pStaticText, Init (R, '(01234) 1234')));
  
@@ -198,7 +209,7 @@ BEGIN
     Dispose (Dialog, Done);
 END;
 
-
+{$IFDEF USECRT}
 FUNCTION TDateiverApp.GetPalette: PPalette;
 CONST
   CNewColor = CColor + CHelpColor;
@@ -209,7 +220,7 @@ CONST
 BEGIN
   GetPalette := @P[AppPalette];
 END;
-
+{$ENDIF}
 
 Constructor TDateiverApp.Init;
 var
@@ -230,12 +241,17 @@ BEGIN
   RegisterDialogs;
   RegisterApp;
 
+  (********************)
+  (* TransCollection: *)
+  (********************)
+  AEDTransCollection := New(PCollection, Init(1, 1));
+  ADETransCollection := New(PCollection, Init(1, 1));
+  AEnglischCollection := New(PVokabelCollection, Init(1, 1));
+  ADeutschCollection := New(PVokabelCollection, Init(1, 1));
+
   TApplication.Init;
 
-
-  
-
-
+{$IFDEF USECRT}
   ColorDat := Application^.GetPalette;
   Assign(ColorFile, GetFName + '.COL');
   If (LastMode <> Mono) and
@@ -252,15 +268,7 @@ BEGIN
     End;
     {$I+}
   End;
-
-  (********************)
-  (* TransCollection: *)
-  (********************)
-
-  AEDTransCollection := New(PCollection, Init(1, 1));
-  ADETransCollection := New(PCollection, Init(1, 1));
-  AEnglischCollection := New(PVokabelCollection, Init(1, 1));
-  ADeutschCollection := New(PVokabelCollection, Init(1, 1));
+{$ENDIF}
 
   GetExtent(R);
   R.A.X := R.B.X - 9;
@@ -486,7 +494,6 @@ PROCEDURE TDateiverApp.SaveFile(WindowNo: WORD; P: PCollection);
     IF WindowNo > 1 THEN BEGIN
       Assign(TF,Editor[WindowNo].Name);
       Rewrite(TF);
-      Delay(2000);
       FOR I := 0 TO P^.Count-1 DO Writeln(TF, PStr(P^.At(I))^.GetStr);
       Close(TF);
     END;
@@ -868,9 +875,12 @@ Var DateiverApp : TDateiverApp;
 
 
 BEGIN
+{$IFDEF IDLEKEY}
   (* http://www.delphigroups.info/2/ac/3804.html *)
   InitIdleKey;
-  
+{$ENDIF}
+
+{$IFDEF USEEMS}
   EMSSF := False;
   EMSLF := False;
   EMSPF := False;
@@ -880,11 +890,11 @@ BEGIN
   EMSDLF := False;
   EMSDPF := False;
   EMSDDF := False;
+{$ENDIF}
 
 
-  Regs.AH := $03;
-  Intr($10, Regs);
-  CursorSave := Regs.CX;
+  SaveCursor;
+
   RegisterStrings;
 
   (*DirTree.RegisterTypes;*)
@@ -893,7 +903,8 @@ BEGIN
   DateiverApp.Done;
 
   OrgCursor;
-  
-  UninitIdleKey
 
+{$IFDEF IDLEKEY}
+  UninitIdleKey
+{$ENDIF}
 END.

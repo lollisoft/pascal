@@ -20,7 +20,7 @@ Uses
      MsgBox,
      Video,
      Filefind,
-     Strings,
+     EStrings,
      StrTools;
 
 Type
@@ -167,7 +167,6 @@ begin
   begin
     writeln;
     write('Vokabel-Datei kann nicht ge”ffnet werden !');
-    delay(1000);
     Halt
   end
   (*$I+*)
@@ -182,7 +181,6 @@ begin
   begin
     writeln;
     write('Translate-Datei kann nicht ge”ffnet werden !');
-    delay(1000);
     Halt
   end
   (*$I+*)
