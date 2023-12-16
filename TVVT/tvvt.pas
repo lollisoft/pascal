@@ -402,9 +402,11 @@ BEGIN
   
 
 
+{$IFDEF USECRT}
   ReWrite(ColorFile);
   Write(ColorFile, ColorDat^);
   Close(ColorFile);
+{$ENDIF}
   TApplication.Done
 END;
 
