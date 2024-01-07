@@ -12,81 +12,34 @@ Program TVBUILD;
 
 {$W+}
 
-Uses MyApp,
-
+Uses App,
      Crypt,
-
      TVBUCmds,
-
      TVBUHelp,
-
-
-
      Projekt,
-
-
-
      HelpFile,
-
-     Crt,
-
      Dos,
-
      Objects,
-
      Memory,
-
      GadGets,
-
      Drivers,
-
      Views,
-
      Menus,
-
      Dialogs,
-
      MsgBox,
-
      Editors,
-
      TVCursor,
-
      Colorsel,
-
      Colors,
-
      MyEditor,
-
      MyStr,
-
      StrTools,
-
      CursCont,
-
-
-
-
-
 {$IFDEF XHEAP}
-
-
-
      XHeap,
-
-
-
 {$ENDIF}
-
-
-
-
-
-     MyStdDlg;
-
-
-
-
+     Dirs,
+     StdDlg;
 
 Type
 
@@ -150,6 +103,7 @@ Const CopyRight : CopyRightTyp = (
 
 
 
+  fdCloseButton   = $0020;      { Put a Close button in the dialog }
 
 
 
@@ -244,13 +198,12 @@ var
 
 
 
+    IfCursor     : Boolean;
 
 
     Laufwerk     : String[12];
 
     ColorFile    : ColorFiletyp;
-
-    ColorDat     : PPalette;
 
     S            : TStream;
 
@@ -723,51 +676,6 @@ BEGIN
   WorkDir := 'C:\';
 
 
-
-  ColorDat := Application^.GetPalette;
-
-  Assign(ColorFile, GetFName + '.COL');
-
-  If (LastMode <> Mono) and
-
-     (LastMode <> BW80) then
-
-  Begin
-
-    {$I-}
-
-    Reset(ColorFile);
-
-    If IOResult = 0 then
-
-    Begin
-
-      Read(ColorFile, S);
-
-      ColorDat^ := S;
-
-      DeskTop^.ReDraw;
-
-      Read(ColorFile, WorkDir);
-
-
-
-      Close(ColorFile);
-
-
-
-
-
-
-
-    End;
-
-    {$I+}
-
-  End;
-
-
-
   InitProjekt(WorkDir);
 
 
@@ -830,17 +738,7 @@ BEGIN
 
 {ENDIF}
 
-
-
-
-
-
-
-
-
   ReWrite(ColorFile);
-
-  Write(ColorFile, ColorDat^);
 
   Write(ColorFile, WorkDir);
 
@@ -2429,6 +2327,7 @@ Var TVBUILDApp : TTVBUILDApp;
 
 
 BEGIN
+  IfCursor := True;
 
   SaveCursor;
 

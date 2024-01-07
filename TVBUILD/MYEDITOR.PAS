@@ -13,7 +13,7 @@ USES
   StrTools, App, Memory, Dialogs, Drivers, Objects, Views,
 
   MyStr,
-  TVBCmds;
+  TVBUCmds;
 
 
 

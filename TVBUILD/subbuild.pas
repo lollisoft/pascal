@@ -14,7 +14,7 @@ Uses App,
 
      Drivers,
 
-     strings,
+     MyStr,
 
      MyEditor,
 
@@ -30,7 +30,7 @@ Uses App,
 
      {Ab_Obj,}
      Var_Obj,
-
+     Dirs,
 
      Objects;
 

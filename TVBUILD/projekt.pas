@@ -4,10 +4,10 @@ Unit Projekt;
 Interface
 
 Uses App, Crypt, TVBUCmds, TVBUHelp, HelpFile,
-     Crt, Dos,   Objects,  Memory,   GadGets,
+     Dos,   Objects,  Memory,   GadGets,
      Drivers,    Views,    Menus,    Dialogs,
      MsgBox,     Editors,  TVCursor, Colorsel,
-     Colors,     Editor,   MyStr,  StrTools,
+     Colors,     MyEditor,   MyStr,  StrTools,
      Klassen,
      KomBuild,
 (*     SubBuild,*)

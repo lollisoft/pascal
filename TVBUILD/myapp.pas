@@ -15,7 +15,6 @@ unit MyApp;
 interface
 
 uses Objects,
-     Crt,
      Drivers,
      Memory,
      HistList,

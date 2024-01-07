@@ -148,7 +148,7 @@ Begin
 
   TRadioButtons.MovedTo(Item);
 
-  Message(Owner, evBroadCast, cmMovedTo, @Self)
+  {Message(Owner, evBroadCast, cmMovedTo, @Self)}
 
 End;
 
@@ -272,7 +272,7 @@ Begin
 
   Begin
 
-    Message(Owner, evBroadCast, cmInputEnter, @Self);
+    {Message(Owner, evBroadCast, cmInputEnter, @Self);}
 
     ClearEvent(Event)
 
@@ -314,10 +314,10 @@ Begin
 
 
 
-  If F <> Item then
+  {If F <> Item then
 
     Message(Owner, evBroadcast, cmItemFocused, @Self);
-
+  }
 End;
 
 

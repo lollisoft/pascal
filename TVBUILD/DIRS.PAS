@@ -8,9 +8,7 @@ Interface
 
 
 
-Uses Crt,
-
-     App,
+Uses App,
 
      Dos,
 
@@ -662,8 +660,6 @@ Procedure DisposeArray(Var Pointer; ElementSize: Integer; Anzahl: Longint);
 
 
 
-Procedure Fehler(txt:string ; var ch:char);
-
 Procedure GetMedium(ch: char);
 
 Procedure SpeichereDatei(DateiName : string12;
@@ -679,8 +675,6 @@ Procedure GetHilf (var Ende, cut: HilfListPtrtyp);
 Procedure SpeichereSuch(lp, pp: StrucktListPtrtyp;
 
                              dp: DateiListPtrtyp);
-
-Procedure Writexy(x,y : byte; txt : string);
 
 Procedure SpeichereLabel(LabelName : string12;
 
@@ -1541,8 +1535,6 @@ Procedure Halt;
 Begin
 
   OrgCursor;
-
-  Clrscr;
 
   System.Halt
 
@@ -3426,16 +3418,6 @@ END;
 
 
 
-Procedure writexy;
-
-begin
-
-  gotoxy(x,y);
-
-  write(txt)
-
-end;
-
 
 
 
@@ -4846,8 +4828,6 @@ begin
 
     write('Index-Datei kann nicht ge”ffnet werden !');
 
-    delay(1000);
-
     Halt
 
   end
@@ -4873,8 +4853,6 @@ begin
     writeln;
 
     write('Pfad-Datei kann nicht ge”ffnet werden !');
-
-    delay(1000);
 
     halt
 
@@ -4904,8 +4882,6 @@ begin
 
     write('Label-Datei kann nicht ge”ffnet werden !');
 
-    delay(1000);
-
     halt
 
   end
@@ -4932,8 +4908,6 @@ begin
 
     write('Zusatz-Datei kann nicht ge”ffnet werden !');
 
-    delay(1000);
-
     halt
 
   end
@@ -4959,8 +4933,6 @@ begin
     writeln;
 
     write('Hilf-Datei kann nicht ge”ffnet werden !');
-
-    delay(1000);
 
     halt
 
@@ -4990,31 +4962,11 @@ begin
 
     write('Struckt-Datei kann nicht ge”ffnet werden !');
 
-    delay(1000);
-
     halt
 
   end
 
   (*$I+*)
-
-end;
-
-
-
-Procedure Fehler;
-
-begin
-
-  gotoxy(1,24);
-
-  write(txt);
-
-  ch := upcase(readkey);
-
-  gotoxy(1,24);
-
-  clreol
 
 end;
 
