@@ -86,7 +86,7 @@ Uses App,
 
 
 
-     StdDlg;
+     MyStdDlg;
 
 
 

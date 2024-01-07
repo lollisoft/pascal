@@ -10,7 +10,7 @@ INTERFACE
 
 USES
 
-  App, Dialogs, Drivers, {IDXFile,} Views, StdDlg, StrTools, Objects;
+  App, Dialogs, Drivers, {IDXFile,} Views, MyStdDlg, StrTools, Objects;
 
 
 

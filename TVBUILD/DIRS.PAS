@@ -24,7 +24,7 @@ Uses Crt,
 
      Views,
 
-     StdDlg;
+     MyStdDlg;
 
 
 

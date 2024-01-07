@@ -18,7 +18,7 @@ Uses App, Crypt, TVBUCmds, TVBUHelp, HelpFile,
 {$ENDIF}
      CursCont,
      Dirs,
-     StdDlg;
+     MyStdDlg;
 
 Const ProjektFileName : String = 'Projekte.TVB';
 
