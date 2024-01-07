@@ -47,7 +47,7 @@ Uses App,
 Const
 
     FileName           : String12 = '*.*';
-    VFileName          : String = 'Vokabel';
+    VFileName          : String = 'LESSON01';
 
 
 Type
