@@ -390,179 +390,57 @@ End;
 
 
 BEGIN
-
   A := 0;
-
-
-
   DeCode;
 
-
-
-
-
-
-
   Rect.Assign (2, 2, 77, 20);
-
   Dialog := New (pDialog, Init (Rect, 'Programminformation'));
 
-
-
-
-
 {$IFDEF DEMO}
-
-
-
   SText := Copyright.cTest;
-
-
-
   R_Assign(SText, 1);
-
-
-
   Dialog^.Insert (New (pStaticText, Init (R, SText)));
-
-
-
 {$ELSE}
-
-
-
-
-
   SText := Copyright.cTVVT;
-
-
-
   R_Assign(SText, 2);
-
-
-
   Dialog^.Insert (New (pStaticText, Init (R, SText)));
-
-
-
 {$ENDIF}
 
-
-
   SText := Copyright.cPName;
-
   R_Assign(SText, 2);
-
-
-
   Dialog^.Insert (New (pStaticText, Init (R, SText)));
-
-
-
   SText := Copyright.cFor;
-
   R_Assign(SText, 2);
-
-
-
   Dialog^.Insert (New (pStaticText, Init (R, SText)));
-
-
-
   SText := Copyright.cCopyr;
-
   R_Assign(SText, 2);
-
-
-
   Dialog^.Insert (New (pStaticText, Init (R, SText)));
-
-
-
   SText := Copyright.cName;
-
   R_Assign(SText, 2);
-
-
-
   Dialog^.Insert (New (pStaticText, Init (R, SText)));
-
-
-
   SText := Copyright.cADR;
-
   R_Assign(SText, 1);
-
-
-
   Dialog^.Insert (New (pStaticText, Init (R, SText)));
-
-
-
   SText := Copyright.cADR1;
-
   R_Assign(SText, 1);
-
-
-
   Dialog^.Insert (New (pStaticText, Init (R, SText)));
-
-
-
   SText := Copyright.cTel;
-
   R_Assign(SText, 1);
-
-
-
   Dialog^.Insert (New (pStaticText, Init (R, SText)));
-
-
-
-
-
 (*  R.Assign (Rect.B.X - Rect.A.X, 15, Rect.B.X - Rect.A.X, 17);*)
-
-
-
   R.Assign ((Rect.B.X - Rect.A.X) Div 2 - 10 Div 2, 15,
-
            ((Rect.B.X - Rect.A.X) Div 2 - 10 Div 2) +
-
            10, 17);
-
-
-
-
-
-
-
   Dialog^.Insert (New (pButton, Init (R, ' ~O~K ', 10, 1)));
-
- 
-
   Dialog^.SelectNext (FALSE);
-
-
-
   EnCode;
-
-
-
   Code := Desktop^.ExecView (Application^.ValidView (Dialog));
-
   IF Code <> cmCancel THEN BEGIN
-
     { cmCancel muss ev ersetzt werden }
-
     { Code auswerten }
-
   END;
-
-  IF Dialog <> NIL THEN 
-
+  IF Dialog <> NIL THEN
     Dispose (Dialog, Done);
-
 END;
 
 
@@ -1112,10 +990,6 @@ begin
 
   DoneMemory;
 
-  SetMemTop(HeapPtr);
-
-
-
   PrintStr(GetString(MemAvail));
 
 
@@ -1127,8 +1001,6 @@ begin
   Exec(GetEnv('COMSPEC'), Command);
 
   SwapVectors;
-
-  SetMemTop(HeapEnd);
 
   InitMemory;
 
