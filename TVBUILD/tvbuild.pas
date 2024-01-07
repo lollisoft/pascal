@@ -4,10 +4,6 @@ Program TVBUILD;
 
 {$DEFINE XHEAP}
 
-
-
-
-
 {$M 65520,8192,655360}
 
 {$X+,S-,F+}
@@ -16,7 +12,7 @@ Program TVBUILD;
 
 {$W+}
 
-Uses App,
+Uses MyApp,
 
      Crypt,
 
@@ -2451,8 +2447,6 @@ BEGIN
   TVBUILDApp.Run;
 
   TVBUILDApp.Done;
-
-
 
   OrgCursor
 
