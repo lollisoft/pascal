@@ -1,0 +1,45 @@
+  USER RESPONSE FORM
+  ==================
+
+    If you have a printer:  Please take a few moments to complete
+        as much of this form as possible.
+
+    (Registered users can upgrade to this version free, and should
+        not register again.)
+
+
+        Name    _____________________________________________
+        Company _____________________________________________
+        Address _____________________________________________
+        City    ____________________________, State _________
+        Zip     ____________________________
+
+
+    How long have you been using Turbo Vision? ______
+
+    Which version of Turbo Pascal are you using? _____
+
+    List any programming tools/add-ins that you use:
+      ___ AnsiView
+      ___ Blaise: ________________________________________
+      ___ Btrieve
+      ___ DMX (original)  --upgrade fee only $10
+      ___ Paradox Engine
+      ___ Topaz
+      ___ TurboPower: ____________________________________
+
+      Others: 
+
+
+
+    Print this form and send it with $20 registration fee to:
+
+                   Randolph Beck
+                   tvDMX Registration
+                   P.O. Box  56-0487
+                   Orlando, FL  32856-0487
+
+    ----------------------------------------------------------------------
+
+    Add any additional questions or comments...
+

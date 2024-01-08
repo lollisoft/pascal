@@ -1,0 +1,116 @@
+Unit tvDMXREP      --tvDMX Data Reporting Objects
+
+The procedures and objects in this unit will output a report from the data
+in a tvDMX view.
+
+
+The reporting objects:
+
+  object TDmxReport
+      This is the base reporting object.  It has an abstract Print() method
+      and will not function as-is.  
+
+  object TDmxReportFile
+      Overrides TDmxReport's Print() method to output to a file.
+
+  object TDmxReportStream
+      Overrides TDmxReport's Print() method to output to a stream.
+
+  object TDmxReportHexFile
+      Overrides TDmxReportFile's RecNumStr() method to return a hexadecimal
+      address.  This object is defined in unit tvDMXHEX.PAS.
+
+
+Each object is initialized by its Init() constructor, and executed by a
+Run() method.  The reports can be customized by overriding virtual methods.
+
+
+Where to override sections of the printed page:
+
+        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+        CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+        DDDDDDEEEEEE.................FFFFFF
+        DDDDDDEEEEEE.................FFFFFF
+        DDDDDDEEEEEE.................FFFFFF
+        DDDDDDEEEEEE.................FFFFFF
+        DDDDDDEEEEEE.................FFFFFF
+        DDDDDDEEEEEE.................FFFFFF
+        DDDDDDEEEEEE.................FFFFFF
+        DDDDDDEEEEEE.................FFFFFF
+        GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
+        HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
+
+
+ [.]--data records as formatted by the tvDMX view.
+
+  A --processed by procedure SetupPage.
+      The default method does nothing.
+
+  B --processed by procedure PrintLabels.
+      This method outputs the DMX field header labels.
+
+  C --processed by procedure SetupDMX.
+      Processes a line to appear under the field header labels.
+
+  D --processed by procedure SetupLine.
+      The default method does nothing.
+
+  E --outputs a string returned from RecNumStr(CurrentRecord).
+      This string is used only if line numbers are enabled.
+
+  F --processed by procedure EndLine.
+      This method outputs a line-feed.
+
+  G --processed by procedure EndDMX.
+      Processes a line to appear under the field header labels.
+
+  H --processed by procedure EndPage.
+      This method outputs a page-feed.
+
+
+
+
+Report objects could be instantiated and run by themselves, but procedure
+DmxReportBox() can be used to execute the process from within a message box:
+
+
+  procedure DmxReportBox (ATitle :TTitleStr; Msg :string; Report :PDmxReport);
+
+  Syntax:   ATitle --window title;
+            Msg    --message string to be displayed during printing;
+            Report --report object, initialized and ready to run
+                     (this is disposed after the procedure is done).
+
+Example:
+
+  DmxReportBox ('Working', 'Processing report...'^M^M^C'to "FILE"',
+                New (PDmxReportFile, Init (DMX, '|', TRUE, 50,78, 'FILE')));
+
+         'Working' --window title;
+            DMX    --a tvDMX view;
+            '|'    --replacement delimiter for visible delimiters
+                     above #126  (uses given delimiters if #0 is used);
+            TRUE   --display record numbers;
+            50     --number of records per page;
+            78     --width of each page;
+            'FILE' --report filename.
+
+
+
+How to print data in the current window:
+
+  procedure PrintCurrentWindow;
+  var  DMX  : PDmxScroller;
+  begin
+    DMX := Message (DeskTop, evCommand, cmDMX_RollCall, @Self);
+    If (DMX <> nil) then
+      begin
+      DmxReportBox ('Printing', 'Processing report...'^M^M^C'to "PRN"',
+            New (PDmxReportFile, Init (DMX, '|', TRUE, 50,78, 'PRN')));
+      end;
+  end;
+
+
+This procedure is demonstrated in the SAMPLES.PAS program.
+
