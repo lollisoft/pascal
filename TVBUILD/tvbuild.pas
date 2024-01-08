@@ -42,352 +42,139 @@ Uses App,
      StdDlg;
 
 Type
-
      String12 = String[12];
-
-
-
      CopyRightTyp = Record
-
                       CopyrightHead : String;
-
                       Anzahl: Byte;
-
                       cName : String;
-
                       cADR  : String;
-
                       cADR1 : String;
-
                       cTel  : String;
-
                       cTest : String;
-
                       cTVVT : String;
-
                       cPName: String;
-
                       cCopyr: String;
-
                       cFor  : String
-
                     End;
 
-
-
-
-
 Const CopyRight : CopyRightTyp = (
-
                          CopyrightHead : 'Copyright-Header';
-
                          Anzahl: 8;
-
                          cName : '     Lothar Behrens      ';
-
                          cADR  : '     Redacted 1          ';
-
                          cADR1 : '     W-12345 Redacted    ';
-
                          cTel  : '     (01234) 1234        ';
-
                          cTest : 'TVBUILD fÅr DOS - Testversion !';
-
                          cTVVT : ' TVBUILD fÅr DOS - Version 1.0 ';
-
                          cPName: '       Turbo - Vision - Programmgenerator       ';
-
                          cCopyr: '     Copyright (c) 1994     ';
-
                          cFor  : '');
-
-
 
   fdCloseButton   = $0020;      { Put a Close button in the dialog }
 
-
-
-
 Type
-
-
-
   ColorFiletyp         = File of TPalette;
-
-
-
   PTVBuildApp         = ^TTVBUILDApp;
-
   TTVBUILDApp         = Object(TApplication)
-
-
-
     MenuExtent : TRect;
-
     Heap       : PHeapView;
-
-
-
     Editor: ARRAY[1..9] OF RECORD
-
                              Ed: PEditorWindow;
-
                              Name: STRING;
-
                            END;
 
-
-
     Constructor Init;
-
     Destructor  Done;                           Virtual;
-
     Procedure   Idle;                           Virtual;
-
-
-
     Procedure   DosShell(Command: String);
-
-
-
     Procedure   InitClipBoard;
-
     Function    FileOpen(Text: String; Var FileName: PathStr): Boolean;
-
     Procedure   StartEditor(FileName:PathStr);
-
     PROCEDURE   NewEditor(Name: STRING);
-
     FUNCTION    GetFile(Arg: STRING): PCollection;
-
     PROCEDURE   SendFile(WindowNo, cmBase: WORD);
-
     PROCEDURE   SaveFile (WindowNo: WORD; P: PCollection );
-
     PROCEDURE   SaveFileAs (WindowNo: WORD; P: PCollection );
-
     Procedure   DoneEditor(Ed: PEditorWindow);
-
-
-
-
-
     Function    GetPalette: PPalette;           Virtual;
-
-
-
     Procedure   HandleEvent(Var Event: TEvent); Virtual;
-
     Procedure   InitMenuBar;                    Virtual;
-
     Procedure   InitStatusLine;                 Virtual;
-
     Procedure   OutOfMemory;                    Virtual;
-
   END;
 
-    
-
-
-
-
-
-
-
 var
-
-
-
     IfCursor     : Boolean;
-
-
     Laufwerk     : String[12];
-
     ColorFile    : ColorFiletyp;
-
     S            : TStream;
-
     FName        : PathStr;
-
-
-
     WorkDir      : String;
 
-
-
-
-
 (* Editor: *)
-
-
-
     EDCommand, WindowNo: WORD;
-
     ClipWindow: PEditorWindow;
 
-
-
-
-
 Procedure EnCode;
-
 Begin
-
   EnCryptStruc(Copyright.CopyrightHead[0], 256, 19);
-
-
-
-
-
   EnCryptStruc(Copyright.cTest[0], 256, 19);
-
   EnCryptStruc(Copyright.cName[0], 256, 19);
-
   EnCryptStruc(Copyright.cADR[0], 256, 19);
-
   EnCryptStruc(Copyright.cADR1[0], 256, 19);
-
   EnCryptStruc(Copyright.cTel[0], 256, 19);
-
   EnCryptStruc(Copyright.cTest[0], 256, 19);
-
   EnCryptStruc(Copyright.cTVVT[0], 256, 19);
-
   EnCryptStruc(Copyright.cPName[0], 256, 19);
-
   EnCryptStruc(Copyright.cCopyr[0], 256, 19);
-
   EnCryptStruc(Copyright.cFor[0], 256, 19);
-
-
-
 End;
-
-
 
 Procedure DeCode;
-
 Begin
-
   DeCryptStruc(Copyright.CopyrightHead[0], 256, 19);
-
-
-
-
-
   DeCryptStruc(Copyright.cTest[0], 256, 19);
-
   DeCryptStruc(Copyright.cName[0], 256, 19);
-
   DeCryptStruc(Copyright.cADR[0], 256, 19);
-
   DeCryptStruc(Copyright.cADR1[0], 256, 19);
-
   DeCryptStruc(Copyright.cTel[0], 256, 19);
-
   DeCryptStruc(Copyright.cTest[0], 256, 19);
-
   DeCryptStruc(Copyright.cTVVT[0], 256, 19);
-
   DeCryptStruc(Copyright.cPName[0], 256, 19);
-
   DeCryptStruc(Copyright.cCopyr[0], 256, 19);
-
   DeCryptStruc(Copyright.cFor[0], 256, 19);
-
-
-
 End;
-
-
-
-
-
-
-
-
 
 function CalcHelpName: PathStr;
-
 var
-
   EXEName: PathStr;
-
   Dir: DirStr;
-
   Name: NameStr;
-
   Ext: ExtStr;
-
 begin
-
   if Lo(DosVersion) >= 3 then EXEName := ParamStr(0)
-
   else EXEName := FSearch('TVDV.EXE', GetEnv('PATH'));
-
   FSplit(EXEName, Dir, Name, Ext);
-
   if Dir[Length(Dir)] = '\' then Dec(Dir[0]);
-
   CalcHelpName := FSearch('TVDVHELP.HLP', Dir);
-
 end;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 PROCEDURE ProgramminformationDialog;
-
   VAR
-
     R, Rect : tRect;
-
     View    : pView;
-
     Code    : INTEGER;
-
     Dialog  : pDialog;
-
     SText   : String;
-
-
-
     A       : Integer;
 
-
-
 Procedure R_Assign(t: String; i: Integer);
-
 Begin
-
   Inc(A, I);
-
   R.Assign ((Rect.B.X - Rect.A.X) Div 2 - Length(t) Div 2, A,
-
            ((Rect.B.X - Rect.A.X) Div 2 - Length(t) Div 2) +
-
            Length(SText), A + 1)
-
 End;
-
-
-
-
 
 BEGIN
   A := 0;
@@ -443,491 +230,214 @@ BEGIN
     Dispose (Dialog, Done);
 END;
 
-
-
-
-
 FUNCTION TTVBUILDApp.GetPalette: PPalette;
-
 CONST
-
   CNewColor = CColor + CHelpColor;
-
   CNewBW    = CBlackWhite + CHelpBlackWhite;
-
   CNewMono  = CMonochrome + CHelpMonochrome;
-
   P : ARRAY [apColor..apMonochrome] OF String[Length(CNewColor)] =
-
               (CNewColor, CNewBW, CNewMono);
-
 BEGIN
-
   GetPalette := @P[AppPalette];
-
 END;
-
-
-
-
 
 Function GetFName: String;
-
 Var Name: String;
-
 Begin
-
   Name := ParamStr(0);
-
   While Pos('.', Name) <> 0 do
-
     System.Delete(Name, Length(Name), 1);
-
   GetFName := Name
-
 End;
 
-
-
-
-
-
-
-
-
-
-
 Constructor TTVBUILDApp.Init;
-
 var
-
   H: Word;
-
   R: TRect;
-
   Dummy: STRING;
-
   Search: SearchRec;
-
   I: INTEGER;
-
   F: Text;
-
   S: String;
-
   V: PView;
-
 BEGIN
-
-
-
   RegisterEditors;
-
   RegisterHelpFile;
-
   RegisterEditor;
-
   RegisterColorsel;
-
   RegisterObjects;
-
   RegisterViews;
-
   RegisterMenus;
-
   RegisterDialogs;
-
   RegisterApp;
-
-
-
   TApplication.Init;
 
-
-
-
-
-
-
-
-
   WorkDir := 'C:\';
-
-
   InitProjekt(WorkDir);
-
-
-
   R := MenuExtent;
-
-
-
   R.A.X := R.B.X - 9;
-
   R.B.Y := R.A.Y + 1;
-
   Heap := New(PHeapView, Init(R));
-
   Insert(Heap);
 
-
-
-
-
   InitClipBoard;
-
   I := 1;
-
-
-
   DisableCommands([cmVVX, cmVVS, cmSave, cmSaveAs]);
-
-
-
   ProgrammInformationDialog;
-
-
-
-
-
 END;
-
-
-
-
-
-
 
 Destructor TTVBUILDApp.Done;
-
 Var S :String;
-
 BEGIN
-
 {IFNDEF DEMO}
-
   DoneProjekt; (* Projekt - Verwaltung *)
-
-
-
-
-
 (*  If Save then SpeichereDateienDialog;*)
-
 {ENDIF}
-
   ReWrite(ColorFile);
-
   Write(ColorFile, WorkDir);
-
-
-
   Close(ColorFile);
-
   TApplication.Done
-
 END;
 
-
-
 (* FÅr Editor: *)
-
-
-
 FUNCTION ReadFile(Name: STRING): PCollection;
-
   VAR
-
     P: PCollection;
-
     ALine: STRING;
-
     AFile: TEXT;
-
   BEGIN
-
     New(P, Init(20,1));
-
     Assign(AFile, Name);
-
     {$I-}Reset(AFile);{$I+}
 
     IF IOResult = 0 THEN BEGIN
-
       WHILE NOT EOF(AFile) DO BEGIN
-
         ReadLn(AFile, ALine);
-
         P^.AtInsert( P^.Count, New(PStr, Init ( ALine )));
-
       END;
-
       Close(AFile);
-
     END;
-
     ReadFile := P;
-
   END;
-
-
-
-
 
 Procedure TTVBUILDApp.DoneEditor(Ed: PEditorWindow);
-
 Begin
-
 End;
 
-
-
 PROCEDURE TTVBUILDApp.NewEditor(Name: STRING);
-
   VAR
-
     R: TRect;
-
     Dir, FName, Ext: STRING;
-
   BEGIN
-
     Inc(WNo);
-
-
-
     R.Assign(0,0,80,23);
-
     FSplit(Name, Dir, FName, Ext);
-
     Ext := DownStr(Ext);
-
     IF Name = ''
-
       THEN Editor[WNo].Ed := New(PEditorWindow, Init(R, WNo, 'Clipboard', Nil,
-
                                                edBase+10*WNo))
-
-     ELSE IF (Ext = '.txt') THEN BEGIN 
-
+     ELSE IF (Ext = '.txt') THEN BEGIN
        Editor[WNo].Ed := New(PEditorWindow, Init(R, WNo, Name, ReadFile(Name),
-
                                            edBase+10*WNo));
-
        Editor[WNo].Name := Name;
-
       END
-
       ELSE IF (Ext<>'.exe') AND (Ext<>'.com') AND (Ext<>'.bak') THEN BEGIN
-
         Editor[WNo].Ed := New(PLineEditor, Init(R, WNo, Name, ReadFile(Name),
-
                                                 128, edBase+10*WNo));
-
         Editor[WNo].Name := Name;
-
        END
-
        ELSE Exit;
-
     DeskTop^.Insert(Editor[WNo].Ed);
-
   END;
-
-
 
 PROCEDURE TTVBUILDApp.InitClipBoard;
-
   VAR
-
     R: TRect;
-
     Dir, FName, Ext: STRING;
-
     Name: String;
-
   BEGIN
-
     Name := '';
-
     GetExtent(R);
-
     Dec(R.B.Y, 2);
-
     FSplit(Name, Dir, FName, Ext);
-
     Ext := DownStr(Ext);
-
-
-
     Editor[WNo].Ed := New(PEditorWindow, Init(R, WNo, 'Clipboard', Nil,
-
                                                edBase+10*WNo));
-
-
-
     ClipWindow := Editor[WNo].Ed;
-
     if ClipWindow <> nil then
-
       Clipboard := ClipWindow^.Editor;
-
-
-
     ClipWindow^.Close;
-
     DeskTop^.Insert(Editor[WNo].Ed);
-
-
-
   END;
-
-
-
-
 
 PROCEDURE TTVBUILDApp.SaveFile(WindowNo: WORD; P: PCollection);
-
   VAR
-
     TF: TEXT;
-
     I: INTEGER;
-
   BEGIN
-
     IF WindowNo > 1 THEN BEGIN
-
       Assign(TF,Editor[WindowNo].Name);
-
       Rewrite(TF);
-
       FOR I := 0 TO P^.Count-1 DO Writeln(TF, PStr(P^.At(I))^.GetStr);
-
       Close(TF);
-
     END;
-
   END;
-
-
 
 PROCEDURE TTVBUILDApp.SaveFileAs(WindowNo: WORD; P: PCollection);
-
   VAR
-
     TF: TEXT;
-
     I: INTEGER;
-
     D: PFileDialog;
-
     FileName: PathStr;
-
-
-
   BEGIN
-
     IF WindowNo > 1 THEN BEGIN
-
       D := PFileDialog(ValidView(New(PFileDialog, Init(Editor[WindowNo].Name, 'Datei speichern als',
-
         '~N~ame', fdCloseButton, 100))));
-
       If D <> Nil then
-
       Begin
-
         If Desktop^.ExecView(D) <> cmCancel then
-
         Begin
-
           D^.GetFileName(FileName);
-
           Editor[WindowNo].Name := FileName;
-
           Editor[WindowNo].Ed^.NewTitle(FileName);
-
-
-
           Assign(TF,Editor[WindowNo].Name);
-
           Rewrite(TF);
-
           FOR I := 0 TO P^.Count-1 DO Writeln(TF, PStr(P^.At(I))^.GetStr);
-
           Close(TF);
-
         End;
-
         Dispose(D, Done)
-
       End;
-
     END;
-
   END;
-
-
-
-
 
 FUNCTION TTVBUILDApp.GetFile(Arg: STRING): PCollection;
-
   VAR
-
     D: PFileDialog;
-
     FileName: PathStr;
-
     P: PCollection;
-
   BEGIN
-
     D := PFileDialog(ValidView(New(PFileDialog, Init(Arg, 'Laden',
-
                                                 'File', 3, 12))));
-
     IF (D <> Nil) AND (Desktop^.ExecView(D) <> cmCancel) THEN BEGIN
-
       D^.GetFileName(FileName);
-
       GetFile := ReadFile(FileName);
-
      END
-
      ELSE GetFile := Nil;
-
   END;
-
-
 
 PROCEDURE TTVBUILDApp.SendFile(WindowNo, cmBase: WORD);
-
   VAR Event: TEvent;
-
   BEGIN
-
     Event.What := evBroadCast;
-
     Event.Command := cmBase+WindowNo*10+cmEdSend;
-
     Event.InfoPtr := GetFile('*.*');
-
     TopView ^.HandleEvent(Event);
-
   END;
 
-
-
 Function TTVBUILDApp.FileOpen(Text: String; Var FileName: PathStr): Boolean;
-
 var
-
   D: PFileDialog;
-
   W: PWindow;
-
 begin
 
   FileOpen := False;
