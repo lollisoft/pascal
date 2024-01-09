@@ -1,0 +1,913 @@
+
+     tvDMX  (c) 1992,93		Randolph Beck
+     =====
+
+
+About Unit tvDMX
+================
+
+    tvDMX Data Scrollers and Editors
+    --------------------------------
+
+        TView (VIEWS.TPU)
+	 |
+        TScroller (VIEWS.TPU)
+	 |
+	 |
+	TDmxScroller (TVDMX.PAS)
+	 |  |
+	 |  +--TDmxCollectView (See DMXCOL.DOC)
+	 |
+	TDmxEditor (TVDMX.PAS)
+	    |
+	    |--TDmxCollector (See DMXCOL.DOC)
+	    |--TDmxForm (See README.DOC)
+	    |--TDmxEditBuf (See DMXBUF.DOC)
+	    +--TDmxEditDlg (See STDDMX.DOC)
+
+
+    tvDMX Labels and Indicators
+    ---------------------------
+
+	TView (VIEWS.TPU)
+	 |
+	 |
+	TDmxLink (TVDMX.PAS)
+	 |
+	 |--TDmxRecInd (TVDMX.PAS)
+	 |   |
+	 |   +--TDmxExpRecInd (TVDMXBUF.PAS)
+	 |
+	 +--TDmxExtLabels (TVDMX.PAS)
+	     |
+	     |--TDmxLabels (TVDMX.PAS)
+	     |
+	     |--TDmxFLabels (TVDMX.PAS)
+	     |
+	     |--TDmxMLabels (TVDMX.PAS)
+	     |
+	     +--TDmxPxLabels (PxDMX.PAS)
+
+
+Object TDmxScroller
+===================
+
+    TDmxScroller (a TScroller descendant) is the primary tvDMX object.
+    It provides for horizontal and vertical scrolling of records and
+    fields as defined by ATemplate --the formatting string.
+    Object TDmxScroller can be found in unit tvDMX.
+
+
+FIELDS
+------
+
+  CurrentField	:  pDMXfieldrec;
+
+	Pointer to the current field's information block.  This field is
+	only used by descendant objects.  It was declared here so that
+	it may be accessed by TDmxLink objects.  It is initialized as NIL
+	but object TDmxEditor (its first descendant) will change it to
+	the first usable field.
+
+
+  CurrentRecord	:  integer;
+
+	The current record number, starting from zero.  This field is
+	only used by descendant objects.  It was declared here so that
+	it may be accessed by TDmxLink objects.
+	It is initialized as record number zero.
+
+
+  DataBlockSize	:  longint;
+
+	Field DataBlockSize is size of the database.
+
+
+  DMXfield1	:  pDMXfieldrec;
+
+	A pointer to the first record in the field descriptor chain.
+	This is initialized by procedure InitStruct().
+
+
+  Labels	:  PDmxLink;
+
+	Linkage to a view that displays heading lines above the
+	DmxScroller.  If there is no such view, Labels is NIL.
+
+
+  Locked	:  boolean;
+
+	Prevents editing attempts by the user.
+
+
+  RecordSize	:  integer;
+
+	Size of each record.
+	This is initialized by procedure InitStruct().
+
+
+  TotalFields	:  integer;
+
+	The last numbered field in the field descriptor chain.  Some
+	fields are "Combined Fields" such as DateTime, in which case the
+	six WORD types will all count as two fields (one Date field and
+	one Time field).  This is initialized by procedure InitStruct().
+
+
+  Vidis		:  boolean;
+
+	If TRUE, it prevents tvDMX from resetting the current field and
+	record when it loses the focus.  This should only be set TRUE
+	prior to opening a MessageBox().  Altering this field will be
+	useful only for buffered data objects.
+	This field should normally remain FALSE.
+
+
+  WorkingData	:  pointer;
+
+	A pointer to the database in memory.  Some descendants that
+	override function DataAt() may not need this pointer, although
+	all of the example units and programs do.
+	This is initialized by procedure InitData().
+
+
+
+METHODS
+-------
+
+  constructor Init (ATemplate : string;  var AData;
+		    BSize : longint;  var Bounds : TRect;
+		    ALabels : PDmxLink;
+		    AHScrollBar,AVScrollBar : PScrollBar);
+
+      Calls TScroller.Init().
+      The DataBlockSize field is set to BSize.
+      The field descriptor chain is initialized by proc InitStruct().
+      Virtual method InitData() sets field WorkingData to @AData.
+      The maximum record number is determined by BSize.
+      The GrowMode field is set to (gfGrowHiX or gfGrowHiY);
+      If ALabels is not NIL then the ALabels view is linked to this object.
+
+
+  destructor Done;
+	VIRTUAL;
+
+    Calls the DoneData() and DoneStruct() virtual methods before calling
+    TScroller.Done().
+
+
+  constructor Load (var S : TStream);
+
+    Calls TScroller.Load().  Reads the object's fields, and then calls the
+    LoadData() and LoadStruct() virtual methods.
+
+
+  proc  ChangeBounds (var Bounds : TRect);
+	VIRTUAL;
+
+    Sets InBuffer to FALSE, to ensure that the entire view is redrawn, and
+    then calls the inherited ChangeBounds() method.  (InBuffer is a private
+    field that indicates whether text was written to Owner^.Buffer.)
+
+
+  func  DataAt (RecNum : integer) : pointer;
+	VIRTUAL;
+
+    Returns a pointer to the given data record.
+    By overriding this function, a program can completely alter the
+    manner in which the database is organized.  It is very important
+    that you understand this, as it gives programs the capability to
+    access more than 64k.
+
+    This object simply returns a pointer to the position in the database
+    from (RecNum * RecordSize).
+
+
+  proc  DoneData;
+	VIRTUAL;
+
+    Pseudo-abstract method that can be overridden to post-process the
+    data records.
+
+
+  proc  DoneStruct;
+	VIRTUAL;
+
+    Disposes of the internal field-descriptor chain.
+
+
+  proc  Draw;
+	VIRTUAL;
+
+    Draws the view by calling DrawRecord() for each row in the view.
+    Under certain conditions, most of the view may be copied from the
+    view Owner's buffer to save time.
+
+
+  proc  DrawRecord (Y : integer;  var DataRecord );
+
+    Displays data in DataRecord on screen row Y.  It uses the TScroller's
+    Delta field to find the screen's offset.
+
+
+  proc  FieldText (var S : string;  var Color : word;
+		   Field : pDMXfieldrec;  var DataRec );
+	VIRTUAL;
+
+    Pseudo-abstract method that is called just before drawing a field.
+    The default method does nothing, but it may be overwritten to modify
+    the text string or the color.
+
+    The S and Color parameters may be modified.  Color is the actual
+    screen color attribute.  This will be 0 when tvDMX is printing.
+
+    DataRec is the record of the field that is being addressed.  A pointer
+    to the field data can be found by adding the value of Field^.datatab to
+    the address of DataRec.
+
+      eg:  FData := ptr(seg(DataRec), ofs(DataRec) + Field^.datatab);
+
+    Note that, if this object is a TDmxEditor descendant, you may use its
+    DrawingField boolean field to indicate whether the field being displayed
+    is currently highlighted.
+
+      eg:  If (S = '[X]') and DrawingField then Color := Color or Blink;
+
+
+  func  GetPalette  : PPalette;
+	VIRTUAL;
+
+    Returns a pointer to the view's palette.  It uses cDMX (defined in
+    unit DmxGizma) as this string.
+
+
+  proc  HandleEvent (var Event : TEvent);
+	VIRTUAL;
+
+    Handles most events by calling the inherited HandleEvent(), and then
+    processes these evCommand or evBroadcast events:  cmDMX_RollCall,
+    cmDMX_Draw, cmDMX_DrawData, cmDMX_LockData, cmDMX_UnlockData.
+
+
+  proc  InitData (var AData );
+	VIRTUAL;
+
+    Sets pointer field WorkingData to @AData.  Can be overridden to
+    initialize different data if function DataAt() is also overridden.
+                                                      
+
+  proc  InitStruct (var ATemplate );
+	VIRTUAL;
+
+    Uses ATemplate to set up the internal field-descriptor chain.
+    This can be called multiple times to extend the chain.
+
+
+  proc  LoadData (var S : TStream);
+	VIRTUAL;
+
+    Abstract method called by the Load() constructor.
+    This MUST set the object's DataBlockSize and WorkingData fields.
+
+
+  proc  LoadStruct (var S : TStream);
+	VIRTUAL;
+
+    Virtual method called by the Load() constructor to load the internal
+    field-descriptor chain.
+
+
+  func  RecNumStr (RecNum : integer) : string;
+	VIRTUAL;
+
+    Must return a record number in string form.   This method is used
+    only by the reporting objects (in unit tvDMXREP.PAS) to print record
+    numbers in a format specific to the view.
+    It is overridden in unit tvDMXHEX to return record numbers in hex.
+
+
+  func  RecordLimit : longint;
+	VIRTUAL;
+
+    Returns the total number of records in the table.  This method is
+    overridden in some descendants to ignore an expansion record.
+
+
+  proc  SetState (AState : word; Enable : boolean);
+	VIRTUAL;
+
+    If focus is received (sfFocused), and if the DataBlockSize field is
+    determined to be different, then SetLimit() is called to adjust Limit.
+
+
+  proc  Store (var S : TStream);
+
+    Calls TScroller.Store().  Writes the object's fields, and then calls
+    the StoreData() and StoreStruct() virtual methods.
+
+
+  proc  StoreData (var S : TStream);
+	VIRTUAL;
+
+    Abstract method called by the Store() method.  This MUST store
+    information that will allow its data to be reconnected if this object
+    is loaded again.
+
+
+  proc  StoreStruct (var S : TStream);
+	VIRTUAL;
+
+    Virtual method called by the Store() method.
+
+
+  proc  WrongKeypressed (var Event : TEvent);
+	VIRTUAL;
+
+    Virtual method called whenever a key is pressed that cannot be
+    accepted (eg: text in a numeric field).  The default method sends
+    a cmDMX_WrongKey command to the Application view.
+
+
+  func  Valid (Command : word) : boolean;
+	VIRTUAL;
+
+    Calls the inherited Valid() method.  If Command is cmValid, it checks
+    the InitValid field to confirm nothing was lost during initialization.
+
+Object TDmxEditor
+=================
+
+    Object TDmxEditor is the fully functional tvDMX object for scrolling
+    and editing data fields and records.  Heading lines and a record number
+    indicator can be attached separately.
+    Object TDmxEditor can be found in unit tvDMX.
+
+
+FIELDS
+------
+
+  CurPos	:  integer;
+
+	Position of the cursor within the current field (not counting any
+	extra characters in the template).
+
+
+  DataAltered	:  boolean;
+
+	Set TRUE when data is modified.
+
+
+  DoubleValid	:  boolean;
+
+	Set TRUE automatically whenever a evMouseDown event occurs.
+	DoubleValid ensures that the last mouse-click occurred in a valid
+	zone that the pointer has already switched to.
+	If checking Event.Double directly, programs should always check
+	that DoubleValid is TRUE before responding to a Double-click mouse
+	event.
+
+
+  DrawingField	:  boolean;
+
+	Set TRUE while TDmxScroller.DrawField() is drawing that field.
+	It is reset to FALSE when DrawField() is complete.
+
+
+  FieldAltered	:  boolean;
+
+	Set TRUE if the current field is altered.
+	This is reset to FALSE by procedure SetUpField().
+
+
+  FieldData	:  pointer;
+
+	Pointer to the data in the current field.
+	This is set by procedure SetUpField().
+
+
+  FieldSelected	:  boolean;
+
+	Set TRUE when a field is selected.  It will be FALSE while it is
+	changing fields or when another view is selected.
+
+
+  FirstKey	:  boolean;
+
+	TRUE if a key has not been pressed yet while in the current field.
+	This is used so that right/left cursor keys can act as ctrl-arrow
+	keys until editing a field.
+
+
+  JustAltered	:  boolean;
+
+	Set TRUE if any of the data was altered by tvDMX since it was
+	last focused.
+
+
+  LockChecked	: boolean;
+
+	Indicates that the locked-status of the current record has already
+	been checked.  This is set and reset internally.
+
+
+  RecInd	:  PDmxLink;
+
+	Linkage to a view that displays the current record number beside
+	the horizontal scroll bar.
+
+
+  RecordAltered	:  boolean;
+
+	Set TRUE if the current record is altered.
+	This is reset to FALSE by procedure SetUpRecord().
+
+
+  RecordData	:  pointer;
+
+	Pointer to the data in the current record.
+	This is set by procedure SetUpRecord().
+
+
+  RecordSelected :  boolean;
+
+	Set TRUE when a record is selected.  It will be FALSE while it is
+	changing records or when another view is selected.
+
+
+  RecWasLocked	: boolean;
+
+	Indicates that the current record was locked by another view or
+	application.  This field is set internally by CheckRecLock() if
+	the SetRecLock() virtual function returns FALSE.  It will be
+	cleared when EvaluateRecord() is called.
+
+
+  RedrawRecord	:  boolean;
+
+	If TRUE, the entire record is redrawn when DrawField() is called.
+	Procedure DrawField() always returns this value to FALSE.
+
+
+METHODS
+-------
+
+  constructor Init (ATemplate : string;  var AData;  BSize : longint;
+		    var Bounds : TRect;  ALabels,ARecInd  : PDmxLink;
+		    AHScrollBar,AVScrollBar : PScrollBar);
+
+    Calls TDmxScroller.Init().  Sets CurrentField by searching the field-
+    descriptor chain for the first non-skip and unhidden data field.
+    Sets CurrentRecord to record zero.  Sets RecInd to ARecInd.
+    If RecInd is not NIL, it sets RecInd^.Link to @Self and then adjusts
+    HScrollBar's width (if HScrollBar is not NIL) to make room for RecInd.
+
+
+  constructor Load (var S : TStream);
+
+    Calls TDmxScroller.Load().  Reads the object's fields, and then finds
+    the pointer for CurrentField.
+
+
+  destructor Done;
+	VIRTUAL;
+
+    Checks FieldSelected and RecordSelected, and calls EvaluateField()
+    and EvaluateRecord() if necessary.  Then calls TDmxScroller.Done().
+
+
+  proc  ChangeBounds (var Bounds : TRect);
+	VIRTUAL;
+
+    Ensures that a field and record are not selected while calling the
+    inherited ChangeBounds() method.  The field and/or record may be
+    scrolled afterwards, to keep the current field visible.
+
+
+  proc  ChangeMade;
+
+    Sets the FieldAltered, RecordAltered, JustAltered and DataAltered
+    fields TRUE.  This is method is called whenever a change is made.
+
+
+  func  CheckRecLock : boolean;
+
+    Manages the record-locking feature by calling the SetRecLock() virtual
+    method when data in a record is first modified.
+
+
+  proc  ClearRecLock;
+
+    Manages the record-locking feature by calling the ResetRecLock()
+    virtual method when the user leaves a record that was modified.
+
+
+  proc  Draw;
+	VIRTUAL;
+
+    Calls the inherited Draw() method, and then calls the DrawField()
+    method to draw the current field.
+
+
+  proc  DrawField (var Field : pDMXfieldrec);
+
+    Draws an individual field.  The displayed position is dependent upon
+    CurrentRecord and the parameters in Field^.  The color is determined
+    by the value of ShowFmt.
+
+
+  proc  EvaluateField;
+
+    Called AFTER each FIELD is edited.  It adjusts ShowFmt and calls
+    DrawField() to redraw the field in the regular color.  If FieldAltered
+    is TRUE, then the cmDMX_FieldAltered command is broadcast through this
+    view's owner.  The FieldSelected field is set to FALSE.
+    *see also proc SetUpField()
+
+
+  proc  EvaluateRecord;  VIRTUAL;
+	VIRTUAL;
+
+    Called AFTER each RECORD is edited.  Calls the ClearRecLock() method.
+    The RecordSelected field is set to FALSE.
+    *see also proc SetUpRecord()
+
+
+  proc  GetBlob (Num : integer; var Blob : pointer; var Len : integer);
+
+    Can be called to retrieve data in a BLOb field, which are unformatted
+    fields that cannot be displayed or edited by tvDMX alone.  BLObs are
+    accounted for in a tvDMX template string with the InitBlobField()
+    function in unit DMXGIZMA.PAS.
+    BLObs are numbered starting from one, and independently of field
+    numbers.  If the given BLOb number exists, the Blob parameter will be
+    set to the address of the data, and the size will be returned in Len.
+    If the BLOb number does not exist, then Len will return zero.
+
+
+  proc  GotoPos (AFieldNum,ARecNum : integer);
+
+    Can be called to move the field and record pointer.
+
+
+  proc  HandleEvent (var Event : TEvent);
+	VIRTUAL;
+
+    Calls method ProcessCommand(), ProcessKey(), or ProcessMouse(),
+    depending upon Event.What.  cmDMX command events that would cause
+    movement to another field and/or record must first be validated by
+    the Valid() method.  TDmxScroller.HandleEvent() is called if the
+    event was not handled.
+
+
+  proc  ProcessCommand (var Command : word;  XY : TPoint);
+
+    Called by HandleEvent() to process command events.  Command constants
+    are defined in unit DmxGizma.  This method is often called internally
+    for certain keystrokes.
+
+
+  proc  ProcessEnter (var Event : TEvent);
+	VIRTUAL;
+
+    Virtual method called when kbEnter is pressed.  The default method
+    moves the cursor to the next field.
+
+
+  proc  ProcessKey (var Event : TEvent);
+
+    Called by HandleEvent() to process keystrokes.  Keystrokes that cause
+    the record and/or field pointer to move are converted into command
+    events, which are sent to the event-handler.
+
+
+  proc  ProcessMouse   (var Event : TEvent);
+
+    Called by HandleEvent() to process mouse events.  If a mouse button
+    is pressed, and the mouse is positioned on a non-skip field, then
+    the cursor will move to that selected field.  (WrongKeyEvent() is
+    called if the cursor cannot move to that field.)
+
+
+  proc  ResetRecLock;
+	VIRTUAL;
+
+    Called internally by the record-locking methods.  The default method
+    does nothing, but it can be overridden to call your own database
+    record-locking procedures.
+
+
+  func  SetRecLock : boolean;
+	VIRTUAL;
+
+    Called internally by the record-locking methods.  The default method
+    does nothing and returns TRUE, but it can be overridden to call your
+    own database record-locking procedures.  It must return FALSE if the
+    record was already.
+
+
+  proc  SetState (AState : word; Enable : boolean);
+	VIRTUAL;
+
+    Calls methods SetUpField() and SetUpRecord() or EvaluateField() and
+    EvaluateRecord() when the view becomes focused or unfocused (unless
+    the Vidis field is set TRUE).
+
+
+  proc  SetUpField;
+	VIRTUAL;
+
+    Called BEFORE each FIELD is edited.  May call RecInd^.DrawView(), if
+    a record number indicator view is linked.
+    *see also proc EvaluateField()
+
+
+  proc  SetUpRecord;
+	VIRTUAL;
+
+    Called BEFORE each RECORD is edited.  This calls ClearRecLock() and
+    sends a cmDMX_SetupRecord broadcast message to the view's owner.
+    This method can be intercepted to display special information (eg:
+    record number) or to rearrange the record before editing.
+    *see also proc EvaluateRecord()
+
+
+  proc  Store (var S : TStream);
+
+    Calls TDmxScroller.Store().  Writes the object's fields, and then
+    saves a the current field's position number.
+
+
+  proc  ZeroizeField (Whole : boolean;  Field : pDMXfieldrec);
+	VIRTUAL;
+
+    Called when Ctrl-T is pressed --to erase data in the given field.
+    Also called by method ZeroizeRecord() for each field in the record.
+    All fields with the same field number will be erased if Whole is TRUE.
+    The task of erasing is accomplished by filling the field with the
+    byte in Field^.fillvalue.
+
+
+  proc  ZeroizeRecord;
+	VIRTUAL;
+
+    Called when Ctrl-Y is pressed --to erase data in the current record.
+    It calls method ZeroizeRecord() for each field in the record.
+
+Object TDmxLink
+===============
+
+    TDmxLink is a TView descendant designed to link with a TDmxScroller
+    object, or one of its descendants, to display a heading line or a
+    current record number indicator.
+
+    This object is never instantiated.  It was only written as a base object
+    to write functional descendants for linking with the main tvDMX view.
+
+
+FIELD
+-----
+
+  Link		:  PDmxScroller;
+
+	Link to a TDmxScroller object, so that your descendants can access
+	all fields in TDmxScroller.
+
+
+METHODS
+-------
+
+  constructor Init (Bounds : TRect);
+
+    Calls TView.Init() and then sets GrowMode to (gfGrowLoY + gfGrowHiY)
+    and EventMask to evMessage.
+
+
+  func  GetPalette : PPalette;
+	VIRTUAL;
+
+    This returns a pointer to the same variable used by other tvDMX
+    views for palette selections.  This should be overridden when a
+    tvDMX view uses a different palette.
+
+
+  proc  Insert (AOwner : PGroup);
+
+    Inserts this view into the AOwner group.
+
+
+  proc  SetState (AState : word;  Enable : boolean);
+	VIRTUAL;
+
+    Calls TView.SetState().  When enabling the sfExposed state flag, it
+    ensures that the Link view (a tvDMX scroller/editor) is in front of
+    this view.  And if Link is NIL, it will use the cmDMX_RollCall command
+    to find the first tvDMX view.
+
+
+  Load() and Store() methods are implemented, but not documented.
+
+Object TDmxExtLabels
+====================
+
+    TDmxExtLabels is the view that displays the field labels at the top of
+    the window.  The Link field (defined in object TDmxLink) should be a
+    pointer to a tvDMX scroller or editor view.
+
+    This object is not instantiated in any of the exampple programs.  It
+    is usually easier to use one of its four descendants:  TDmxLabels,
+    TDmxFLabels, TDmxMLabels and TDmxPxLabels.
+
+
+FIELDS
+------
+
+  Data		:  PCharArray;
+
+	Text in the label string.  The label is organized in this way for
+	scroller/editors with display formats wider than 255 characters.
+
+
+  DblBar	:  boolean;
+
+	Forces the Ruler-Bar to be drawn with a double-lined frame.  This
+	is set FALSE in all the current example programs.
+
+
+  Heaped	:  boolean;
+
+	Indicates that the characters in Data have been saved on the heap,
+	and must be disposed with the object.
+
+
+  Len		:  integer;
+
+	The length of the label string.
+
+
+METHODS
+-------
+
+  constructor Init (ALen :integer; AData :PCharArray; var Bounds :TRect);
+
+    Calls TDmxLink.Init() and then sets the Data pointer to AData, and
+    Len to ALen.  GrowMode := gfGrowHiX.
+
+
+  constructor InitInsert (AOwner :PGroup; ALen :integer; AData :PCharArray);
+
+    Calls Init() with the bounds computed from AOwner, and then inserts
+    this view into AOwner.
+
+
+  destructor  Done;
+	VIRTUAL;
+
+    Disposes of Data, if Heaped is TRUE.
+
+
+  proc  Draw;
+	VIRTUAL;
+
+    Displays Data^ as field labels on the top line of the view, while
+    accounting for the horizontal offset (Link^.Delta.X).  The bottom
+    line displays the "ruler" --a horizontal line with field delimiters--
+    in alignment with TDmxScroller derivative that is normally displayed
+    below it.  This was improved in version tvDMX 2.x to reverse the
+    order if this view is below Link, and display the field labels on the
+    bottom row.  Override this method if the view has more than two lines.
+
+
+  proc  DrawRuler (Upper, AtLimit : boolean);
+
+    Normally used with (Upper=TRUE) and (AtLimit=FALSE) to display a line
+    of field delimiters (see Draw() method above) on the lowest line of
+    the view.  This would be a double line if AtLimit was TRUE.  And it
+    would be displayed on the top row if Upper was FALSE.
+
+
+  proc  HandleEvent (var Event : TEvent);
+	VIRTUAL;
+
+    Calls the inherited HandleEvent() method.
+    Handles evMouseDown events by sending either a cmDMX_Up or cmDMX_Down
+    command, depending upon the position of this view relative to Link.
+    This way, clicking on the upper label line would move the tvDMX cursor
+    up one record.
+    cmDMX_ScrollBarChanged broadcast events (from the Link view) cause this
+    view to redraw in its new position.  cmDMX_FixSize broadcasts are
+    handled by reducing the width of its owner.
+
+
+  proc  SetState (AState : word;  Enable : boolean);
+	VIRTUAL;
+
+    Calls TDmxLink.SetState().  When enabling the sfExposed state flag, it
+    sets GrowMode to a value depending upon whether Link is above or below
+    this view.
+
+
+  Load() and Store() methods are implemented, but not documented.
+
+Objects TDmxLabels, TDmxFLabels, TDmxMLabels and TDmxPxLabels
+=============================================================
+
+    Object TDmxLabels is a descendent of TDmxExtLabels that initializes its
+    Data and Len fields, using a pointer to a string.
+
+    Object TDmxFLabels stores its label string on the heap.
+
+    Object TDmxMLabels is initialized with a PSItem pointer to a chain of
+    strings.  This object concatenates the string into a contiguous list of
+    characters.  Use this derivative when your tvDMX view must scroll more
+    than 255 characters.  (See proc InitTSItemFields() in unit DMXGIZMA.)
+
+    Object TDmxPxLabels is used with the TDmxParadox object (in unit PxDMX).
+
+
+    Each of these objects has an additional constructor InitInsert() that
+    can assign its own bounds at the top of a window (given in a parameter
+    called AOwner).  They INSERT themselves directly into a given window.
+
+    These derived objects have no new fields.
+
+
+OBJECTS
+-------
+
+  constructor TDmxLabels.Init (DataStr : pstring;  var Bounds : TRect);
+  constructor TDmxLabels.InitInsert (AOwner : PGroup;  DataStr : pstring);
+
+    Calls TDmxExtLabels.Init() and then sets the Data pointer to the first
+    character in DataStr^, and sets Len to the length of DataStr^.
+
+
+  constructor TDmxFLabels.Init (LabelStr : string;  var Bounds : TRect);
+  constructor TDmxFLabels.InitInsert (AOwner : PGroup;  LabelStr : string);
+
+    Calls TDmxExtLabels.Init() and then sets Len to the length of LabelStr.
+    It allocates space for the characters in Data and sets the Data pointer
+    accordingly.
+
+
+  constructor TDmxMLabels.Init (Labels : PSItem;  var Bounds : TRect);
+  constructor TDmxMLabels.InitInsert (AOwner : PGroup;  Labels : PSItem);
+
+    Calls TDmxExtLabels.Init() and then sets the Data pointer to AData, and
+    Len to ALen.  GrowMode := gfGrowHiX.
+
+
+  constructor TDmxPxLabels.Init (var Bounds : TRect);
+  constructor TDmxPxLabels.InitInsert (AOwner : PGroup);
+
+    Calls TDmxExtLabels.Init() and sets Heaped to TRUE.  The PxDMX unit's
+    InitializingPxLabels pointer is set to @Self.  The TDmxParadox view will
+    fill in the field names as while initializes.
+
+
+Objects TDmxRecInd and TDmxExpRecInd
+====================================
+
+    TDmxRecInd displays a record number indicator.  This is overridden by
+    object TDmxExpRecInd in unit tvDMXBUF to display both a current record
+    number and the total number of records.
+
+    These derivatives have no special fields.
+
+
+METHODS
+-------
+
+  constructor Init (Bounds : TRect;  Len : integer);
+
+    Calls TDmxLink.Init (Bounds), sets GrowMode to (gfGrowLoY + gfGrowHiY)
+    and sets EventMask to evMessage.
+
+
+  constructor InitInsert (AOwner : PGroup; Len : integer);
+
+    Calls Init() with the bounds computed from AOwner, and then inserts
+    this view into AOwner.
+
+
+  proc  Draw;
+	VIRTUAL;
+
+    Draws the record number indicator using Link^.CurrentRecord.
+    Object TDmxExpRecInd also displays the number of records beside
+    the current record number.
+
+
+  proc  HandleEvent (var Event : TEvent);
+	VIRTUAL;
+
+    Calls the inherited HandleEvent() method.  For evMouseDown events,
+    it sends a cmDMX_RecIndClicked message to the Application view.  (Some
+    applications may use that to display a "Go to Record" dialog box.)
+
+
+  proc  SetState (AState : word; Enable : boolean);
+	VIRTUAL;
+
+    Hides the view while dragging or inactive.
+
+

@@ -1,0 +1,255 @@
+  PxDMX and PxGIZMA (c) 1994  Randolph Beck
+  =================
+
+
+  PxDMX  --Paradox Data Editing Unit for tvDMX
+  =====
+
+    Borland's Paradox Engine is required to use this unit.
+    See program PXSHOP.PAS for sample code.
+
+
+  Network Available Constant
+  --------------------------
+
+    NetInit       :  boolean  =  FALSE;
+
+	Set by TDmxPxEditor and TDmxParadox objects during object
+	construction if network-related procedures should be used.
+
+
+  Memo Editing Constants
+  ----------------------
+
+    cmDMX_EditMemo		=  cmDMX + 35;
+    hcPxMemo	  : word	=  hcNoContext;
+
+
+    StdMemoSize	  : word	=  4094;
+    StdMemoRect	  : TRect	=  (A:(X:10;Y:3);B:(X:70;Y:17));
+    MemoZoomRect  : TRect	=  (A:(X:10;Y:3);B:(X:70;Y:17));
+
+    BlankFields	  : boolean	=  TRUE;
+    Auto1900	  : boolean	=  TRUE;
+
+    PxDelimiter	  : char	=  '|';
+    PxCommands	  : TCommandSet	=  [];
+
+
+
+  Template Design Constants
+  -------------------------
+
+    fldPxSTRING   : char        =  's';
+    fldPxNUMBER   : string[31]	=  'r,rrr,rrr.rrrrr';
+    fldPxCURRENCY : string[31]	=  '($rrr,rrr.zz)';
+    fldPxSHORTNUM : string[31]	=  'iii,iii ';
+
+    fldPxDATE     : string[63]	=  ' WW-'^F + ^U+char(12) +
+				  #0'ZW-'   + ^U+char(31) +
+				  #0'ZZZW '^F;
+
+	These typed-constants are used by the TDmxParadox constructor
+	to build a template string.  Note how program PXSHOP.PAS changes
+	these during initialization.  See the TDmxParadox.FieldTemplate
+        method to customize templates for individual fields.
+
+
+  PxDMX Global Functions
+  ----------------------
+
+  function  PxDmxFieldTemplate(FName,FType: NameString) : string;
+
+	Returns a template string for the given field name and type.
+	procedure is called by TDmxParadox.FieldTemplate().
+
+
+  function  PxEntryFields(Px: TableHandle; DMX: PDmxParadox) : PSItem;
+
+	Returns a pointer to a TSItem string-item chain of template codes
+	which can be used by the EntryBox() function.
+
+        The DMX parameter can be a NIL to use the unit's default tvDMX
+        template design constants (see fldXXXX above).
+
+	If DMX is not NIL, the DMX^.FieldTemplate() method will be called
+        to create specialized templates.
+
+
+
+  Object Types
+  ------------
+
+    TDmxPxEditor        =  OBJECT(TDmxEditBuf)
+
+	This is a simple object that displays data from a Paradox table.
+	The table must already be open, and a pointer to the table-handle
+	is passed in the AData pointer.  Your program must provide a valid
+	template-string to match the assigned table.  Its constructor uses
+	the same syntax as TDmxEditBuf.Init().
+	The constructor's BSize parameter can be set to the maximum number
+	of records you want to permit entered, or to zero if you want no
+	set limit.  (Note that this version is still limited to editing
+	32765 records.)
+    
+    
+    TDmxPxWindow  =  OBJECT(TDmxExpBufWin)
+
+	This is a TDmxWindow derivative that initializes a TDmxPxEditor
+	view.  Its constructor uses the same syntax as TDmxWindow.Init().
+
+
+    TDmxParadox   =  OBJECT (TDmxPxEditor)
+
+	This is a descendant of TDmxPxEditor that creates a template-
+	string, using the fldPxXXXX template design constants (see above).
+	It has this constructor:
+
+	  constructor Init (var AData : TableHandle;  BSize : longint;
+			    var Bounds : TRect;  ALabels,ARecInd : PDmxLink;
+				AHScrollBar,AVScrollBar : PScrollBar);
+
+	(See the TDmxPxLabels object below.)
+
+	Template strings are assigned using this VIRTUAL method:
+
+	  function  FieldTemplate (FName,FType : NameString) : string;
+
+	This FieldTemplate() function is called internally for each field
+	in the table, with FName and FType set to the field name and type
+	(eg: "Customer" and "A32").  It returns a template-string for
+	that field --using one of the fldPxXXXX design constants-- but
+	your program can override this method to return a customized
+	field template-string.
+
+
+    TDmxPxLabels        =  OBJECT (TDmxExtLabels)
+
+	This object is used instead of TDmxLabels objects to create a
+	field-label string while TDmxParadox objects are constructed.
+	This view must be initialized and inserted into the window
+	before the TDmxParadox view is initialized.
+
+
+    TDmxParadoxWin      =  OBJECT (TDmxExpBufWin)
+
+	A TDmxWindow derivative that initializes a TDmxParadox view.
+
+
+  PxGIZMA
+  =======
+
+  Px Sort-Order Constants
+  -----------------------
+
+    These values are returned by the PxTblInfo() and PxTblInfoBox()
+    functions:
+
+      PxAsciiSort	=  0;
+      PxIntlSort	=  1;
+      PxNorDanSort	=  2;
+      PxNorDan4Sort	=  3;
+      PxSwedFinSort	=  4;
+
+
+  Global Functions
+  ----------------
+
+    function  DosErrToPxErr(Err: integer) : integer;
+
+	Converts a DOS error code into an approximate PxERR_XXXX equivalent.
+
+	Example:
+	    If (PxErrorBox(DosErrToPxErr(IOResult)) = PxSuccess) then
+	      begin
+	      ...
+
+
+    function  PxBuild(TblName: FNameStr; AFields: PSItem) : integer;
+
+	Creates a Paradox table using field information in AFields.
+	Each row contains a field name and field type.  A comma must
+	be used to separate the field name from its type.  Fields in
+	the primary key should be followed by an asterisk.  Secondary
+	key fields (incremental only) should be followed by a plus.
+
+	Example:
+	  ErrCode := PxBuild('ACCOUNTS',
+			NewSItem('Name, A25*',
+			NewSItem('ID, N*+',
+			NewSItem('Balance, $',
+			NewSItem('Checked, S',
+			NewSItem('Date, D+',
+				nil)))))
+			);
+
+
+    function  PxErrorBox(Status: integer) : integer;
+
+	Displays a Paradox error message in a message-box
+	(does nothing if Status=Zero).
+
+	Example:
+	    If (PxErrorBox(PxRecBufOpen(TblH,Rec)) = PxSuccess) then
+	      begin
+	      ...
+
+
+    function  PxPswAddBox : boolean;
+    function  PxPswDelBox : boolean;
+
+        Dialog box takes user input to add or remove a password.
+        Returns TRUE if okay.
+
+
+    function  PxTblInfo(TableName: FNameStr;  var Recs: longint;
+			var Fields,KeyFields,SortOrder,VerID: integer;
+			var Encrypted: boolean) : integer;
+
+        Gets information about TableName.  Function returns an error code.
+
+
+    function  PxTblInfoBox(TableName: FNameStr) : boolean;
+
+	Dialog box displays information about TableName.  It returns FALSE
+	if the table does not exist.
+
+
+    function  PxSetDefaultsBox(HC,hOK,hCanx: word) : boolean;
+
+	Dialog box to set Paradox defaults.  The parameters given may be
+	used for help contexts:
+
+	 HC:	Hint := 'Swap buffer size';
+	 HC+1:	Hint := 'Maximum number of tables that can be open at once';
+	 HC+2:	Hint := 'Maximum number of record buffers';
+	 HC+3:	Hint := 'Maximum number of locks per table';
+	 HC+4:	Hint := 'Maximum number of file handles available';
+	 HC+5:	Hint := 'Case sensitive sorting; accented characters at end';
+	 HC+6:	Hint := 'Sorted irrespective of case or special accents';
+	 HC+7:	Hint := 'Special ligatures sorted after int''l sequence';
+	 HC+8:	Hint := 'Norwegian/Danish sort sequence for Paradox 4.0';
+	 HC+9:	Hint := 'Swedish/Finnish letters sorted after int''l sequence';
+
+	Use hcNoContext if help contexts are not used.
+
+
+    function  PxTblCreateBox(HC,hOK,hCanx: word; var Name: string) : boolean;
+
+	Dialog box to create a table.
+
+	Example:
+	  If PxTblCreateBox(hcCreateBox,hcOK,hcCancel, TableName) then
+		OpenTbl(TableName)
+
+	The parameters given may be used for help contexts:
+
+	  hcCreateBox:		Hint := 'Name of table to create';
+	  hcCreateBox+1:	Hint := 'Enter a field name';
+	  hcCreateBox+2:	Hint := 'Type codes:  A,M,N,$,S,D';
+	  hcCreateBox+3:	Hint := 'Field length (Alpha and Memo fields only)';
+	  hcCreateBox+4:	Hint := 'Index on field';
+
+	Use hcNoContext if help contexts are not used.
+
+

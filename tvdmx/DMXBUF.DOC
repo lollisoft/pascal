@@ -1,0 +1,494 @@
+
+     tvDMX  (c) 1992,93		Randolph Beck
+     =====
+
+
+About Unit tvDMXBUF
+===================
+
+
+	TObject (OBJECTS.TPU)
+	 |
+	TView (VIEWS.TPU)
+	 |
+	TScroller (VIEWS.TPU)
+	 |
+	 |
+	TDmxScroller (TVDMX.PAS)
+	 |
+	TDmxEditor (TVDMX.PAS)
+	 |
+	 +--TDmxEditBuf (TVDMXBUF.PAS)
+		|
+		|--TDmxEditRecBuf (TVDMXBUF.PAS)
+		|
+		|--TDmxStreamBuf (TVDMXBUF.PAS)
+		|	  |
+		|	  +--TDmxExpBuf (TVDMXBUF.PAS)
+		|
+		+--TDmxPxEditor (PxDMX.PAS)
+		       |
+		       +--TDmxParadox (PxDMX.PAS)
+
+
+
+
+Object TDmxEditBuf
+==================
+
+    TDmxEditBuf is a descendant of TDmxEditor that uses a circular buffer
+    (referred to as "slots") to edit data from a source other than in RAM.
+
+    It retrieves each record individually when accessed.  The buffer is
+    only used for quick page draws.
+
+    This object can be found in unit tvDMXBUF.  It uses several abstract
+    methods and must not be instantiated as is.  Objects TDmxStreamBuf and
+    TDmxExpBuf are usable descendants that work with streams.
+
+    Descendants MUST override methods SeekRec(), ReadRec() and WriteRec().
+    Most descendants may also require overiding methods RecordLimit() and
+    SeekEnd().  See object TDmxEditRecBuf for a derivative that employs
+    NextRec() and PrevRec() functions instead of SeekRec().
+
+    The SeekRec() and RecordLimit() methods used INTEGERs with tvDMX
+    versions prior to 2.1.  LONGINTs are used now, but the new paging
+    scheme is still incomplete.
+
+
+FIELDS
+------
+
+  Appending	:  boolean;
+
+	Indicates that the current record will be a new record.
+
+
+  Expandable	:  boolean;
+
+	TRUE if new records can be appended to this data window.
+
+
+  KeyAltered	:  boolean;
+
+	Indicates that a key field was altered so that the circular
+	buffer will be refreshed after the current record is entered.
+
+
+  KeyFields	:  set of byte;
+
+	Set of numbers that represents which fields could cause an index
+	file to reposition a record if the key field was altered.  This
+	value is initialized as [] by default, and is not changed by any
+	of the objects in this unit.  Descendants that use keyed files
+	may alter this value.
+
+
+  NumSlots	:  integer;
+
+	Total number of record storage slots in the buffer.
+
+
+  RowSlot	:  PRowSlots;
+
+	A pointer to the circular buffer that is allocated during this
+	object's construction.
+
+
+  StepMode	:  boolean;
+
+	Set during initialization if this data window uses Next() and
+	Previous() methods to scan forward or backward.  This is set
+	FALSE, and it can only be used for TDmxEditRecBuf descendants.
+
+
+METHODS
+-------
+
+  constructor Load (var S : TStream);
+
+    Calls its descendant and then reads the object's fields.
+
+
+  func  DataAt (RecNum : integer)  : pointer;
+	VIRTUAL;
+
+    Returns a pointer to the given data record in buffer RowSlot^
+    --using the ReadRec() function.
+
+
+  proc  DeleteRec;
+	VIRTUAL;
+
+    Pseudo-abstract method to delete the current record.  The default
+    method sets RecordAltered to TRUE, to ensure that the record is
+    cleared.  Descendants should override this method if the record is
+    being physically deleted from the database.
+
+
+  proc  DoneStruct;
+	VIRTUAL;
+
+    Frees the memory allocated for the buffer RowSlot and then calls
+    its ancestor.
+
+
+  func  ErrorFunc : boolean;
+	VIRTUAL;
+
+    Virtual method to handle I/O errors.  This method should take care
+    of the error and return TRUE if the error should be ignored or FALSE
+    if the failed operation should be retried.
+    The default method uses Turbo Vision's SystemError() function to
+    give the user the option of repeating the operation.
+
+
+  proc  EvaluateField;
+	VIRTUAL;
+
+    Called AFTER each FIELD is edited.
+    Sets KeyAltered to TRUE if a change was made and the current field
+    is a key field  Then calls TDmxEditor.EvaluateRecord().
+
+
+  proc  EvaluateRecord;
+	VIRTUAL;
+
+    Called AFTER each RECORD is edited.
+    Calls WriteRec() to write the record to the stream if the record
+    was altered.  Then calls TDmxEditor.EvaluateRecord().
+
+
+  proc  HandleEvent (var Event : TEvent);
+	VIRTUAL;
+
+    Calls ResetSlots() to reset the RowSlot buffer when a cmDMX_Draw
+    or cmDMX_DrawData command is received.
+
+
+  proc  InitStruct (var ATemplate );
+	VIRTUAL;
+
+    Calls TDmxEditor.InitStruct() to initialize the field-descriptor
+    chain and then calls MakeSlots().
+
+
+  proc  LoadStruct (var S : TStream);
+	VIRTUAL;
+
+    Calls TDmxEditor.LoadStruct() to initialize the field-descriptor
+    chain and then calls MakeSlots().
+
+
+  proc  MakeSlots;
+
+    Allocates memory for the RowSlot buffer.
+
+
+  func  ReadRec (var RecData ) : boolean;
+	VIRTUAL;
+
+    Abstract virtual method called by DataAt() to retrieve a record.
+    This function must read a record from the current record position
+    and return TRUE if the operation succeeded or FALSE if it failed.
+    It is the programmer's responsibility to retain the error code for
+    use by the ErrorFunc() method.
+
+
+  func  RecordLimit : longint;
+	VIRTUAL;
+
+    Pseudo-abstract method that returns the number of records in the
+    database.  This method should always be overridden to work with a
+    specific database technique, but a default method is provided that
+    returns the value of (DataBlockSize div RecordSize).
+
+
+  proc  ResetSize;
+
+    Compares RecordLimit() to the current size of the table and resets
+    DataBlockSize and the Limit.X if necessary.
+    Used only for expandable databases.
+
+
+  proc  ResetSlots;
+
+    Resets the circular buffer.
+
+
+  func  SeekEnd : boolean;
+	VIRTUAL;
+
+    Pseudo-abstract virtual method to seek to the end of the database.
+    This is only used for expandable databases.
+    It must return a value of TRUE if the operation succeeded or FALSE
+    if the operation failed.  It is the programmer's responsibility to
+    retain the error code for use by the ErrorFunc() method.
+
+
+  func  SeekRec (RecNum : longint) : boolean;
+	VIRTUAL;
+
+    Abstract virtual method to seek to the given record position.  It is
+    called before reading or writing a record.  It must return a value of
+    TRUE if the operation succeeded or FALSE if the operation failed.
+    It is the programmer's responsibility to retain the error code for use
+    by the ErrorFunc() method.
+
+
+  proc  SetState (AState : word; Enable : boolean);
+	VIRTUAL;
+
+    If Expandable is TRUE then it checks if the size of the data table
+    has changed when the view becomes reselected.
+
+
+  proc  SetUpRecord;
+	VIRTUAL;
+
+    Called BEFORE each RECORD is edited.
+    Clears the buffer for the current record's slot position to ensure
+    that the data will be recent, and then calls its anscestor.
+
+
+  proc  Store (var S : TStream);
+	VIRTUAL;
+
+    Calls its descendant and then writes the object's fields.
+
+
+  func  WriteRec (var RecData ) : boolean;
+	VIRTUAL;
+
+    Abstract virtual method called by EvaluateRecord() to store a record.
+    This function must write a record to the current record position and
+    return TRUE if the operation succeeded or FALSE if it failed.
+    It is the programmer's responsibility to retain the error code for use
+    by the ErrorFunc() method.
+
+
+  proc  ZeroizeField (Whole : boolean; Field : pDMXfieldrec);
+	VIRTUAL;
+
+    Calls TDmxEditor.EvaluateRecord() and then sets KeyAltered to TRUE if
+    the current field is a key field.
+
+Object TDmxStreamBuf
+====================
+
+    TDmxStreamBuf is a descendant of TDmxEditBuf to edit data from a stream.
+    This stream type can be any derivation of TStream.
+
+    The stream must already be open and its initialization and finalization
+    must be handled outside of tvDMX.  (This way, you can have other windows
+    and objects refer to this same stream.)
+
+    A file header will be provided for if PrefixSize is set to the size
+    of the header.  This should be done by a descendant of InitData().
+
+    Although this was created for editing data files, it should be usable
+    with any TStream derivative.  This object can be found in unit tvDMXBUF.
+
+
+FIELDS
+------
+
+  Prefix	:  pointer;
+
+	Pointer to a file prefix, or header, if one exists.  Many file
+	formats (eg: dBASE) use a file prefix with information about the
+	record structure.  This object provides only for the the space
+	used by the prefix when seeking to a specific record.
+	It would be the responsibility of its descendants to keep a file
+	prefix updated.
+
+
+  PrefixSize	:  integer;
+
+	The size of a file header/prefix.
+
+
+METHODS
+-------
+
+  func  ErrorFunc : boolean;
+	VIRTUAL;
+
+    This method resets the stream error and then calls its ancestor.
+
+
+  proc  LoadStruct (var S : TStream);
+	VIRTUAL;
+
+    Calls TDmxEditBuf.LoadStruct() and then reads the PrefixSize field.
+
+
+  func  ReadRec (var RecData ) : boolean;
+	VIRTUAL;
+
+    This function reads RecordSize number of bytes from the stream.
+    (RecordSize is a field inherited from TDmxScroller.)
+
+
+  func  RecordLimit : integer;
+	VIRTUAL;
+
+    Returns the number of records in the database, as determined by
+    the file size minus PrefixSize.
+
+
+  func  SeekRec (RecNum : longint) : boolean;
+	VIRTUAL;
+
+    Seeks to the given record position --taking PrefixSize into account.
+
+
+  func  SeekEnd : boolean;
+	VIRTUAL;
+
+    Seeks to the end of the database.
+
+
+  proc  StoreStruct (var S : TStream);
+	VIRTUAL;
+
+    Calls TDmxEditBuf.StoreStruct() and then writes the PrefixSize field.
+
+
+  func  WriteRec (var RecData ) : boolean;
+	VIRTUAL;
+
+    This function writes RecordSize number of bytes to the stream.
+    (RecordSize is an inherited field.)
+
+Object TDmxExpBuf
+=================
+
+    TDmxExpBuf is a descendant of TDmxStreamBuf that expands as records
+    are added.  The stream must be initialized with an existing file, but
+    the file's starting length can be zero.
+
+    The BSize parameter (of the Init constructor) is used to set the
+    PrefixSize variable.  The file size determines the database size.
+    This object can be found in unit tvDMXBUF.PAS.
+
+    See program file FILESHOP.PAS for an example of TDmxExpBuf usage.
+
+    This derivative has no special fields and only one method.
+
+
+METHODS
+-------
+
+  proc  InitData (var AData );
+	VIRTUAL;
+
+    Calls TDmxStreamBuf.InitData() and then it must correct for the
+    initialization of DataBlockSize as the size of the Prefix:
+    Expandable is set to TRUE;  PrefixSize is set to DataBlockSize;
+    and DataBlockSize is reset by calling TDmxEditBuf.ResetSize().
+
+Object TDmxEditRecBuf
+=====================
+
+    TDmxEditRecBuf is a descendant of TDmxEditBuf to access records with
+    virtual methods that are adapted from database tools.  The SeekRec()
+    function was overridden to change find records using the FirstRec(),
+    LastRec(), NextRec() and PrevRec() abstract methods.
+
+    The following methods must be overridden to create usable descendant
+    objects:  AppendRec(), FirstRec(), LastRec(), NextRec(), PrevRec() and
+    UpdateRec().  Start and end of database errors that may occur when
+    editing indexed databases must be handled by a descendant ErrorFunc()
+    method.
+
+    This object can be found in unit tvDMXBUF.
+
+
+METHODS
+-------
+
+  func  AppendRec (var RecData ) : boolean;
+	VIRTUAL;
+
+    This abstract method should append the current record with RecData
+    and return TRUE if there is no error.
+
+
+  func  FirstRec : boolean;
+	VIRTUAL;
+
+    Pseudo-abstract method to seek to the first record position.
+    The default method repeats PrevRec() until it receives an error.
+    (The error is ignored, and the function always returns TRUE.)
+    It should be overridden with a more efficient method whenever
+    possible to seek directly to the first record, and return TRUE if
+    there is no error.
+
+
+  proc  InitData (var AData );
+	VIRTUAL;
+
+    Calls TDmxEditBuf.InitData() and then sets StepMode to TRUE.
+
+
+  func  LastRec : boolean;
+	VIRTUAL;
+
+    Abstract virtual method to seek to the last record position.
+    This method should be overridden to seek to the last record
+    position, and it should return TRUE if there is no error.
+
+
+  func  NextRec : boolean;
+	VIRTUAL;
+
+    Abstract virtual method to seek to the next record position.
+    This method should be overridden to seek to the next record
+    position, and it should return TRUE if there is no error.
+
+
+  func  PrevRec : boolean;
+	VIRTUAL;
+
+    Abstract virtual method to seek to the previous record position.
+    This method should be overridden to seek to the previous record
+    position, and it should return TRUE if there is no error.
+
+
+  func  SeekEnd : boolean;
+	VIRTUAL;
+
+    This method satisfies the requirement for seeking to new records
+    by returning TRUE, and doing nothing else.
+
+
+  func  SeekRec (RecNum : longint) : boolean;
+	VIRTUAL;
+
+    This method uses FirstRec(), NextRec(), and PrevRec() to seek to a
+    record.  It returns TRUE if there was no error.
+
+
+  func  UpdateRec (var RecData ) : boolean;
+	VIRTUAL;
+
+    This abstract method should update the current record with RecData
+    and return TRUE if there is no error.
+
+
+  func  WriteRec (var RecData ) : boolean;
+	VIRTUAL;
+
+    Virtual method to write a record.
+    This method calls AppendRec() or UpdateRec(), depending upon the
+    boolean field Appending.
+
+  proc  ZeroizeRecord;
+	VIRTUAL;
+
+    If Appending is set TRUE then it calls its anscestor to clear the
+    current record.  If not Appending then it prompts the user to confirm
+    that deleting the record is desired.
+
+

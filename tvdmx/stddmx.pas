@@ -1,286 +1,456 @@
 
 {þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ}
 {							}
-{	StdDMX   --Standard Interface Unit		}
-{	tvDMX    --data editing project (ver 1.41)	}
+{	StdDMX	 --Standard tvDMX Interface Unit	}
+{       tvDMX     --data editing project (ver 2.x)      }
 {							}
-{	Copyright (c) 1992  Randolph Beck		}
-{			    P.O. Box  56-0487		}
-{			    Orlando, FL 32856		}
-{			    CIS:  72361,753		}
+{       Copyright (c) 1992-96   Randolph Beck           }
+{				P.O. Box  540433	}
+{				Orlando, FL 32854	}
 {							}
+{	http://www.byronref.com/rmb/			}
+{	email:  rb@randybeck.com			}
+{                                                       }
 {þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ}
 
 Unit StdDMX;
 
-{  This unit has been updated with a special frame for tvDMX windows that
-   limits the size of data windows according to the width of their headers.
- }
-
-{$B-,D-,O+,R-,X+,V- }
+{$B-,D+,R-,X+,V- }
 
 interface
 
-uses  Objects, Drivers, Views, Dialogs, RSet, DmxGizma, tvDMX;
+uses  Objects, Drivers, Views, Dialogs, App, MsgBox,
+      RSet, tvGizma, DmxGizma, tvDMX;
+
+const	CDmxEditDlg	= #19#20#06#06#01#02; { similar to CInputLine }
+			 {  |  |  |  |	|  | }
+  {  1 normal fields -------+  |  |  |	|  | }
+  {  2 normal selected field --+  |  |	|  | }
+  {  3 read-only selected field --+  |	|  | }
+  {  4 locked field -----------------+	|  | }
+  {  5 delimiter -----------------------+  | }
+  {  6 border -----------------------------+ }
 
 type
-    PDmxEditDlg  = ^TDmxEditDlg;  { tvDMX editor for dialog boxes }
+    PDmxEditDlg	 = ^TDmxEditDlg;  { tvDMX editor for dialog boxes }
     PInputFields = ^TInputFields; { line-editor for dialog boxes }
-    PCutFrame	 = ^TCutFrame;	  { special frame for smaller windows }
-    PDmxViewer   = ^TDmxViewer;   { tvDMX data scroller window }
-    PDmxWindow   = ^TDmxWindow;   { tvDMX data editor window  }
+    PValidFields = ^TValidFields; { validating line-editor }
+    PDmxViewer	 = ^TDmxViewer;   { tvDMX data scroller window }
+    PDmxWindow	 = ^TDmxWindow;   { tvDMX data editor window  }
 
 
-    TDmxEditDlg  =  object (TDmxEditor)
-      function  GetPalette  : PPalette;  VIRTUAL;
-      procedure HandleEvent (var Event : TEvent);  VIRTUAL;
+    TDmxEditDlg	 =  OBJECT(TDmxEditor)
+      function	DataSize : word;  VIRTUAL;
+      procedure GetData(var Rec );  VIRTUAL;
+      procedure SetData(var Rec );  VIRTUAL;
+      function  GetPalette : PPalette;  VIRTUAL;
     end;
 
 
-    TInputFields =  object (TDmxEditDlg)
-      constructor Init (InfoStr : string; var Bounds : TRect);
-      procedure InitData (var AData );  VIRTUAL;
+    TInputFields =  OBJECT(TDmxEditDlg)
+	Skip1stKey,StdEnter	: boolean;
+      constructor Init(InfoStr: string; var Bounds: TRect);
+      procedure InitData(var AData );  VIRTUAL;
       procedure DoneData;  VIRTUAL;
-      procedure LoadData (var S : TStream);  VIRTUAL;
-      procedure StoreData (var S : TStream);  VIRTUAL;
-      function  DataSize  : word;  VIRTUAL;
-      procedure GetData (var Rec );  VIRTUAL;
-      procedure SetData (var Rec );  VIRTUAL;
-      procedure HandleEvent (var Event : TEvent);  VIRTUAL;
-      procedure SetState (AState : word; Enable : boolean);  VIRTUAL;
+      procedure LoadData(var S: TStream);  VIRTUAL;
+      procedure StoreData(var S: TStream);  VIRTUAL;
+      procedure HandleEvent(var Event: TEvent);  VIRTUAL;
+      procedure SetState(AState: word; Enable: boolean);  VIRTUAL;
       procedure SetUpField;  VIRTUAL;
     end;
 
 
-    TCutFrame	=  OBJECT (TFrame)
-      procedure Draw;  VIRTUAL;
+    TValidFields  =  OBJECT(TInputFields)
+	VLo,VHi 	: integer;
+      constructor Init(InfoStr: string; var Bounds: TRect; ALo,AHi: integer);
+      procedure HandleEvent(var Event: TEvent);  VIRTUAL;
+      function	Valid(Command: word) : boolean;  VIRTUAL;
     end;
 
 
-    TDmxViewer   =  OBJECT (TWindow)
-	Limit  : TPoint;
-      constructor Init (var Bounds : TRect;  ATitle : TTitleStr;  ANumber : integer;
-                            ATemplate : string;  var AData;  BSize : longint;
-                        var ALabels  : string);
-      procedure InitDMX (ATemplate  : string;  var AData;
-                           ALabels, ARecInd  : PDmxLink;
-                           BSize  : longint);  VIRTUAL;
-      procedure ChangeBounds (var Bounds : TRect);  VIRTUAL;
-      procedure InitFrame;  VIRTUAL;
-      function  NewDmxLabels (var ALabels ) : PDmxLink;  VIRTUAL;
-      function  Valid (Command : word) : boolean;  VIRTUAL;
-      procedure Zoom;  VIRTUAL;
+    TDmxViewer	 =  OBJECT(TLtdWindow)
+	DMX	: PDmxEditor;
+      constructor Init(var Bounds: TRect;  ATitle: TTitleStr;  ANumber: integer;
+			ATemplate: string;  var AData;  BSize: longint;
+			var ALabels: string);
+      constructor Load(var S: TStream);
+      procedure InitDMX(ATemplate: string;  var AData;
+			ALabels, ARecInd: PDmxLink;
+			BSize: longint);  VIRTUAL;
+      function	NewDmxLabels(var ALabels ) : PDmxLink;	VIRTUAL;
+      procedure Store(var S: TStream);
+      function	Valid(Command: word) : boolean;  VIRTUAL;
     end;
 
 
-    TDmxWindow   =  OBJECT (TDmxViewer)
-      constructor Init (var Bounds : TRect;  ATitle : TTitleStr;  ANumber : integer;
-                            ATemplate : string;  var AData;  BSize : longint;
-                        var ALabels  : string;  IndLen  : integer);
-      procedure InitDMX (ATemplate  : string;  var AData;
-                         ALabels, ARecInd  : PDmxLink;
-                         BSize  : longint);  VIRTUAL;
-      function  NewRecInd (Len : integer) : PDmxLink;  VIRTUAL;
+    TDmxWindow	 =  OBJECT(TDmxViewer)
+      constructor Init(var Bounds: TRect;  ATitle: TTitleStr;  ANumber: integer;
+			ATemplate: string;  var AData;  BSize: longint;
+			var ALabels: string;	IndLen	: integer);
+      procedure InitDMX(ATemplate: string;  var AData;
+			ALabels, ARecInd: PDmxLink;
+			BSize: longint);  VIRTUAL;
+      function	NewRecInd(Len: integer) : PDmxLink;  VIRTUAL;
     end;
 
 
 
-  function  InsertField (Dialog : PDialog;  Col,Row : integer;
-                         Fmt : boolean;  ALabel,ATemplate : string)  : PView;
+  procedure GetBlob(Num: integer; var Blob: pointer; var Len: integer);
+
+
+  function  InsertField(Dialog: PDialog;  Col,Row: integer;
+			Fmt: boolean;  ALabel,ATemplate: string) : PInputFields;
+
+  function  ValidField(Dialog: PDialog;	Col,Row, ALo,AHi: integer;
+			Fmt: boolean;  ALabel,ATemplate: string) : PValidFields;
 
   procedure RegisterStdDMX;
 
 
 const
-    RDmxEditDlg  :  TStreamRec = (
-        ObjType:  cmDMX + 5;
-        VmtLink:  ofs (TypeOf (TDmxEditDlg)^);
-        Load:     @TDmxEditDlg.Load;
-        Store:    @TDmxEditDlg.Store
+    RDmxEditDlg	:  TStreamRec =(
+	ObjType:  rnDmxEditDlg;
+	VmtLink:  ofs(TypeOf(TDmxEditDlg)^);
+	Load:	  @TDmxEditDlg.Load;
+	Store:	  @TDmxEditDlg.Store
       );
 
-    RInputFields :  TStreamRec = (
-        ObjType:  cmDMX + 6;
-        VmtLink:  ofs (TypeOf (TInputFields)^);
-        Load:     @TInputFields.Load;
-        Store:    @TInputFields.Store
+    RInputFields :  TStreamRec =(
+	ObjType:  rnInputFields;
+	VmtLink:  ofs(TypeOf(TInputFields)^);
+	Load:	  @TInputFields.Load;
+	Store:	  @TInputFields.Store
       );
 
-    RDmxWindow   :  TStreamRec = (
-        ObjType:  cmDMX + 7;
-        VmtLink:  ofs (TypeOf (TDmxWindow)^);
-        Load:     @TDmxWindow.Load;
-        Store:    @TDmxWindow.Store
+    RValidFields :  TStreamRec =(
+	ObjType:  rnValidFields;
+	VmtLink:  ofs(TypeOf(TValidFields)^);
+	Load:	  @TValidFields.Load;
+	Store:	  @TValidFields.Store
       );
 
-    RDmxViewer   :  TStreamRec = (
-        ObjType:  cmDMX + 8;
-        VmtLink:  ofs (TypeOf (TDmxViewer)^);
-        Load:     @TDmxViewer.Load;
-        Store:    @TDmxViewer.Store
+    RDmxViewer	:  TStreamRec =(
+	ObjType:  rnDmxViewer;
+	VmtLink:  ofs(TypeOf(TDmxViewer)^);
+	Load:	  @TDmxViewer.Load;
+	Store:	  @TDmxViewer.Store
       );
 
-    RCutFrame	 :  TStreamRec = (
-        ObjType:  cmDMX + 9;
-        VmtLink:  ofs (TypeOf (TCutFrame)^);
-        Load:     @TCutFrame.Load;
-        Store:    @TCutFrame.Store
+    RDmxWindow	:  TStreamRec =(
+	ObjType:  rnDmxWindow;
+	VmtLink:  ofs(TypeOf(TDmxWindow)^);
+	Load:	  @TDmxWindow.Load;
+	Store:	  @TDmxWindow.Store
       );
 
 
 implementation
 
+  { ออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ }
+
+
+procedure GetBlob(Num: integer; var Blob: pointer; var Len: integer);
+var  P : PDmxEditor;
+begin
+  Blob := nil;
+  Len  := 0;
+  P := Message(DeskTop, evCommand, cmDMX_RollCall, nil);
+  If (P <> nil) then P^.GetBlob(Num, Blob, Len);
+end;
+
 
   { ออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ }
 
 
-function  InsertField (Dialog : PDialog;  Col,Row : integer;
-                       Fmt : boolean;  ALabel,ATemplate : string)  : PView;
-var  i  : integer;
-     R  : TRect;
-     B  : PView;
+function  InsertField(Dialog: PDialog;  Col,Row: integer;
+		      Fmt: boolean;  ALabel,ATemplate: string) : PInputFields;
+var  i	: integer;
+     R	: TRect;
+     B	: PInputFields;
 begin
   With Dialog^ do
     begin
-    i  := succ (CStrLen (ALabel));
-    R.Assign (Col, Row, Col + DmxStrLen (ATemplate), succ (Row));
+    i  := succ(CStrLen(ALabel));
+    R.Assign(Col, Row, Col + DmxStrLen(ATemplate), succ(Row));
     If (ALabel <> '') then
       begin
-      If Fmt then R.Move (1, 1) else R.Move (i, 0);
+      If Fmt then R.Move(1, 1) else R.Move(i, 0);
       end;
-    B  := New (PInputFields, Init (ATemplate, R));
-    Insert (B);
+    B  := New(PInputFields, Init(ATemplate, R));
+    Insert(B);
     If (ALabel <> '') then
       begin
-      R.Assign (Col, Row, Col + i, succ (Row));
-      Insert (New (PLabel, Init (R, ALabel, B)));
+      R.Assign(Col, Row, Col + i, succ(Row));
+      Insert(New(PLabel, Init(R, ALabel, B)));
       end;
     end;
   InsertField := B;
 end;
 
 
-  { ออ TDmxEditDlg ออออออออออออออออออออออออออออออออออออออออออออออออออออออ }
+  { ออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ }
 
 
-function  TDmxEditDlg.GetPalette  : PPalette;
-{  6 border --------------------------------------+  }
-{  5 delimiter --------------------------------+  |  }
-{  4 locked field --------------------------+  |  |  }
-{  3 read-only selected field -----------+  |  |  |  }
-{  2 normal selected field -----------+  |  |  |  |  }
-{  1 normal fields ----------------+  |  |  |  |  |  }
-{                                  |  |  |  |  |  |  }
-const CDmxEditDlg : string [6] = #19#20#06#06#01#02; { similar to CInputLine }
+function  ValidField(Dialog: PDialog;	Col,Row, ALo,AHi: integer;
+		     Fmt: boolean;  ALabel,ATemplate: string) : PValidFields;
+var  i	: integer;
+     R	: TRect;
+     B	: PValidFields;
 begin
-  GetPalette := @CDmxEditDlg
+  With Dialog^ do
+    begin
+    i := succ(CStrLen(ALabel));
+    R.Assign(Col, Row, Col + DmxStrLen(ATemplate), succ(Row));
+    If (ALabel <> '') then
+      begin
+      If Fmt then R.Move(1, 1) else R.Move(i, 0);
+      end;
+    B := New(PValidFields, Init(ATemplate, R, ALo,AHi));
+    Insert(B);
+    If (ALabel <> '') then
+      begin
+      R.Assign(Col, Row, Col + i, succ(Row));
+      Insert(New(PLabel, Init(R, ALabel, B)));
+      end;
+    end;
+  ValidField := B;
 end;
 
 
-procedure TDmxEditDlg.HandleEvent (var Event : TEvent);
+  { ออ TValidFields ออออออออออออออออออออออออออออออออออออออออออออออออออออออ }
+
+
+constructor TValidFields.Init(InfoStr: string; var Bounds: TRect;  ALo,AHi: integer);
 begin
-  With Event do
-    If (What = evKeyboard) and
-      ((KeyCode = kbTab) or (KeyCode = kbShiftTab) or (KeyCode = kbEsc)) then
-      TDmxScroller.HandleEvent (Event)
+  TInputFields.Init(InfoStr, Bounds);
+  VLo := ALo;
+  VHi := AHi;
+end;
+
+
+procedure TValidFields.HandleEvent(var Event: TEvent);
+begin
+  If (Event.What <> evKeyDown) or (Event.CharCode in[#0..#31,'0'..'9']) then
+    TInputFields.HandleEvent(Event);
+end;
+
+
+function  TValidFields.Valid(Command: word) : boolean;
+var  i	   : integer;
+     Range : array[0..1] of longint;
+     S	   : string;
+     R	   : TRect;
+begin
+  If (Command = cmValid) or (Command = cmCancel) or
+    ((integer(WorkingData^) >= VLo) and (integer(WorkingData^) <= VHi)) then
+    TInputFields.Valid(Command)
+   else
+    begin
+    Range[0] := VLo;
+    Range[1] := VHi;
+    If (TypeOf(Prev^) = TypeOf(TLabel)) and (PLabel(Prev)^.Link = @Self) and
+       (PLabel(Prev)^.Text <> nil) and (PLabel(Prev)^.Text^ <> '') then
+      begin
+      S := PLabel(Prev)^.Text^;
+      For i := length(S) downto 1 do
+	If (S[i] = '~') or ((i = length(S)) and (S[i] in[' ',':'])) then
+	  Delete(S,i,1);
+      end
      else
-      TDmxEditor.HandleEvent (Event);
+      S := 'Selection';
+    R.Assign(0, 0, 50, 9);
+    R.Move((Desktop^.Size.X - R.B.X) div 2,(Desktop^.Size.Y - R.B.Y) div 2);
+    MessageBoxRect(R, S + ' is out of valid range:'^M^M^C'%d to %d', @Range, mfError + mfOKButton);
+    Valid := FALSE;
+    Select;
+    end;
+end;
+
+
+  { ออ TDmxEditDlg ออออออออออออออออออออออออออออออออออออออออออออออออออออออ }
+
+
+function  TDmxEditDlg.DataSize : word;
+begin
+  DataSize := LongRec(DataBlockSize).Lo
+end;
+
+
+procedure TDmxEditDlg.GetData(var Rec );
+var  Len : word;
+begin
+  Len  := DataSize;
+  If (Len > 0) and (WorkingData <> nil) then Move(WorkingData^, Rec, Len);
+end;
+
+
+procedure TDmxEditDlg.SetData(var Rec );
+var  Len : word;
+begin
+  Len  := DataSize;
+  If (Len > 0) and (WorkingData <> nil) then Move(Rec, WorkingData^, Len);
+  DrawView;
+end;
+
+
+function  TDmxEditDlg.GetPalette : PPalette;
+const  A : string[length(CDmxEditDlg)] = CDmxEditDlg;
+begin
+  GetPalette := @A
 end;
 
 
   { ออ TInputFields ออออออออออออออออออออออออออออออออออออออออออออออออออออออ }
 
 
-constructor TInputFields.Init (InfoStr : string;  var Bounds : TRect);
+constructor TInputFields.Init(InfoStr: string;  var Bounds: TRect);
+var  S	  : string;
+     void : integer;
 begin
     { init with no data }
-  TDmxEditDlg.Init (^A + InfoStr, Mem [0:0], 0, Bounds, nil,nil, nil,nil);
+  S := ^A + InfoStr;
+  TDmxEditDlg.Init(S, void, 0, Bounds, nil,nil, nil,nil);
   GrowMode := gfGrowHiX;
+  Options  := Options or ofFirstClick;
+  StdEnter := TRUE;
+  Skip1stKey := TRUE;
 end;
 
 
-procedure TInputFields.InitData (var AData );
+procedure TInputFields.InitData(var AData );
 { allocates memory for the data }
 begin
   DataBlockSize := Size.Y * RecordSize;  { correct improper size }
-  GetMem (WorkingData, DataBlockSize);
-  fillchar (WorkingData^, DataBlockSize, 0);
-  TDmxEditDlg.InitData (WorkingData^);
+  GetMem(WorkingData, DataBlockSize);
+  fillchar(WorkingData^, DataBlockSize, 0);
+  TDmxEditDlg.InitData(WorkingData^);
 end;
 
 
 procedure TInputFields.DoneData;
 begin
   TDmxEditDlg.DoneData;
-  FreeMem (WorkingData, DataBlockSize);
+  FreeMem(WorkingData, DataBlockSize);
 end;
 
 
-procedure TInputFields.LoadData (var S : TStream);
+procedure TInputFields.LoadData(var S: TStream);
 begin
-  S.Read (DataBlockSize, sizeof (DataBlockSize));
-  GetMem (WorkingData,  DataBlockSize);
-  S.Read (WorkingData^, DataBlockSize);
+  S.Read(StdEnter, sizeof(StdEnter));
+  S.Read(DataBlockSize, sizeof(DataBlockSize));
+  GetMem(WorkingData,  DataBlockSize);
+  S.Read(WorkingData^, DataBlockSize);
 end;
 
 
-procedure TInputFields.StoreData (var S : TStream);
+procedure TInputFields.StoreData(var S: TStream);
 begin
-  S.Write (DataBlockSize, sizeof (DataBlockSize));
-  S.Write (WorkingData^, DataBlockSize);
+  S.Write(StdEnter, sizeof(StdEnter));
+  S.Write(DataBlockSize, sizeof(DataBlockSize));
+  S.Write(WorkingData^, DataBlockSize);
 end;
 
 
-function  TInputFields.DataSize  : word;
-begin
-  DataSize  := LongRec (DataBlockSize).Lo
-end;
+const  Initing : boolean = FALSE;
 
 
-procedure TInputFields.GetData (var Rec );
-var  Len : word;
-begin
-  Len  := DataSize;
-  If (Len > 0) and (WorkingData <> nil) then Move (WorkingData^, Rec, Len);
-end;
+procedure TInputFields.HandleEvent(var Event: TEvent);
+    function  AtEndField : boolean;
+    var  F : pDMXfieldrec;
+    begin
+      F := CurrentField;
+      Repeat
+	F := F^.Next;
+      Until (F = nil) or ((F^.fieldsize > 0) and (F^.access and (accSkip or accHidden) = 0));
+      AtEndField := (F = nil);
+    end;
 
+    function  Movable(GoLeft: boolean) : boolean;
+    var  v  : integer;
+    begin
+      Movable := TRUE;
+      If (CurrentField <> nil) then
+	begin
+	If GoLeft then v := 0 else v := pred(CurrentField^.fieldsize);
+	If (upcase(CurrentField^.typecode) in [fldSTR, fldSTRNUM]) then
+	  begin
+	  If (v > 0) then Dec(v);
+	  Movable := FirstKey or (CurPos = v);
+	  end
+        else
+	If (upcase(CurrentField^.typecode) in [fldCHAR, fldCHARNUM]) then
+	  begin
+	  Movable := FirstKey or (CurPos = v);
+	  end;
+	end;
+    end;
 
-procedure TInputFields.SetData (var Rec );
-var  Len : word;
-begin
-  Len  := DataSize;
-  If (Len > 0) and (WorkingData <> nil) then Move (Rec, WorkingData^, Len);
-  DrawView;
-end;
-
-
-procedure TInputFields.HandleEvent (var Event : TEvent);
 begin
   With Event do
     If (What = evKeyboard) then
       begin
-      If ((KeyCode = kbPgUp) or (KeyCode = kbUp)) and (CurrentRecord = 0) then
-        KeyCode := kbShiftTab;
-      If ((KeyCode = kbPgDn) or (KeyCode = kbDown)
-          or ((KeyCode = kbEnter) and (CurrentField^.Next = nil)))
-         and (succ (CurrentRecord) = Limit.Y)
-       then
-        KeyCode := kbTab;
+      If (KeyCode = kbEnter) and StdEnter and AtEndField then
+	begin
+	KeyCode := kbEnter;
+	TScroller.HandleEvent(Event);
+	Exit;
+	end
+      else
+      If (KeyCode = kbEnter) or ((KeyCode = kbRight) and Movable(FALSE)) and
+	  AtEndField then
+	begin
+	KeyCode := kbTab;
+	TScroller.HandleEvent(Event);
+	Exit;
+	end
+      else
+      If (((KeyCode = kbLeft) and Movable(TRUE))) and (CurrentField = DMXfield1) then
+	begin
+	KeyCode := kbShiftTab;
+	TScroller.HandleEvent(Event);
+	Exit;
+	end
+      else
+	begin
+	If ((KeyCode = kbPgUp) or (KeyCode = kbUp)) and (CurrentRecord = 0) then
+	  KeyCode := kbShiftTab;
+	If ((KeyCode = kbPgDn) or (KeyCode = kbDown)
+	  or ((KeyCode = kbEnter) and AtEndField))
+	  and (succ(CurrentRecord) = Limit.Y)
+	 then
+	  KeyCode := kbTab;
+	end;
+      end
+    else
+    If (What = evBroadcast) and (Command = cmDMX_RollCall) and Initing and
+       (InfoPtr <> @Self) then
+      begin
+      StdEnter := FALSE;
       end;
-  TDmxEditDlg.HandleEvent (Event);
+  TDmxEditDlg.HandleEvent(Event);
 end;
 
 
-procedure TInputFields.SetState (AState : word; Enable : boolean);
+procedure TInputFields.SetState(AState: word; Enable: boolean);
 var  cmd    : word;
      voidXY : TPoint;
 begin
   If (AState and sfFocused <> 0) and not Enable then JustAltered := FALSE;
-  TDmxEditDlg.SetState (AState, Enable);
+  TDmxEditDlg.SetState(AState, Enable);
   If Enable and (AState and sfFocused <> 0) then
     begin
     cmd  := cmDMX_Home;
-    ProcessCommand (cmd, voidXY);
+    ProcessCommand(cmd, voidXY);
+    end
+  else
+  If Enable and (AState and sfExposed <> 0) then
+    begin
+    If (Owner <> nil) then
+      begin
+      Initing := TRUE;
+      Message(Owner, evBroadcast, cmDMX_RollCall, @Self);
+      Initing := FALSE;
+      end;
     end;
 end;
 
@@ -289,165 +459,131 @@ procedure TInputFields.SetUpField;
 begin
   TDmxEditDlg.SetUpField;
   If (CurrentField <> nil) and
-     (upcase (CurrentField^.typecode) in [fldSTR, fldSTRNUM, fldCHAR, fldCHARNUM])
+     (upcase(CurrentField^.typecode) in [fldSTR, fldSTRNUM, fldCHAR, fldCHARNUM]) and
+     Skip1stKey
    then
     FirstKey := FALSE;
-end;
-
-
-  { ออ TCutFrame อออออออออออออออออออออออออออออออออออออออออออออออออออออออออ }
-
-
-procedure TCutFrame.Draw;
-var XY : TPoint;
-begin
-  TFrame.Draw;
-  If GetState (sfActive) then
-    begin
-    If (PDmxViewer (Owner)^.Limit.X > 0) then
-      XY.X := PDmxViewer (Owner)^.Limit.X else XY.X := Owner^.Owner^.Size.X;
-    If (PDmxViewer (Owner)^.Limit.Y > 0) then
-      XY.Y := PDmxViewer (Owner)^.Limit.Y else XY.Y := Owner^.Owner^.Size.Y;
-    If (Size.X >= XY.X) and (Size.Y >= XY.Y) then
-      WriteStr ((Size.X - 4), 0, #18, 5);
-    end;
 end;
 
 
   { ออ TDmxViewer ออออออออออออออออออออออออออออออออออออออออออออออออออออออออ }
 
 
-constructor TDmxViewer.Init (var Bounds     : TRect;
-                                 ATitle     : TTitleStr;
-                                 ANumber    : integer;
-                                 ATemplate  : string;
-                             var AData;
-                                 BSize      : longint;
-                             var ALabels    : string);
+constructor TDmxViewer.Init(var Bounds	   : TRect;
+				ATitle     : TTitleStr;
+				ANumber    : integer;
+				ATemplate  : string;
+			    var AData;
+				BSize	   : longint;
+			    var ALabels    : string);
+const  NilWin	: array[0..1] of Longint = (0,0);
 begin
-  TWindow.Init (Bounds, ATitle, ANumber);
-  InitDMX (ATemplate, AData, NewDmxLabels (ALabels), nil, BSize);
+  TLtdWindow.Init(Bounds, TRect(NilWin), ATitle, ANumber);
+  InitDMX(ATemplate, AData, NewDmxLabels(ALabels), nil, BSize);
   Options := Options or ofTileable;
 end;
 
 
-procedure TDmxViewer.InitDMX (    ATemplate  : string;
-                              var AData;
-                                  ALabels    : PDmxLink;
-                                  ARecInd    : PDmxLink;
-                                  BSize      : longint);
-var  R     : TRect;
+constructor TDmxViewer.Load(var S: TStream);
 begin
-  GetExtent (R);
-  R.Grow (-1,-1);
-  If ALabels <> nil then Inc (R.A.Y, 2);
-  Insert (New (PDmxScroller, Init (ATemplate, AData, BSize, R,
-                                  ALabels,
-                                  StandardScrollBar (sbHorizontal+ sbHandleKeyboard),
-                                  StandardScrollBar (sbVertical  + sbHandleKeyboard))));
+  TLtdWindow.Load(S);
+  GetSubViewPtr(S, DMX);
 end;
 
 
-function  TDmxViewer.NewDmxLabels (var ALabels ) : PDmxLink;
+procedure TDmxViewer.InitDMX(ATemplate: string;
+			      var AData;
+			      ALabels,ARecInd: PDmxLink;
+			      BSize: longint);
+var  R	: TRect;
 begin
-  If (string (ALabels) = '') or (@ALabels = nil) then
+  GetExtent(R);
+  R.Grow(-1,-1);
+  If (ALabels <> nil) then Inc(R.A.Y, ALabels^.Size.Y);
+  Insert(New(PDmxScroller, Init(ATemplate, AData, BSize, R, ALabels,
+				   StandardScrollBar(sbHorizontal),
+				   StandardScrollBar(sbVertical))));
+end;
+
+
+function  TDmxViewer.NewDmxLabels(var ALabels ) : PDmxLink;
+begin
+  If (@ALabels = nil) or (string(ALabels) = '') then
     NewDmxLabels := nil
    else
-    NewDmxLabels := New (PDmxLabels, InitInsert (@Self, @ALabels));
+    NewDmxLabels := New(PDmxLabels, InitInsert(@Self, @ALabels));
 end;
 
 
-procedure TDmxViewer.ChangeBounds (var Bounds : TRect);
+procedure TDmxViewer.Store(var S: TStream);
 begin
-  If (Limit.X > 0) and (Bounds.B.X - Bounds.A.X > Limit.X) then Bounds.B.X := Bounds.A.X + Limit.X;
-  If (Limit.Y > 0) and (Bounds.B.Y - Bounds.A.Y > Limit.Y) then Bounds.B.Y := Bounds.A.Y + Limit.Y;
-  TWindow.ChangeBounds (Bounds);
+  TLtdWindow.Store(S);
+  PutSubViewPtr(S, DMX);
 end;
 
 
-procedure TDmxViewer.InitFrame;
-var R : TRect;
+function  TDmxViewer.Valid(Command: word) : boolean;
+var  Len : integer;
+     V	 : boolean;
 begin
-  GetExtent (R);
-  Frame := New (PCutFrame, Init (R));
-end;
-
-
-function  TDmxViewer.Valid (Command : word) : boolean;
-var  DMX : PDmxScroller;
-     Len : integer;
-begin
-  Valid := TWindow.Valid (Command);
-  DMX := Message (@Self, evCommand, cmDMX_RollCall, nil);
-  If (DMX <> nil) and (DMX^.Labels <> nil) then
+  V := TLtdWindow.Valid(Command);
+  If V and (Command = cmValid) then
     begin
-    Limit.X := PDmxLabels (DMX^.Labels)^.Len + (Size.X - Current^.Size.X);
-    Len     := length (GetTitle (MaxViewWidth)) + 12;
-    If (Len > ScreenWidth) then Len := ScreenWidth;
-    If (Len > Limit.X) then Limit.X := Len;
-    If (Limit.X < MinWinSize.X) then Limit.X := MinWinSize.X;
+    If (DMX = nil) then DMX := Message(@Self, evCommand, cmDMX_RollCall, nil);
+    If (DMX <> nil) and (DMX^.Labels <> nil) then
+      begin
+      If (Limit.A.Y > 0) then Limit.A.Y := succ(Size.Y - DMX^.Size.Y);
+      Limit.B.X	:= PDmxLabels(DMX^.Labels)^.Len + (Size.X - DMX^.Size.X);
+      Len	:= length(GetTitle(MaxViewWidth)) + 12;
+      If (Len > ScreenWidth) then Len := ScreenWidth;
+      If (Len > Limit.B.X) then Limit.B.X := Len;
+      If (Limit.B.X < MinWinSize.X) then Limit.B.X := MinWinSize.X;
+      end;
     end;
-end;
-
-
-procedure TDmxViewer.Zoom;
-var R  : TRect;
-    XY : TPoint;
-begin
-  If (Limit.X = 0) or (Limit.X > Owner^.Size.X) then
-    XY.X := Owner^.Size.X else XY.X := Limit.X;
-  If (Limit.Y = 0) or (Limit.Y > Owner^.Size.Y) then
-    XY.Y := Owner^.Size.Y else XY.Y := Limit.Y;
-  If ((Size.X <> XY.X) or (Size.Y <> XY.Y)) then
-    begin
-    GetBounds (ZoomRect);
-    Owner^.GetExtent (R);
-    Locate (R);
-    end
-   else
-    Locate (ZoomRect);
+  Valid := V;
 end;
 
 
   { ออ TDmxWindow ออออออออออออออออออออออออออออออออออออออออออออออออออออออออ }
 
 
-constructor TDmxWindow.Init (var Bounds     : TRect;
-                                 ATitle     : TTitleStr;
-                                 ANumber    : integer;
-                                 ATemplate  : string;
-                             var AData;
-                                 BSize      : longint;
-                             var ALabels    : string;
-                                 IndLen     : integer);
+constructor TDmxWindow.Init(var Bounds	   : TRect;
+				ATitle     : TTitleStr;
+				ANumber    : integer;
+				ATemplate  : string;
+			    var AData;
+				BSize	   : longint;
+			    var ALabels    : string;
+				IndLen     : integer);
+const  NilWin	: array[0..1] of Longint = (0,0);
 begin
-  TWindow.Init (Bounds, ATitle, ANumber);
-  InitDMX (ATemplate, AData, NewDmxLabels (ALabels), NewRecInd (IndLen), BSize);
+  TLtdWindow.Init(Bounds, TRect(NilWin), ATitle, ANumber);
+  InitDMX(ATemplate, AData, NewDmxLabels(ALabels), NewRecInd(IndLen), BSize);
   Options := Options or ofTileable;
 end;
 
 
-procedure TDmxWindow.InitDMX (ATemplate  : string;  var AData;
-                              ALabels, ARecInd : PDmxLink;
-                              BSize  : longint);
-var  R  : TRect;
+procedure TDmxWindow.InitDMX(ATemplate: string;  var AData;
+			     ALabels, ARecInd: PDmxLink;
+			     BSize: longint);
+var  R	: TRect;
 begin
-  GetExtent (R);
-  R.Grow (-1,-1);
-  If ALabels <> nil then Inc (R.A.Y, 2);
-  Insert (New (PDmxEditor, Init (ATemplate, AData, BSize, R,
-                                 ALabels, ARecInd,
-                                 StandardScrollBar (sbHorizontal + sbHandleKeyboard),
-                                 StandardScrollBar (sbVertical   + sbHandleKeyboard))));
+  GetExtent(R);
+  R.Grow(-1,-1);
+  If (ALabels <> nil) then Inc(R.A.Y, ALabels^.Size.Y);
+  Insert(New(PDmxEditor, Init(ATemplate, AData, BSize, R,
+				ALabels, ARecInd,
+				StandardScrollBar(sbHorizontal),
+				StandardScrollBar(sbVertical))));
 end;
 
 
-function  TDmxWindow.NewRecInd (Len : integer) : PDmxLink;
+function  TDmxWindow.NewRecInd(Len: integer) : PDmxLink;
 begin
   If (Len <= 0) then
     NewRecInd := nil
    else
-    NewRecInd := New (PDmxRecInd, InitInsert (@Self, Len));
+    NewRecInd := New(PDmxRecInd, InitInsert(@Self, Len));
 end;
 
 
@@ -456,11 +592,10 @@ end;
 
 procedure RegisterStdDMX;
 begin
-  RegisterType (RDmxEditDlg);
-  RegisterType (RInputFields);
-  RegisterType (RDmxWindow);
-  RegisterType (RDmxViewer);
-  RegisterType (RCutFrame);
+  RegisterType(RDmxEditDlg);
+  RegisterType(RInputFields);
+  RegisterType(RDmxViewer);
+  RegisterType(RDmxWindow);
 end;
 
 

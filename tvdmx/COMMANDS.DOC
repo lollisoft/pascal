@@ -1,0 +1,343 @@
+
+     tvDMX  (c) 1992,93		Randolph Beck
+     =====
+
+
+About tvDMX Commands
+====================
+
+    Most tvDMX commands are defined in unit DMXGIZMA with a constant that
+    is defined relative to constant cmDMX.  Constant cmDMX is based on the
+    constant defined as FirstCmdNum = 4400, which is defined in unit RSET.
+    tvDMX reserves commands 4400 through 4999 for its own use, but you can
+    change this to prevent conflicts by modifying FirstCmdNum or cmDMX.
+
+	    cmBeep			cmChime
+	    cmToggleSound		cmToggleVideo
+	    cmUserScreen		FirstCmdNum
+
+	    cmDMX			cmDMX_Ack
+	    cmDMX_Bottom		cmDMX_DoubleClick
+	    cmDMX_Down			cmDMX_Draw
+	    cmDMX_DrawData		cmDMX_End
+	    cmDMX_Enter			cmDMX_FieldAltered
+	    cmDMX_FixSize		cmDMX_goto
+	    cmDMX_Home			cmDMX_Left
+	    cmDMX_Lock			cmDMX_LockData
+	    cmDMX_NextRow		cmDMX_PgDn
+	    cmDMX_PgUp			cmDMX_RecIndClicked
+	    cmDMX_Reset			cmDMX_Right
+	    cmDMX_RollCall		cmDMX_ScreenBottom
+	    cmDMX_ScreenTop		cmDMX_ScrollBarChanged
+	    cmDMX_SetupRecord		cmDMX_Top
+	    cmDMX_Unlock		cmDMX_UnlockData
+	    cmDMX_Up			cmDMX_WrongKey
+	    cmDMX_XXXX			cmDMX_ZeroizeField
+	    cmDMX_ZeroizeRecord
+
+	    cmPRN_EndPage		cmPRN_FormFeed
+	    cmPRN_LineFeed		cmPRN_NewPage
+	    cmPRN_Reset			cmPRN_SetOptions
+
+
+
+CONSTANTS
+---------
+
+    cmBeep		= cmDMX + 54;
+
+	TAppA.HandleEvent() beeps if BeepOn is TRUE.  See cmToggleSound.
+
+
+    cmChime		= cmDMX + 55;
+
+	Broadcast every 30 minutes by object TTimeView.
+
+
+    cmDMX		= FirstCmdNum;
+
+	Command constant reserved for future use.  All tvDMX commands
+	constants are based on this number.  (See also FirstCmdNum below.)
+
+
+    cmDMX_XXXX		= 
+
+	Record and/or Field movement commands:
+	    cmDMX_Enter			cmDMX_Left
+	    cmDMX_Right			cmDMX_Home
+	    cmDMX_End			cmDMX_goto
+	    cmDMX_NextRow		cmDMX_Up
+	    cmDMX_Down			cmDMX_PgUp
+	    cmDMX_PgDn			cmDMX_ScreenTop
+	    cmDMX_ScreenBottom		cmDMX_Top
+	    cmDMX_Bottom
+
+	These commands are issued internally when the user changes fields
+	or records.  They are processed only after validation by Valid().
+	You can override the Valid() method to test for data validity when
+	one of these commands is given.  Example:
+
+	  function  TMyDmx.Valid (Command : word) : boolean;
+	  var  V : boolean;
+	  begin
+	    V := inherited Valid (Command);
+	    If V and
+	      (Command >= cmDMX_Left) and (Command <= cmDMX_Bottom) and
+	      (CurrentField <> nil) and
+	      (CurrentField^.fieldnum = 3) and
+	      (PRealNum(FieldData)^ > 15000.0)
+	     then
+	      begin
+	      Vidis := TRUE;
+	      MessageBox ('Number too big.', nil, mfError or mfOKButton);
+	      Vidis := FALSE;
+	      V := FALSE;
+	      end;
+	    Valid := V;
+	  end;
+
+	This example prevents the user from entering over 15000 in field 3.
+	It assumes that field 3 is a TYPE TRealNum field (see RSET.PAS).
+	Note how the Vidis flag must be used to prevent resetting the view
+	when the message box is activated.
+
+
+    cmDMX_Ack		= cmDMX +  2;
+
+	Command event sent to a view to acknowledge a roll call broadcast.
+	This command will only be received by views that send cmDMX_RollCall
+	broadcasts/commands.  The cmDMX_RollCall / cmDMX_Ack combination can
+	be used to determine if any tvDMX views share the same data.
+
+
+    cmDMX_Bottom	= cmDMX + 29;
+
+	See cmDMX_XXXX control commands.
+
+
+    cmDMX_DoubleClick	= cmDMX + 30;
+
+	This command is issued when a field gets a valid double-click.
+
+
+    cmDMX_Down		= cmDMX + 23;
+
+	See cmDMX_XXXX control commands.
+
+
+    cmDMX_Draw		= cmDMX +  4;
+
+	Should be used by TDmxScroller derivatives only.  This broadcast
+	forces all tvDMX views that access this data to redraw the view.
+	This command is broadcast by TDmxEditor views when they become
+	unfocused --to ensure that changes are reflected in other windows.
+	InfoPtr should be set to @Self.
+
+
+    cmDMX_DrawData	= cmDMX +  5;
+
+	Broadcast call to be used by non-tvDMX views to force the tvDMX views
+	that use the data at InfoPtr^ to redraw.  For example, a dialog box
+	in SAMPLES.PAS calls this function before exit:
+
+	    Message (DeskTop, evBroadcast, cmDMX_DrawData, @BusyData);
+
+	This makes sure that changes made by the dialog box are reflected
+	in all tvDMX views which access the BusyData array.
+
+
+    cmDMX_End		= cmDMX + 19;
+    cmDMX_Enter		= cmDMX + 15;
+
+	See cmDMX_XXXX control commands.
+
+
+    cmDMX_FieldAltered	= cmDMX +  3;
+
+	Broadcast event sent by EvaluateField() to the view's owner after a
+	field has been altered.  This is especially useful in dialog boxes.
+
+
+    cmDMX_FixSize	= cmDMX + 10;
+
+	Broadcast call to ensure that tvDMX windows have not become wider than
+	they were originally designed.  This event should be broadcast after
+	cascade or tile operations are conducted.  Application object TAppA
+	sends this broadcast when handling the cmCascade and cmTile commands.
+
+
+    cmDMX_goto		= cmDMX + 20;
+    cmDMX_Home		= cmDMX + 18;
+    cmDMX_Left		= cmDMX + 16;
+
+	See cmDMX_XXXX control commands.
+
+
+    cmDMX_Lock		= cmDMX +  6;
+    cmDMX_Unlock	= cmDMX +  8;
+
+	Should be used by TDmxScroller derivatives only.  This broadcast
+	forces all tvDMX views that access this data to set/reset the Locked
+	field, which will prevent the user from altering data in that view.
+	InfoPtr should be set to @Self.
+
+
+    cmDMX_LockData	= cmDMX +  7;
+    cmDMX_UnlockData	= cmDMX +  9;
+
+	Broadcast call to be used by non-tvDMX views to force the tvDMX views
+	that use the data at InfoPtr^ to set/reset the Locked field.
+
+
+    cmDMX_NextRow	= cmDMX + 21;
+    cmDMX_PgDn		= cmDMX + 25;
+    cmDMX_PgUp		= cmDMX + 24;
+
+	See cmDMX_XXXX control commands.
+
+
+    cmDMX_RecIndClicked	= cmDMX + 46;
+
+	Broadcast by TDmxRecInd when record indicator was clicked.  This
+        command is tied to the "Go to Record" option in SAMPLES.EXE.
+
+
+    cmDMX_Reset		= cmDMX + 49;
+
+	Resets the size of the collection in unit tvDMXCOL.
+
+
+    cmDMX_Right		= cmDMX + 17;
+
+	See cmDMX_XXXX control commands.
+
+
+    cmDMX_RollCall	= cmDMX +  1;
+
+	Broadcast call that may be issued by any view to determine if any
+	tvDMX views are on the desktop.  A tvDMX view will respond to it by
+	sending a cmDMX_Ack message to the sender.
+	This can also be issued as a command-event to determine if the
+	selected view is a tvDMX view.
+
+
+    cmDMX_ScreenBottom	= cmDMX + 27;
+    cmDMX_ScreenTop	= cmDMX + 26;
+
+	See cmDMX_XXXX control commands.
+
+
+    cmDMX_ScrollBarChanged = cmDMX + 33;
+
+	Broadcast via the tvDMX view's owner to update the TDmxLabels views
+	when the scroll bars have changed.
+
+
+    cmDMX_SetupRecord	= cmDMX + 11;
+
+	Broadcast through the view's owner when the position pointer moves
+	to another record.
+
+
+    cmDMX_Top		= cmDMX + 28;
+
+	See cmDMX_XXXX control commands.
+
+
+    cmDMX_Unlock	= cmDMX +  8;
+
+	See cmDMX_Lock.
+
+
+    cmDMX_UnlockData	= cmDMX +  9;
+
+	See cmDMX_LockData.
+
+
+    cmDMX_Up		= cmDMX + 22;
+
+	See cmDMX_XXXX control commands.
+
+
+    cmDMX_WrongKey	= cmDMX + 12;
+
+	Command sent to the application when a key was pressed that cannot
+	be accepted (eg: text in a numeric field).  This command is handled
+	by the event-handler in the TAppA object (in unit tvGIZMA).
+
+
+    cmDMX_ZeroizeField	= cmDMX + 13;
+
+	Command to delete the current field.  If Valid(cmDMX_ZeroizeField)
+	is TRUE, the tvDMX view's event handler calls ZeroizeField() to
+	process this command.
+
+
+    cmDMX_ZeroizeRecord	= cmDMX + 14;
+
+	Command to delete the current record.  If Valid(cmDMX_ZeroizeRecord)
+	is TRUE, the tvDMX view's event handler calls ZeroizeRecord() to
+	process this command.
+
+
+    cmPRN_EndPage	= cmDMX + 41;
+
+	tvDMXREP: broadcast before page end.
+
+
+    cmPRN_FormFeed	= cmDMX + 44;
+
+	tvDMXREP: send form feed to printer.
+
+
+    cmPRN_LineFeed	= cmDMX + 43;
+
+	tvDMXREP: send line feed to printer.
+
+
+    cmPRN_NewPage	= cmDMX + 40;
+
+	tvDMXREP: broadcast before new page.
+
+
+    cmPRN_Reset		= cmDMX + 45;
+
+	tvDMXREP: reset printer.
+
+
+    cmPRN_SetOptions	= cmDMX + 42;
+
+	tvDMXREP: command to open options window.
+
+
+    cmToggleSound	= cmDMX + 52;
+
+	Command handled by the TAppA object's event handler to toggle its
+	BeepOn flag, and change the menubar's ON/OFF indicator.  MenuBar
+	initialization with function TAppA.NewSoundItem() is recommended,
+	but not required.  (See program SAMPLES.)
+
+
+    cmToggleVideo	= cmDMX + 53;
+
+	Command handled by the TAppA object's event handler to toggle the
+	hi-res screen on and off, and change the menubar's 25/50 indicator.
+	Use of the TAppA.NewVideoItem() function is recommended, but not
+	required.  (See program SAMPLES.)
+
+
+    cmUserScreen	= cmDMX + 51;
+
+	Command handled by the TAppA object's event-handler to display the
+	screen that was visible prior to the application's initialization.
+
+
+    FirstCmdNum	=  4400;
+
+	Starting number for reserved commands.  tvDMX commands are all
+	based on the cmDMX constant, which is based on this value.
+	tvDMX reserves commands 4400 through 4999 for its own use, but
+	you can change this by modifying this constant.
+	(Unit RSET)
+
+

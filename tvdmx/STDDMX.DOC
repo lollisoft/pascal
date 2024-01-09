@@ -1,0 +1,201 @@
+
+     tvDMX  (c) 1992,93		Randolph Beck
+     =====                      P.O. Box  540433
+                                Orlando, FL 32854
+
+  This is a freeware package and may be copied for free --providing
+  that it is not altered and is transferred with its documentation.
+
+  The author may be contacted at this address:
+     
+         Randolph Beck
+         P.O. Box  540433
+         Orlando, FL 32854-0433
+
+         CompuServe:  72361,753
+         Internet:    rb@randybeck.com	
+
+  Or visit my web page at http://www.byronref.com/rmb/		
+
+
+
+About Unit STDDMX
+=================
+
+	TScroller (TVIEWS.TPU)
+	 |
+	TDmxScroller (TVDMX.PAS)
+	 |
+	TDmxEditor (TVDMX.PAS)
+	 |
+	TDmxEditDlg (STDDMX.PAS)
+	 |
+	TInputFields (STDDMX.PAS)
+
+
+	TWindow (TVIEWS.TPU)
+	 |
+	TLtdWindow (TVGIZMA.PAS)
+	 |
+	TDmxViewer (STDDMX.PAS)
+	 |
+	TDmxWindow (STDDMX.PAS)
+	 |
+	TDmxExpBufWin (TVDMXBUF.PAS)
+
+
+
+    proc  GetBlob
+    func  InsertField
+    proc  RegisterStdDMX
+
+   object TDmxEditDlg (TDmxEditor)
+   object TInputFields (TDmxEditDlg)
+   object TDmxViewer (TLtdWindow)
+   object TDmxWindow (TDmxViewer)
+
+
+FUNCTIONS
+---------
+
+  func  InsertField (Dialog : PDialog;  Col,Row : integer;
+		     Fmt : boolean;  ALabel,ATemplate : string)  : PView;
+
+	Inserts a label and a DMX object into a Dialog window.
+	This function makes it easier for the programmer to insert
+	a tvDMX TInputFields object into a dialog window.
+
+	  Parameters:
+	    Dialog	--dialog into which this new view is inserted;
+	    Col, Row	--starting column and row;
+	    Fmt		--label/field orientation;
+	    ALabel	--label string;
+	    ATemplate	--tvDMX template string;
+
+	  Returns:
+	    PView	--pointer to the tvDMX display object.
+		(Usually thrown away.  Compile with X+ compiler directive.)
+
+	This idea can be translated to create similar functions for
+	TInputLine objects, and others.  (See InsertText(), below.)
+
+
+OBJECTS
+-------
+
+
+Object TDmxEditDlg
+==================
+
+    Object TDmxEditDlg is a TDmxEditor descendant designed for insertion
+    into a dialog box.  This object can be found in unit StdDMX.
+
+    This derivative has no special fields.
+
+
+METHODS
+-------
+
+func  GetPalette  : PPalette;  VIRTUAL;
+      Override: Often
+
+      Returns a pointer to palette string suitable for dialog boxes.
+
+
+proc  HandleEvent (var Event : TEvent);  VIRTUAL;
+      Override: Never
+
+      Calls TDmxEditor.HandleEvent() for all events except for kbTab,
+      kbShiftTab or kbEsc keyboard events --which are handled by
+      TDmxScroller.HandleEvent()-- to select other views.
+
+Object TInputFields
+===================
+
+    Object TInputFields is a data editor designed to be used in the same
+    manner as object TInputLine.  
+
+    This derivative has no special fields.
+
+
+METHODS
+-------
+
+constructor Init (InfoStr : string;  var Bounds : TRect);
+
+      Calls TDmxEditor.Init() with a ^A code preceding InfoStr to make
+      showzeroes TRUE for all fields.  No label or indicator fields are
+      needed.  The data is allocated by InitData().
+      GrowMode is set to gfGrowHiX.
+
+
+func  DataSize  : word;  VIRTUAL;
+      Override: Sometimes
+
+      Returns the lower part of the longint DataBlockSize.
+      See also: proc GetData() and SetData().
+
+
+proc  DoneData;  VIRTUAL;
+      Override: Often
+
+      Pseudo-abstract method that can be overridden to process the data
+      during the object's finalization.
+
+
+proc  GetData (var Rec );  VIRTUAL;
+      Override: Sometimes
+
+      Copies DataSize() bytes from the view to Rec.
+
+
+proc  HandleEvent (var Event : TEvent);  VIRTUAL;
+      Override: Never
+
+      Translates the following keyboard events:  kbUp, kbDown, kbPgUp and
+      kbPgDn before calling TDmxEditDlg.HandleEvent().
+
+
+proc  InitData (var AData );  VIRTUAL;
+      Override: Sometimes
+
+      Allocates enough data for the number of records that would fit in the
+      window defined by Init().
+
+
+proc  LoadData (var S : TStream);  VIRTUAL;
+      Override: Sometimes
+
+      Virtual method called by the Load() method.
+      Reads the DataBlockSize field; allocates that amount for the pointer
+      WorkingData; and reads the data into WorkingData^ from the stream.
+
+
+proc  SetData (var Rec );  VIRTUAL;
+      Override: Often
+
+      Copies DataSize() bytes from Rec to the view.
+
+
+proc  SetState (AState : word; Enable : boolean);  VIRTUAL;
+      Override: Never
+
+      Refer to TV Guide's TView.SetState() documentation.
+
+
+proc  SetUpField;  VIRTUAL;
+      Override: Never
+
+      Called BEFORE each FIELD is edited.
+      Calls TDmxEditor.SetUpField() and then adjusts a private field to
+      react differently for dialog windows.
+
+
+proc  StoreData (var S : TStream);  VIRTUAL;
+      Override: Sometimes
+
+      Virtual method called by the Store() method.
+      Writes the DataBlockSize field and then writes the data from
+      WorkingData^ to the stream.
+
+

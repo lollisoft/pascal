@@ -1,0 +1,248 @@
+Units tvDMXREP and INPUTWIN
+===========================
+
+Unit tvDMXREP:
+-------------
+
+    The procedures and objects in this unit will output a report from
+    the data in a tvDMX view.
+
+
+The reporting objects:
+
+  object TDmxReport
+
+    This is the base reporting object.  It has an abstract Print() method
+    and will not function as-is.
+
+
+  object TDmxReportFile
+
+    Overrides TDmxReport's Print() method to output to a file.
+
+
+  object TDmxReportStream
+
+    Overrides TDmxReport's Print() method to output to a stream.
+
+
+  object TDmxReportHexFile
+
+    Overrides TDmxReportFile's RecNumStr() method to return a record
+    number as a hexadecimal address.  This object is defined in unit
+    tvDMXHEX.PAS.
+
+
+  Each object is initialized by its Init() constructor, and executed by a
+  Run() method.  Reports can be customized by overriding virtual methods.
+
+
+  Where to override sections of the printed page:
+
+	  AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	  BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+	  CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+	  DDDDDDEEEEEE.................FFFFFF
+	  DDDDDDEEEEEE.................FFFFFF
+	  DDDDDDEEEEEE.................FFFFFF
+	  DDDDDDEEEEEE.................FFFFFF
+	  DDDDDDEEEEEE.................FFFFFF
+	  DDDDDDEEEEEE.................FFFFFF
+	  DDDDDDEEEEEE.................FFFFFF
+	  DDDDDDEEEEEE.................FFFFFF
+	  GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
+	  HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
+
+
+   [.]--data records as formatted by the tvDMX view.
+
+    A --processed by procedure SetupPage() and by evCommand cmPRN_NewPage*.
+	The default method does nothing.
+
+    B --processed by procedure PrintLabels().
+	This method outputs the DMX field header labels.
+
+    C --processed by procedure SetupDMX().
+	Processes a line to appear under the field header labels.
+
+    D --processed by procedure SetupLine().
+	The default method does nothing.
+
+    E --outputs a string returned from RecNumStr(CurrentRecord).  Function
+	RecNumStr() returns the result from func TDmxScroller.RecNumStr().
+	This string is used only if line numbers are enabled.
+
+    F --processed by procedure EndLine().
+	This method outputs a line-feed.
+
+    G --processed by procedure EndDMX().
+	Processes a line to appear under the field header labels.
+
+    H --processed by procedure EndPage() and by evCommand cmPRN_EndPage*.
+	This method outputs a page-feed.
+
+  * The cmPRN_NewPage and cmPRN_EndPage command events are sent to the main
+    Application view and to the view being processed so that their event-
+    handlers may print additional text specific to those views without
+    having to create a new TDmxReport descendant.  Event.InfoPtr will be a
+    PDmxReport pointer type which can be used to print the text like this:
+
+      PDmxReport (Event.InfoPtr)^.PrintStr ('Sample text.');
+      PDmxReport (Event.InfoPtr)^.NewLine;
+
+    To ensure proper formatting, use the TDmxReport.NewLine method as shown,
+    instead of adding carriage return codes to the text in the PrintStr()
+    statement.  Also see procedures PrnPageStart() and PrnPageEnd().
+
+
+  Report objects could be instantiated and run by themselves, but procedure
+  DmxReportBox() can be used to execute them from within a message box:
+
+  procedure DmxReportBox (ATitle :TTitleStr; Msg :string; Report :PDmxReport);
+
+    Parameters: ATitle --window title;
+		Msg    --message string to be displayed during printing;
+		Report --report object, initialized and ready to run
+			 (this is disposed after the procedure is done).
+
+  Example:
+
+  DmxReportBox ('Working', 'Processing report...'^M^M^C'to "FILE"',
+		New (PDmxReportFile, Init (DMX, '|', TRUE, 50,78, 'FILE')));
+
+	 'Working' --window title;
+	    DMX    --a tvDMX view object;
+	    '|'    --replacement delimiter for visible delimiters
+		     above #126  (uses given delimiters if #0 is used);
+	    TRUE   --display record numbers;
+	    50     --number of records per page;
+	    78     --width of each page;
+	    'FILE' --report filename.
+
+    How to print data in the current window:
+
+      procedure PrintCurrentWindow;
+      var  DMX  : PDmxScroller;
+      begin
+	DMX := Message (DeskTop, evCommand, cmDMX_RollCall, @Self);
+	If (DMX <> nil) then
+	  begin
+	  DmxReportBox ('Printing', 'Processing report...'^M^M^C'to "PRN"',
+		New (PDmxReportFile, Init (DMX, '|', TRUE, 50,78, 'PRN')));
+	  end;
+      end;
+
+    Use procedure PrnCurrentDMX() if you are also using PrnSetOptions()
+    (see below).
+
+
+			   < Optional Equipment >
+
+  function  StdPrnMenuItems (AHelpCtx : word;  Next : PMenuItem): PMenuItem;
+
+    Creates a chain of menu items for "Settings", "Line feed", "Form feed"
+    and "Reset" command options.  The last three commands are handled by
+    the TAppPrn object's event-handler.  If AHelpCtx is not zero, then the
+    individual help context will increment for each item.
+
+
+  procedure PrnCurrentDMX;
+
+    Prints the current window, using the parameters set by the "Settings"
+    dialog box.  See procedure PrnSetOptions().
+
+
+  procedure PrnPageStart (var Event : TEvent);
+  procedure PrnPageEnd (var Event : TEvent);
+
+    These procedures would normally be called by your main application's
+    event-handler to print additional information related to the window.
+
+      PrnPageStart() --prints the window's title if it has one;
+      PrnPageEnd()   --prints the current page number.
+
+    The Event parameter should be the one given to the Application's
+    event-handler.
+
+
+  function  PrnSetOptions (AHelpCtx,AOKCtx,ACancelCtx : word) : word;
+
+    This procedure opens a dialog box with output options for the end-user.
+
+    Parameters: AHelpCtx   --first help context number;
+                AOKCtx     --help context for OK button;
+                ACancelCtx --help context for Cancel button.
+
+    Result:	This function returns the command used to exit this window
+		--cmOK or cmCancel.
+
+      AHelpCtx will be used this way:
+
+	AHelpCtx+0 = 'Destination: Printer'
+	AHelpCtx+1 = 'Destination: File'
+	AHelpCtx+2 = 'Destination: (Enter filename)'
+	AHelpCtx+3 = 'Options: Allow extended characters'
+	AHelpCtx+4 = 'Options: Display record numbers'
+	AHelpCtx+5 = 'Options: Line feed on carriage return'
+	AHelpCtx+6 = 'Options: Manual page feed'
+	AHelpCtx+7 = 'Page Length'
+	AHelpCtx+8 = 'Page Width'
+
+    Notes:  function StdPrnMenuItems() will generate a menu item for this
+    procedure with the command cmPRN_SetOptions, but your main application
+    must still handle the event.  Example:
+
+    Case Event.Command of
+      ...
+      cmPRN_SetOptions:  PrnSetOptions (hcSetOptions, hcOK, hcCancel);
+      ...
+
+Unit INPUTWIN:
+-------------
+
+    This unit is designed to place a small field-window over most fields
+    (except for BOOLEAN and 'N' dBASE-types).  Users can use this window
+    to override READ-ONLY or case restrictions, and to enter numbers not
+    in the range allowed by a field's template.
+
+    Calculations may be entered if the field is numeric.  Example:
+
+      (341.6*92.1)+5
+
+
+  procedure CalcVal (S : string; var V : trealnum; var code : integer);
+
+    This procedure works like procedure Val() --with similar syntax--
+    but it will also perform calculations.  The '+','-','*','/' and '^'
+    operators may be used.  Commas are not permitted.  Error positions
+    are returned in the parameter "code".  Although this procedure was
+    designed for object FieldWin, it can also be used independently.
+
+
+  procedure CurrentFieldWindow;
+
+    Opens a FieldWin box over the current field in the current window.
+    Nothing happens if the current window is not a tvDMX window or if
+    the field cannot be edited by FieldWin.
+
+
+  object TEditField  =  OBJECT (TInputLine)
+
+    This view displays a TInputLine which the user can edit.
+    Its Valid(Command) method will get the current field's data when
+    Command=cmValid, and then return the data when Command=cmOK if
+    the string can be returned in that field's type.  It uses CalcVal()
+    to convert the entered string into a number if necessary.
+    The constructor's only parameter is a PDmxEditor pointer.  This may
+    be changed in future versions.
+
+
+  object TFieldWin   =  OBJECT (TDialog)
+
+    This dialog box positions itself over the currently selected field
+    of a given PDmxEditor view.  The only other parameter is the window's
+    title.  ValidView() absolutely must be called before inserting this
+    window into the desktop to prevent its use on BOOLEAN or 'N' fields.
+    Procedure CurrentFieldWindow() will manage this window automatically.
+
+

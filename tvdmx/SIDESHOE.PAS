@@ -1,0 +1,448 @@
+
+{þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ}
+{							}
+{       SIDESHOE  --an experimental tvDMX accessory	}
+{       tvDMX     --data editing project (ver 2.x)      }
+{							}
+{       Copyright (c) 1994-96   Randolph Beck           }
+{				P.O. Box  540433	}
+{				Orlando, FL 32854	}
+{							}
+{	http://www.byronref.com/rmb/			}
+{	email:  rb@randybeck.com			}
+{                                                       }
+{	A special tvDMX view that will be attached to   }
+{       a main tvDMX view.  The two will behave as one  }
+{       except that the user is able to scroll to the   }
+{       right while a given number of columns will      }
+{       remain visible on the left.                     }
+{                                                       }
+{       The main tvDMX view must be sideshoe-aware.     }
+{       See SIDETEST.PAS, MAINSHOE.PAS and PxSHOE.PAS.  }
+{                                                       }
+{       Warning:  Using SIDESHOE can be tricky.         }
+{							}
+{þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ}
+
+
+Unit SIDESHOE;
+
+{$B-,D+,E+,N+,O+,X+,V- }
+
+interface
+
+uses
+    Objects, Drivers, Memory, Views, Dialogs, App,
+    RSet, DmxGizma, tvGizma, tvDMX;
+
+type
+    PDmxSide	= ^TDmxSide;
+    TDmxSide	=  OBJECT(TDmxEditor)
+	Main		:  PDmxEditor;
+      constructor Init(ADmx: PDmxEditor; ASideFields: integer);
+      function  DataAt(RecNum: integer) : pointer;  VIRTUAL;
+      procedure FieldText(var S: string;  var Color: word;
+			  Field: pDMXfieldrec;  var DataRec );	VIRTUAL;
+      function  GetPalette : PPalette;	VIRTUAL;
+      procedure HandleEvent(var Event: TEvent);  VIRTUAL;
+      procedure InitStruct(var ATemplate );  VIRTUAL;
+      function	RecordLimit : longint;	VIRTUAL;
+      procedure SetState(AState: word; Enable: boolean);  VIRTUAL;
+      function	SetRecLock : boolean;  VIRTUAL;
+      procedure SetupRecord;  VIRTUAL;
+      procedure ZeroizeRecord;  VIRTUAL;
+    end;
+
+
+    PDmxSideLabels   = ^TDmxSideLabels;
+    TDmxSideLabels   =  OBJECT(TDmxFLabels)
+      procedure Draw;  VIRTUAL;
+      procedure SetState(AState: word; Enable: boolean);  VIRTUAL;
+    end;
+
+
+implementation
+
+var
+    MakeMain		:  PDmxEditor;
+    NumSideFields	:  integer;
+
+
+  { ออ TDmxSide ออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ }
+
+
+constructor TDmxSide.Init(ADmx: PDmxEditor; ASideFields: integer);
+const T	: string[1] = '';
+var   R	: TRect;
+      S : string;
+      C : PCharArray;
+      MainLabels: PDmxExtLabels;
+      MainHBar	: PScrollBar;
+begin
+  ADmx^.GetBounds(R);
+  MakeMain := ADmx;
+  NumSideFields := ASideFields;
+  inherited Init(T, ADmx^.WorkingData^, ADmx^.DataBlockSize, R,
+		 nil, ADmx^.RecInd,
+		 nil, ADmx^.VScrollBar);
+  Options := Options or ofFirstClick;
+  Main^.Options := Main^.Options or ofFirstClick;
+  GrowMode := GrowMode and not (gfGrowLoX or gfGrowHiX);
+  Main^.GrowMode := (Main^.GrowMode and (gfGrowRel or gfGrowLoY or gfGrowHiY)) or gfGrowHiX;
+  RecInd := Main^.RecInd;
+  MainHBar   := Main^.HScrollBar;
+  If (MainHBar <> nil) and (MainHBar^.Size.X > Size.X + 9) then
+    begin
+    MainHBar^.GetBounds(R);
+    R.A.X := Main^.Origin.X;
+    MainHBar^.Locate(R);
+    end;
+  MainLabels := PDmxExtLabels(Main^.Labels);
+  If (MainLabels <> nil) and (MainLabels^.Len > Size.X) and MainLabels^.Heaped
+   then
+    begin
+    Move(MainLabels^.Data^, S[1], Size.X);
+    S[0] := chr(Size.X);
+    GetMem(C, MainLabels^.Len - Size.X);
+    Move(MainLabels^.Data^[Size.X], C^, MainLabels^.Len - Size.X);
+    FreeMem(MainLabels^.Data, MainLabels^.Len);
+    Dec(MainLabels^.Len, Size.X);
+    MainLabels^.Data := C;
+    MainLabels^.GetBounds(R);
+    R.B.X := R.A.X + Size.X;
+    Labels := New(PDmxSideLabels, Init(S,R));
+    Main^.Owner^.Insert(Labels);
+    Labels^.Link := @Self;
+    PDmxExtLabels(Labels)^.DblBar := TRUE;
+    MainLabels^.GetBounds(R);
+    R.A.X := Main^.Origin.X;
+    MainLabels^.Locate(R);
+    end;
+end;
+
+
+function  TDmxSide.DataAt(RecNum: integer) : pointer;
+begin
+  DataAt := Main^.DataAt(RecNum);
+end;
+
+
+procedure TDmxSide.FieldText(var S: string;  var Color: word;
+			     Field: pDMXfieldrec;  var DataRec );
+var  DF : boolean;
+begin
+  DF := Main^.DrawingField;
+  If not DrawingField then
+    DrawingField := Main^.DrawingField
+   else
+    Main^.DrawingField := DrawingField;
+  Main^.FieldText(S, Color, Field, DataRec);
+  Main^.DrawingField := DF;
+end;
+
+
+function  TDmxSide.GetPalette : PPalette;
+begin
+  GetPalette := Main^.GetPalette
+end;
+
+
+procedure TDmxSide.HandleEvent(var Event: TEvent);
+var  RS,FS,RSm,FSm,Rx	: boolean;
+     E			: TEvent;
+
+    function  NextFieldExists : boolean;
+    var  F : pDMXfieldrec;
+    begin
+      F := CurrentField^.Next;
+      While (F <> nil) and
+	    (F^.access and (accHidden or accSkip or accDelimiter) <> 0)
+       do  F := F^.Next;
+      NextFieldExists := (F <> nil);
+    end;
+
+    procedure DoCommand;
+    var  XY : TPoint;
+    begin
+      With Event do
+	begin
+	Case Command of
+          cmDMX_SetupRecord :
+             if (Event.InfoPtr = Main) or (Event.InfoPtr = @Self) then
+                 begin
+                      RecordAltered := FALSE;
+                      Main^.RecordAltered := false;
+                 end;
+
+          cmDMX_Draw, cmDMX_DrawData :
+            begin
+                 DrawView;
+                 Exit;
+            end;
+	  cmDMX_ZeroizeField:
+	    begin
+	    RedrawRecord := TRUE;
+	    Exit;
+	    end;
+	  cmDMX_ZeroizeRecord:
+	    begin
+	    Rx := TRUE;
+	    Exit;
+	    end;
+	  cmDMX_Enter:
+	    begin
+	    If (CurrentField^.fieldnum < TotalFields) then Exit;
+	    Message(Main, evCommand, cmDMX_Home, @Self);
+	    Main^.Select;
+	    end;
+	  cmDMX_Left:
+	    begin
+	    Exit;
+	    end;
+	  cmDMX_Right:
+	    If NextFieldExists then Exit else
+	      begin
+	      Message(Main, evCommand, cmDMX_Home, @Self);
+	      Main^.Select;
+	      end;
+	  cmDMX_Home:
+	    begin
+	    Exit;
+	    end;
+	  cmDMX_End:
+	    begin
+	    Main^.Select;
+	    Message(Main, evCommand, cmDMX_End, @Self);
+	    end;
+	  cmDMX_NextRow:
+	    begin
+	    Message(Main, evCommand, cmDMX_Home, @Self);
+	    Main^.Select;
+	    end;
+	  cmDMX_goto:
+	    If Valid(Command) and Main^.Valid(Command) then
+	      begin
+	      RS := RecordSelected;  FS := FieldSelected;
+	      If FS then EvaluateField;
+	      If RS then EvaluateRecord;
+	      Limit.Y := Main^.Limit.Y;
+	      DataBlockSize := Main^.DataBlockSize;
+	      inherited HandleEvent(Event);
+	      If (CurrentRecord <> Main^.CurrentRecord) then
+		begin
+		RSm := Main^.RecordSelected;  FSm := Main^.FieldSelected;
+		If FSm then Main^.EvaluateField;
+		If RSm then Main^.EvaluateRecord;
+		Main^.CurrentRecord := CurrentRecord;
+		If RSm then Main^.SetupRecord;
+		If FSm then Main^.SetupField;
+		end;
+	      If RS then
+		begin
+		If not Main^.RecordSelected then Main^.SetupRecord;
+		SetupRecord;
+		If FS then SetupField;
+		end;
+	      Rx := TRUE;
+	      end;
+	  cmDMX_Up,
+	  cmDMX_Down,
+	  cmDMX_PgUp,
+	  cmDMX_PgDn,
+	  cmDMX_ScreenTop,
+	  cmDMX_ScreenBottom,
+	  cmDMX_Top,
+	  cmDMX_Bottom:
+	    If Valid(Command) and Main^.Valid(Command) then
+	      begin
+	      RS := RecordSelected;  FS := FieldSelected;
+	      If FS then EvaluateField;
+	      If RS then EvaluateRecord;
+	      Message(Main, What, Command, @Self);
+	      If not Main^.RecordSelected then Main^.SetupRecord;
+	      inherited HandleEvent(Event);
+	      If RS then SetupRecord;
+	      If FS then SetupField;
+	      end;
+	  100..255, 1000..cmDMX-1, cmDMX+400..$FFFF:
+	    begin
+	    If (What = evCommand) then Main^.HandleEvent(Event);
+	    Exit;
+	    end;
+	 else
+	    Exit;
+	  end;
+	If (Event.What and FocusedEvents <> 0) then ClearEvent(Event);
+	end;
+    end;
+begin
+  Rx := FALSE;
+  Locked := Main^.Locked;
+  With Event do
+    If (What and evMessage <> 0) and (InfoPtr <> Main) then DoCommand;
+  If (Event.What <> evNothing) then inherited HandleEvent(Event);
+  If FieldAltered then Main^.ChangeMade;
+  If Rx and (RecInd <> nil) then
+    begin
+    Limit.Y := Main^.Limit.Y;
+        DataBlockSize := Main^.DataBlockSize;
+    RecInd^.DrawView;
+    end;
+end;
+
+
+procedure TDmxSide.InitStruct(var ATemplate );
+var  F1,MainF : pDMXfieldrec;
+
+    function  NewFieldRec(F, APrev: pDMXfieldrec) : pDMXfieldrec;
+    var  FRec : pDMXfieldrec;
+    begin
+      New(FRec);
+      Move(F^, FRec^, sizeof(FRec^));
+      If (F^.template <> nil) then FRec^.template := NewStr(F^.template^);
+      If (APrev <> nil) then APrev^.Next := FRec;
+      FRec^.Prev := APrev;
+      FRec^.Next := nil;
+      NewFieldRec := FRec;
+    end;
+
+begin
+  Main := MakeMain;
+  If (Main = nil) or (Main^.DMXfield1 = nil) or (NumSideFields <= 0) then Exit;
+  RecordSize := Main^.RecordSize;
+  TotalFields := NumSideFields;
+  MainF := Main^.DMXfield1;
+  DMXfield1 := NewFieldRec(MainF, nil);
+  F1 := DMXfield1;
+  MainF^.access := MainF^.access or accHidden;
+  If (Main^.CurrentField = MainF) then
+    Main^.CurrentField := Main^.CurrentField^.Next;
+  MainF := Main^.DMXfield1^.Next;
+  While (MainF <> nil) and (MainF^.fieldnum <= NumSideFields) do
+    begin
+    F1 := NewFieldRec(MainF, F1);
+    MainF^.access := MainF^.access or accHidden;
+    MainF^.screentab := 0;
+    If (Main^.CurrentField = MainF) then
+      Main^.CurrentField := Main^.CurrentField^.Next;
+    MainF := MainF^.Next;
+    end;
+  With F1^ do
+    If (access and accDelimiter <> 0) and (typecode = 'ณ') then typecode := 'บ';
+  DMXfield1^.Prev := F1;
+  Limit.X := MainF^.screentab;
+  Main^.Limit.X := Main^.Limit.X - Limit.X;
+  While (MainF <> nil) do
+    begin
+    MainF^.screentab := MainF^.screentab - Limit.X;
+    If (MainF^.screentab < 0) then MainF^.screentab := 0;
+    MainF := MainF^.Next;
+    end;
+  Origin := Main^.Origin;
+  Size.X := Limit.X;
+  Size.Y := Main^.Size.Y;
+  Dec(Main^.Size.X, Limit.X);
+  Inc(Main^.Origin.X, Limit.X);
+end;
+
+
+function  TDmxSide.RecordLimit : longint;
+begin
+  RecordLimit := Main^.RecordLimit;
+  Limit.Y := Main^.Limit.Y;
+  DataBlockSize := Main^.DataBlockSize;
+end;
+
+
+function  TDmxSide.SetRecLock : boolean;
+begin
+  SetRecLock := (Main^.LockChecked and not Main^.RecWasLocked) or
+		(not Main^.LockChecked and Main^.CheckRecLock);
+end;
+
+
+procedure TDmxSide.SetState(AState: word; Enable: boolean);
+begin
+  Limit.Y := Main^.Limit.Y;
+  DataBlockSize := Main^.DataBlockSize;
+  If (AState and sfSelected <> 0) and Enable then
+    begin
+    ShowFmt := ShowFmt + [showCurrentField];
+    RedrawRecord := TRUE;
+    If (Main <> nil) then
+      begin
+      Main^.ShowFmt := Main^.ShowFmt - [showCurrentField];
+      If (Main^.CurrentField = nil) or (Main^.RecordData = nil) then
+	Main^.RedrawRecord := TRUE
+       else
+	Main^.DrawRecord(CurrentRecord - Delta.Y, RecordData^);
+      end;
+    end;
+  inherited SetState(AState, Enable);
+  If (AState and sfFocused <> 0) and Enable and (Main <> nil) then
+    begin
+    If (Main^.HScrollBar <> nil) then Main^.HScrollBar^.Show;
+    If (Main^.VScrollBar <> nil) then Main^.VScrollBar^.Show;
+    end;
+  Limit.Y := Main^.Limit.Y;
+  DataBlockSize := Main^.DataBlockSize;
+  If (Labels <> nil) then Labels^.GrowMode := 0;
+end;
+
+
+procedure TDmxSide.SetupRecord;
+begin
+  Limit.Y := Main^.Limit.Y;
+  DataBlockSize := Main^.DataBlockSize;
+
+  If not Main^.RecordSelected then Main^.SetupRecord;
+  inherited SetupRecord;
+
+  Limit.Y := Main^.Limit.Y;
+  DataBlockSize := Main^.DataBlockSize;
+
+end;
+
+
+procedure TDmxSide.ZeroizeRecord;
+begin
+  Main^.ZeroizeRecord;
+end;
+
+
+  { ออ TDmxSideLabels ออออออออออออออออออออออออออออออออออออออออออออออออออออ }
+
+
+procedure TDmxSideLabels.Draw;
+var  i : integer;
+     C : char;
+begin
+  inherited Draw;
+  If (Len > 0) and (Data <> nil) then
+    begin
+    If (Link <> nil) and (Link^.Origin.Y <= Origin.Y) then
+      begin
+      i := 0;
+      C := 'ผ';
+      end
+     else
+      begin
+      i := pred(Size.Y);
+      C := 'ป';
+      end;
+    WriteStr(pred(Len), i, C, 5);
+    end;
+end;
+
+
+procedure TDmxSideLabels.SetState(AState: word; Enable: boolean);
+begin
+  TDmxLink.SetState(AState, Enable);
+  GrowMode := 0;
+end;
+
+
+  { ออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ }
+
+
+End.

@@ -1,12 +1,14 @@
 
 {þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ}
-{                                                       }
-{      RSET      --General data types and constants     }
-{                                                       }
-{      Copyright (c) 1992  Randolph Beck                }
-{                          P.O. Box  56-0487            }
-{                          Orlando, FL 32856            }
-{                          CIS:  72361,753              }
+{							}
+{	RSET	--General data types and constants	}
+{							}
+{       Copyright (c) 1992-98   Randolph Beck           }
+{				P.O. Box  540433	}
+{				Orlando, FL 32854	}
+{							}
+{	http://www.byronref.com/rmb/			}
+{	email:  rb@randybeck.com			}
 {                                                       }
 {þþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþþ}
 
@@ -14,12 +16,16 @@ Unit RSet;
 
 interface
 
+{$IFNDEF NOTV }
+uses  MsgBox;
+{$ENDIF }
+
 type
-    TREALNUM	=  Real;
+    TREALNUM    =  Real;
     PREALNUM	= ^TREALNUM;
 
-    { Using TREALNUM for floating point numbers makes it easy to
-      change from REAL to DOUBLE or other real number type. }
+    { Using TREALNUM for floating point numbers makes it easy
+      to change from REAL to DOUBLE or other real number type. }
 
 
     PBoolean	= ^Boolean;
@@ -31,10 +37,27 @@ type
     PReal	= ^Real;
 
     PCharArray	= ^TCharArray;
-    TCharArray	=  array [0..32767] of char;
+    TCharArray	=  array[0..32767] of char;
 
 
 const
+    FirstCmdNum	=  4400;  { starting number for reserved commands }
+    FirstRegNum	=  4400;  { starting number for registered objects }
+
+
+{$IFNDEF NOTV }
+    { Message Box flags }
+    mfInfoOK	=  mfInformation or mfOKButton;
+    mfErrorOK	=  mfError or mfOKButton;
+    mfErrorCancel= mfError or mfCancelButton;
+    mfWarningOK	=  mfWarning or mfOKButton;
+    mfWarningYN	=  mfWarning or mfYesButton or mfNoButton;
+    mfConfirmOK	=  mfConfirmation or mfOKButton;
+    mfConfirmYN	=  mfConfirmation or mfYesButton or mfNoButton;
+{$ENDIF }
+
+
+    { Day and Month constants }
     Sunday	=   0;
     Monday	=   1;
     Tuesday	=   2;
@@ -57,6 +80,15 @@ const
     December	=  12;
 
 
+    { file-open mode constants for TDosStreams }
+    { usage: S.Init('FILE.DAT', stOpenRead or stDenyNone); }
+    stDenyAll	= $10;
+    stDenyWrite	= $20;
+    stDenyRead	= $30;
+    stDenyNone	= $40;
+
+
+    { KeyCode constants }
     kbCtrlA	= $1E01;
     kbCtrlB	= $3002;
     kbCtrlC	= $2E03;

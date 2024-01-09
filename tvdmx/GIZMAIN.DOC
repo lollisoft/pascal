@@ -1,0 +1,564 @@
+
+     tvDMX  (c) 1992,93		Randolph Beck
+     =====                      P.O. Box  540433
+                                Orlando, FL 32854
+
+
+About Units RSET, DMXGIZMA and TVGIZMA
+======================================
+
+    Unit RSET
+    ---------
+    Data types and untyped constants.  No objects, procedures, functions,
+    or typed-constants are included.
+
+	type  TCharArray
+	type  TREALNUM
+	FirstCmdNum and FirstRegNum constants
+        stXXXX constants
+        kbXXXX constants
+	day and month name constants
+
+
+    Unit DMXGIZMA
+    -------------
+    Defines DMX-specific constants, types and functions.
+
+	type  tDMXfieldrec
+	accXXXX constants
+	cmXXXX constants
+	fldXXXX constants
+
+	proc  DisposeSItems	func  DmxStrLen
+	func  InitAppendFields	func  InitBlobField
+	func  InitEnumField	func  InitTSItemFields
+	func  MaxItemStrLen	func  ReadSItems
+	func  SItemsLen		proc  WriteSItems
+
+
+    Unit TVGIZMA
+    ------------
+    Objects and functions for general Turbo Vision support.
+
+	object TAppA (TApplication)
+	object TLtdFrame (TFrame)
+	object TLtdWindow (TWindow)
+	object TTimeView (TView)
+	object TUserScreen (TScroller)
+
+	proc  AssignWinRect	func  DParam
+	func  InsertText	func  NewVarItem
+	func  SParam		proc  TrimDialog
+	func  wnNextAvail
+
+
+TYPES
+-----
+
+    PBoolean	= ^Boolean;
+    PByte	= ^Byte;
+    PShortInt	= ^ShortInt;
+    PInteger	= ^Integer;
+    PWord	= ^Word;
+    PLongInt	= ^LongInt;
+    PReal	= ^Real;
+
+	These types define pointers to their respective types.
+	PChar and PString are defined by Turbo Vision in unit OBJECTS.
+	Also refer also to TYPE TREALNUM.
+	(Unit RSET)
+
+
+    TCharArray	=  array [0..32767] of char;
+
+	A CHAR array for general use and typecasts.  This is used internally
+	by tvDMX and is similar in concept to Turbo Vision's TByteArray.
+	TYPE PCharArray is also defined as a pointer to TCharArray.
+	(Unit RSET)
+
+
+    tDMXfieldrec =  RECORD
+
+	This type is used in the chain that describes each field in the
+	record.  This chain is initialized by TDmxScroller.InitStruct().
+
+	tDMXfieldrec fields:
+
+	    Next,Prev	:  pDMXfieldrec;
+		Pointers to next or previous links in the chain.
+
+	    access	:  byte;
+		Read-only, hidden, skip.  (See accXXXX constants.)
+
+	    fieldnum	:  word;
+		Number of this field (0=no number).
+
+	    screentab	:  integer;
+		Virtual column number to this field.
+
+	    columnwid	:  integer;
+		Virtual column number to this field.
+
+	    shownwid	:  integer;
+		Virtual column number to this field.
+
+	    typecode	:  char;
+		'i', 'W', 'H', 's', 'r', etc.
+
+	    fillvalue	:  char;
+		#0 or ' '.
+
+	    upperlimit	:  byte;
+		Field's maximum value (set with ^U template code).
+
+	    showzeroes	:  boolean;
+		Display zero values (set with ^Z template code).
+
+	    truelen	:  byte;
+		Unformatted text length.
+
+	    parenthesis	:  boolean;
+		'('/')' characters.
+
+	    decimals	:  byte;
+		Number of trailing digits.
+
+	    fieldsize	:  integer;
+		Size of field's data TYPE.
+
+	    datatab	:  integer;
+		Position in record.
+
+	    template	:  pstring;
+		Field template string.
+
+
+	TYPE pDMXfieldrec is also defined as a pointer to tDMXfieldrec.
+	(Unit DMXGIZMA)
+
+
+    TREALNUM	=  REAL;
+
+	The tvDMX 'R' code accesses data of type TREALNUM.
+	Using TREALNUM for floating point numbers makes it easy to
+	change defaults from REAL to DOUBLE or other real number type.
+	TYPE PREALNUM is also defined as a pointer to TREALNUM.
+	(Unit RSET)
+
+
+CONSTANTS
+---------
+
+    accXXXX	=
+
+	These constants define the bits for individual fields.
+
+	    accNormal    =    0;  --regular field
+	    accReadOnly  =    1;  --read-only field
+	    accHidden    =    2;  --hidden field
+	    accSkip      =    4;  --skip field
+	    accDelimiter =    8;  --field delimiter (not a field)
+	    accSpecA	 =  $20;  --programmer definable
+	    accSpecB	 =  $40;  --programmer definable
+	    accSpecC	 =  $80;  --programmer definable
+
+	This is used for tDMXfieldrec.access.
+	(Unit DMXGIZMA)
+
+
+    cDMX	= #6#7#4#4#1#2;
+
+	Palette for tvDMX views:
+	    1 normal fields
+	    2 normal selected field
+	    3 read-only field (while selected)
+	    4 locked field (while selected)
+	    5 delimiter
+	    6 border
+
+	This is overridden in unit StdDMX by object TDmxEditDlg to make
+	it more suitable for dialog boxes.
+	(Unit DMXGIZMA)
+
+
+    cmDMX		= FirstCmdNum;
+
+	Command constant reserved for future use.  All tvDMX commands
+	constants are based on this number.  (See also FirstCmdNum below.)
+	(Unit DMXGIZMA)
+
+
+    cmXXXX		=
+
+	Most command constants are defined in unit DMXGIZMA.PAS, and are
+	documented in file COMMANDS.DOC.
+
+	    cmBeep			cmChime
+	    cmToggleSound		cmToggleVideo
+	    cmUserScreen		FirstCmdNum
+
+	    cmDMX			cmDMX_Ack
+	    cmDMX_Bottom		cmDMX_DoubleClick
+	    cmDMX_Down			cmDMX_Draw
+	    cmDMX_DrawData		cmDMX_End
+	    cmDMX_Enter			cmDMX_FieldAltered
+	    cmDMX_FixSize		cmDMX_goto
+	    cmDMX_Home			cmDMX_Left
+	    cmDMX_Lock			cmDMX_LockData
+	    cmDMX_NextRow		cmDMX_PgDn
+	    cmDMX_PgUp			cmDMX_RecIndClicked
+	    cmDMX_Reset			cmDMX_Right
+	    cmDMX_RollCall		cmDMX_ScreenBottom
+	    cmDMX_ScreenTop		cmDMX_ScrollBarChanged
+	    cmDMX_SetupRecord		cmDMX_Top
+	    cmDMX_Unlock		cmDMX_UnlockData
+	    cmDMX_Up			cmDMX_WrongKey
+	    cmDMX_XXXX			cmDMX_ZeroizeField
+	    cmDMX_ZeroizeRecord
+
+	    cmPRN_EndPage		cmPRN_FormFeed
+	    cmPRN_LineFeed		cmPRN_NewPage
+	    cmPRN_Reset			cmPRN_SetOptions
+
+
+    FirstCmdNum	=  4400;
+
+	Starting number for reserved commands.  tvDMX commands are all
+	based on the cmDMX constant, which is based on this value.
+	tvDMX reserves commands 4400 through 4999 for its own use, but
+	you can change this by modifying this constant.
+	(Unit RSET)
+
+
+    FirstRegNum	=  4400;
+
+	Starting number for object registration numbers.
+	(Unit RSET)
+
+
+    fldXXXX  =
+
+	Field code notation for the supported data types:
+	    fldSTR	=   'S';  --STRING field
+	    fldSTRNUM	=   '#';  --numeric STRING field
+	    fldCHAR	=   'C';  --CHARACTER field
+	    fldCHARNUM	=   '0';  --numeric CHARACTER field
+	    fldCHARVAL	=   'N';  --dBASE-formatted numeric CHARACTER field
+	    fldBYTE	=   'B';  --BYTE field
+	    fldSHORTINT	=   'J';  --SHORTINT field
+	    fldWORD	=   'W';  --WORD field
+	    fldINTEGER	=   'I';  --INTEGER field
+	    fldLONGINT	=   'L';  --LONGINT field
+	    fldREALNUM	=   'R';  --REAL number field  (uses type TREALNUM)
+	    fldBOOLEAN	=   'X';  --BOOLEAN value field
+	    fldHEXVALUE	=   'H';  --Hexadecimal numeric field
+	    fldZEROMOD	=   'Z';  --zero template code modifier
+
+	(Unit DMXGIZMA)
+
+
+    fldDATE	=  ' WW-'^F^Z  + ^U+char(12) + ^P+char(2) +
+		   #0'ZW-'^Z   + ^U+char(31) +
+		   #0'ZZZW '^Z^F + ^P+char(-6) +
+		   #0 + ^P+char(4);
+
+	fldDATE defines what is called a "complex field".  The ^F control
+	code ensures that these three integer fields receive the same field
+	number.  ^Z will force zeroes to be displayed.  The ^P code uses the
+	next character to adjust the data pointer forward 2 bytes, backward 6
+	bytes, and then 4 bytes forward again.  This way, a sequence of three
+	word fields of YEAR-MONTH-DAY can be displayed in MONTH-DAY-YEAR order,
+	like this:  '  1-01-1992 '.
+	The ^U code uses the next character as a maximum value for that field
+	to limit months to 12 and days to 31.
+	Refer to the section on control codes elsewhere in the documentation.
+	(Unit DMXGIZMA)
+
+
+    fldTIME	=  ' WW:'^F^Z + ^U+char(23) +
+		   #0'ZW '^Z + ^U+char(59) +
+		   #0'W'^F^H#0;  { seconds are hidden }
+
+	fldTIME defines a complex field for HOURS:MINUTES (the SECONDS field
+	is hidden).  The ^U code uses the next character as a maximum value
+	for that field to limit hours to 23 and minutes to 59.
+	fldDATE and fldTIME combine to display a DateTime type.
+	(Unit DMXGIZMA)
+
+
+    fldDATETIME  =  ' WW-'^F^Z + ^U+char(12) + ^P+char(2) +
+		   #0'ZW-'^Z + ^U+char(31) +
+		   #0'ZZZW '^Z^F + ^P+char(-6) +
+		   '\' + ^P+char(4) +
+		   ' WW:'^F^Z + ^U+char(23) +
+		   #0'ZW:'^Z   + ^U+char(59) +
+		   #0'ZW '^Z^F + ^U+char(59);  { seconds are not hidden }
+
+	fldDATETIME is a modified concatenation of the fldDATE and fldTIME
+	field templates --except that the seconds field is not hidden.
+	See TMyApp.BusyWindow in program SAMPLES.PAS for examples using
+	fldDATETIME and fldDATE and fldTIME.
+	(Unit DMXGIZMA)
+
+
+    kbCtrlA	 = $1E01;
+    ...		    ...
+    kbCtrlZ	 = $2C1A;
+    kbShiftEnter = $1C0D;
+
+	Additional keyboard codes not defined by Turbo Vision.
+	(Unit RSET)
+
+
+    Sunday	=   0;
+    ...		   ...
+    Saturday	=   6;
+
+	Day-of-week constants.
+	Example:  If (Day in [Sunday, Friday..Sunday]) then Exit;
+	(Unit RSET)
+
+
+    January	=   1;
+    ...		   ...
+    December	=  12;
+
+	Month-number constants.
+	Example:  If (DT.Month = April) and (DT.Day = 15) then Exit;
+	(Unit RSET)
+
+
+FUNCTIONS
+---------
+
+  proc  AssignWinRect (var Bounds : TRect;  MaxX, MaxY : integer);
+
+	Assigns Bounds to fit into the desktop, with MaxX and MaxY as the
+	maximum desired width and height.  Bounds is cut and moved to a
+	cascaded position behind the currently active window.  (This is
+	similar to what happens when a new file is loaded into the TP IDE.)
+	New version takes advantage of TV 2's new GetTileRect() function.
+	(Unit TVGIZMA)
+
+
+  proc  DisposeSItems (AItems : PSItem);
+
+	Dispose a chain of TSItems.
+	(Unit DMXGIZMA)
+
+
+  func  DmxStrLen (S : string)  : integer;
+
+	Returns the length of the visible portions of a template string.
+	(Unit DMXGIZMA)
+
+
+  func  DParam (N : longint;  Next : pointer) : pointer;
+  func  SParam (S : pstring;  Next : pointer) : pointer;
+
+	Accessories that create a chain of parameter-pointers for the
+	FormatStr() and MessageBox() procedures.  The Next parameter can
+	be nested to create an array of pointers.  Examples:
+
+	  FormatStr (S, '%s is at %d (%xH), and %d.',
+		  SParam (@Name,
+		  DParam (Num,
+		  DParam (Num,
+		  DParam (Num * RecordSize,
+		  nil))))^   { requires a caret^ }
+		);
+
+	  MessageBox ('%s is at %d (%xH), and %d.',
+		  SParam (@Name,
+		  DParam (Num,
+		  DParam (Num,
+		  DParam (Num * RecordSize,
+		  nil)))),   { no caret }
+		mfInformation + mfOKButton
+		);
+
+	These functions are limited to 16 parameters.
+	(Unit TVGIZMA)
+
+
+  func  InitAppendFields (ATemplate : pstring) : DmxIDstr;
+
+	Initializes a pointer to more field templates.  This can be used to
+	increase the effective length of your template.
+
+	Example:
+	   Stx2 := 'WW,WWW |WW,WWW | CCCCCCCC ';
+	   Stx1 := ' sssssssssssssss|WW,WWW |' + InitAppendFields (@Stx2);
+
+	See also function InitTSItemFields() below.
+	(Unit DMXGIZMA)
+
+
+  func  InitBlobField (Len : integer; AccMode,Default : byte) : DmxIDstr;
+
+	Initializes an unformatted data field of the given field length.
+	BLOb fields take up space within the record but will not be displayed.
+	You can use the GetBlob() --see previous page-- procedure to retrieve
+	this data.  They are used for memo fields in MEMOSHOP.PAS.
+
+	Example:
+	   Stx := ' sssssssssssssss|WW,WWW |'
+		+ InitBlobField (20, AccNormal, 0)
+		+ 'WW,WWW |WW,WWW | CCCCCCCC ';
+	(Unit DMXGIZMA)
+
+
+  func  InitEnumField (ShowZ : boolean;
+		       AccMode,Default : byte;
+		       AItems : PSItem) : DmxIDstr;
+
+	Initializes a tvDMX enumerated field list.
+
+	Example:
+	   Stx := ' sssssssssssssss|WW,WWW |'
+		+  InitEnumField (FALSE, AccNormal, 0,
+				NewSItem (' Zero ',
+				NewSItem (' One',
+				NewSItem (' Two',
+				nil))))
+		+ '| ###-#### |rrr,rrr.rrr ';
+	(Unit DMXGIZMA)
+
+
+  func  InitTSItemFields (ATemplates : PSItem) : DmxIDstr;
+
+	Initializes a chain of TSItem templates.  This can be used to
+	increase the effective length of your template.
+
+	Example:
+	   Stx := ' sssssssssssssss|WW,WWW |'
+		+ InitTSItemFields (NewSItem (' sssssssssss`sssssssss|',
+				    NewSItem ('($rrr,rrr.rr)|',
+				    NewSItem (' CCCCC|WWW,WWW |',
+				    nil))))
+	(Unit DMXGIZMA)
+
+
+  func  InsertText (Dialog :PDialog; Col,Row :integer; AText :string) : PView;
+
+	Sizes, initializes, and inserts a single-line TStaticText view into
+	the specified dialog window.  Example:
+
+	  InsertText (Dialog, 4,3, 'Ready');
+
+	It returns a PView pointer which is usually ignored.
+	(Unit TVGIZMA)
+
+
+  func  MaxItemStrLen (AItems : PSItem) : integer;
+
+	Returns the maximum length of the strings in a TSItem chain.
+	(Unit DMXGIZMA)
+
+
+  func  NewVarItem (Name,Param : TMenuStr;   var Ind : pstring;
+		KeyCode,Command,AHelpCtx : word;
+		Next : PMenuItem) : PMenuItem;
+
+	Creates a new menu item, and assigns a value to a status indicator.
+	This is used by TAppA's NewSoundItem() and NewVideoItem() methods.
+	(Unit TVGIZMA)
+
+
+  func  ReadSItems (var S : TStream) : PSItem;
+
+	Reads strings from a TSItem chain.
+	(Unit DMXGIZMA)
+
+
+  func  SItemsLen (S : PSItem) : integer;
+
+	Returns the cumulative length of the strings in a TSItem chain.
+	(Unit DMXGIZMA)
+
+
+  func  SParam (S : pstring;  Next : pointer) : pointer;
+
+	See function DParam()
+
+
+  proc  TrimDialog (Window : PWindow);
+
+	Shrinks and centers a dialog window to ease the design process.
+	The dialog window should be initialized with the maximum size
+	allowable.  TrimDialog() can be called after the controls are
+	inserted to resize the window down to the maximum size needed.
+	(Unit TVGIZMA)
+
+
+  func  wnNextAvail : integer;
+
+	Returns the next available (unused) window number.  This function
+	was formerly called NextWindowNumber(), and it will still work
+	under that name for a limited period of time.
+	(Unit TVGIZMA)
+
+
+  proc  WriteSItems (var S : TStream; Items : PSItem);
+
+	Writes strings to a TSItem chain.
+	(Unit DMXGIZMA)
+
+
+OBJECTS
+-------
+
+    TAppA	=  OBJECT (TApplication)
+
+	TApplication descendant that initializes TV's major components
+	after saving the original user screen.  Its InitClock() virtual
+	method initializes and inserts a TTimeView on the right side of
+	the menu line.  The OutOfMemory() virtual method is overridden
+	to provide a standard "Out of memory" message box.  The Idle()
+	virtual method maintains the status of the cmCascade and cmTile
+	commands, and then updates the TTimeView, if instantiated.
+	Methods NewSoundItem() and NewVideoItem() should be used in your
+	MenuBar initialization for special "indicator" menu items which
+	will display the status of these options.  (See program SAMPLES.)
+	NewVideoItem() will only add itself to the MenuBar on hi-res systems.
+	The HandleEvent() method handles the cmDMX_WrongKey, cmUserScreen,
+	cmToggleSound, cmToggleVideo, cmCascade and cmTile commands.
+	(See the commands section --above-- for tvDMX commands.)
+	The original user screen is re-displayed after termination.
+	(Unit TVGIZMA)
+
+
+    TLtdFrame	=  OBJECT (TFrame)
+
+	Frame derivative designed to overwrite the Zoom icon when the
+	window is at its maximum size.
+	(Unit TVGIZMA)
+
+
+    TLtdWindow	=  OBJECT (TWindow)
+
+	Window that can be limited to a given maximum and/or minimum size.
+
+	  constructor Init (var Bounds,ALimit : TRect;
+			    ATitle : TTitleStr;
+			    ANumber : integer);
+
+	This is initialized with a second TRect parameter that defines its
+	minimum size (in ALimit.A) and its maximum size (in ALimit.B).
+	(Unit TVGIZMA)
+
+
+    TTimeView	=  OBJECT (TView)
+
+	Clock view that displays the time in AM/PM format.  This is
+	initialized by the TAppA object.
+	(Unit TVGIZMA)
+
+
+    TUserScreen	=  OBJECT (TScroller)
+
+	Scroller object that displays the original user screen that has
+	been saved by the TAppA.Init() constructor.
+	(Unit TVGIZMA)
+
+
