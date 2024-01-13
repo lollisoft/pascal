@@ -1,12 +1,13 @@
 Program TVBUILD;
 
 (*{$DEFINE DEMO}*)
+(*{$DEFINE CURSOR}*)
 
-{$DEFINE XHEAP}
+(*{$DEFINE XHEAP}*)
 
 {$M 65520,8192,655360}
 
-{$X+,S-,F+}
+{$X+,S+,O+,F+}
 
 {$G-}
 
@@ -28,7 +29,9 @@ Uses App,
      Dialogs,
      MsgBox,
      Editors,
+{$IFDEF CURSOR}
      TVCursor,
+{$ENDIF}
      Colorsel,
      Colors,
      MyEditor,
@@ -270,10 +273,12 @@ BEGIN
   RegisterMenus;
   RegisterDialogs;
   RegisterApp;
+
+  InitProjekt(WorkDir);
+
   TApplication.Init;
 
   WorkDir := 'C:\';
-  InitProjekt(WorkDir);
   R := MenuExtent;
   R.A.X := R.B.X - 9;
   R.B.Y := R.A.Y + 1;
@@ -293,9 +298,6 @@ BEGIN
   DoneProjekt; (* Projekt - Verwaltung *)
 (*  If Save then SpeichereDateienDialog;*)
 {ENDIF}
-  ReWrite(ColorFile);
-  Write(ColorFile, WorkDir);
-  Close(ColorFile);
   TApplication.Done
 END;
 
@@ -439,89 +441,44 @@ var
   D: PFileDialog;
   W: PWindow;
 begin
-
   FileOpen := False;
-
-
-
   D := PFileDialog(ValidView(New(PFileDialog, Init('*.*', Text,
-
     '~N~ame', fdOpenButton, 100))));
-
   if D <> nil then
-
   begin
-
     if Desktop^.ExecView(D) <> cmCancel then
-
     begin
-
       D^.GetFileName(FileName);
-
       FileOpen := True
-
     end;
-
     Dispose(D, Done);
-
   end;
-
 end;
 
-
-
 Procedure TTVBUILDApp.StartEditor(FileName: PathStr);
-
 Var A: Integer;
-
 Begin
-
   For A := 1 to 9 do If (Editor[A].Ed <> Nil) and
-
                         (Editor[A].Name = FileName) then Exit;
-
-
-
   NewEditor(FileName);
-
 End;
 
-
-
 procedure TTVBUILDApp.DosShell(Command: String);
-
 begin
-
   DoneSysError;
-
   DoneEvents;
-
   DoneVideo;
-
   DoneMemory;
-
   PrintStr(GetString(MemAvail));
-
-
-
   PrintStr('Type EXIT to return...');
-
   SwapVectors;
-
   Exec(GetEnv('COMSPEC'), Command);
-
   SwapVectors;
-
   InitMemory;
-
   InitVideo;
-
   InitEvents;
-
   InitSysError;
-
   Redraw;
-
 end;
 
 
@@ -535,1200 +492,473 @@ end;
 Procedure TTVBUILDApp.HandleEvent(Var Event: TEvent);
 
 Var R: TRect;
-
-
-
 (* FÅr Editor: *)
-
-
-
   FUNCTION HandleBroadCast: BOOLEAN;
-
     BEGIN
-
       IF Event.Command DIV 100 * 100 = edBase THEN BEGIN
-
         HandleBroadCast := True;
-
         WindowNo := Event.Command MOD 100 DIV 10;
-
         EDCommand := Event.Command MOD 10;
-
         CASE EDCommand OF
-
           cmEdSave: SaveFile(WindowNo, Event.InfoPtr);
-
           cmEdSaveAs: SaveFileAs(WindowNo, Event.InfoPtr);
-
           cmEdSaveAndExit: SaveFile(WindowNo, Event.InfoPtr);
-
           cmEdRead: SendFile(WindowNo,edBase);
-
           cmEdExit: Dispose(Editor[WindowNo].Ed, Done);
-
           cmEdKillWnd: Editor[WindowNo].Ed := Nil;
-
           ELSE HandleBroadCast := False;
-
         END;
-
         CASE Event.Command OF
-
           edBase + cmEdSave: SaveFile(WindowNo, Event.InfoPtr);
-
           edBase + cmEdSaveAs: SaveFileAs(WindowNo, Event.InfoPtr);
-
           ELSE HandleBroadCast := False;
-
         END;
-
        END
-
        ELSE HandleBroadCast := False;
-
     END;
 
-
-
-
-
-
-
-
-
-
-
-
-
 procedure ShowClip;
-
 begin
-
   ClipWindow^.Select;
-
   ClipWindow^.Show;
-
 end;
-
-
-
-
-
 {
-
 Procedure Memory;
-
 Var LMem : Longint;
-
     SMem,
-
     EMem,
-
     XMem : Word;
-
     PA,
-
     PT   : Word;
 
-
-
-
-
 Function GetVersion: String;
-
 Begin
-
   GetVersion := EMS.GetVersion
-
 End;
-
-
-
-
-
 BEGIN
-
   EMem := 0;
-
   XMem := 0;
-
-
-
   LMem := System.MemAvail;
-
-
-
   If EMS.TestEMMDriver then
-
     EMS.EMMPageCount(EMem, PT)
-
-
-
   Else EMem := 0;
-
-
-
   XMem := 0;
-
   If XMS.Result = 0 then
-
     XMem := XMS.MemAvail
-
-
-
   Else XMem := 0;
-
-
-
-
-
-
-
   MessageBox('          Speicherplatz:' +
-
              Chr(13) +
-
              Chr(13) +
-
              '   Konventionell  : ' + GetString(System.MemAvail) + ' Byte.' +
-
              Chr(13) +
-
              Chr(13) +
-
              '   EMS ' + GetVersion + '        : ' + GetString(PT) + ' Seiten.' +
-
              Chr(13) +
-
              Chr(13) +
-
              '   EMS VerfÅgbar  : ' + GetString(EMem) + ' Seiten.' +
-
              Chr(13) +
-
              Chr(13) +
-
              '   XMS            : ' +
-
               GetString(XMem) + ' kByte.',
-
              Nil, mfInformation + mfOkButton);
-
-
-
 END;
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 (* BEGIN von TDareiverApp.HandleEvent: *)
-
-
-
 Const SM: String12 = '*.*'; (* SuchmaskenVoreinstellung *)
-
-
-
-
-
-
-
 Var Regs: Registers;
-
     Info: ^String;
-
     Result: Word;
-
-
-
     OldDir: String;
-
-
-
     Name  : String;
-
     P     : PView;
-
-
-
 BEGIN
-
   If AProjekt^.ASelectedProjekt = - 1 then
-
   Begin
-
     DisableCommands([cmProjektSpeichern,
-
                      cmProjektSelektieren,
-
                      cmProjektSpeichern,
-
                      cmRunAppQuelle,
-
                      cmAktualQuelle,
-
                      cmWriteAppQuelle,
-
                      cmCompileAppQuelle,
-
                      cmSubsEditieren,
-
                      cmUnitEditieren,
-
                      cmMainEditieren,
-
                      cmVariablenEditieren,
-
                      cmConstantenEditieren,
-
                      cmEditAppQuelle,
-
                      cmMakeAndRun,
-
                      cmProjektModus]);
-
   End
-
   Else
-
   Begin
-
     EnableCommands ([cmProjektSpeichern,
-
                      cmProjektSelektieren,
-
                      cmProjektSpeichern,
-
                      cmRunAppQuelle,
-
                      cmAktualQuelle,
-
                      cmWriteAppQuelle,
-
                      cmCompileAppQuelle,
-
                      cmSubsEditieren,
-
                      cmUnitEditieren,
-
                      cmMainEditieren,
-
                      cmVariablenEditieren,
-
                      cmConstantenEditieren,
-
                      cmEditAppQuelle,
-
                      cmMakeAndRun,
-
                      cmProjektModus]);
-
   End;
-
-
-
-
-
-
-
   Case Event.What of
-
     evBroadCast:
-
     Begin
-
       Begin
-
         If Event.Command = cmSubListItemSelected then
-
         Begin
-
           P := Event.InfoPtr;
-
           If TypeOf(P^) = TypeOf(TListBox) then
-
           Begin
-
             Wait('ListBox');
-
           End;
-
-
-
           If PListBox(Event.InfoPtr)^.Owner <> Nil then
-
             Name := PLabel(PListBox(Event.InfoPtr)^.Owner)^.Text^
-
           Else
-
             Name := 'Nil';
-
-
-
           ClearEvent(Event);
-
           Wait(Name + ' was Selected');
-
-
-
         End
-
       End;
-
     End;
-
   End;
-
-
-
   TApplication.HandleEvent(Event);
-
-
-
   case Event.What of
-
     evCommand:
-
     Begin
-
       GetExtent(R);
-
       R.Assign(R.A.X, R.A.Y, R.B.X, R.B.Y-2);
-
-
-
       case Event.Command of
-
-
-
         cmInfo                : Begin
-
                                   ProgramminformationDialog;
-
                                 End;
-
-
-
         cmTile                : DeskTop^.Tile(R);
-
         cmCascade             : DeskTop^.Cascade(R);
-
         cmColors              : Begin
-
                                   ColorDialog;
-
                                   DeskTop^.ReDraw
-
                                 End;
-
-
-
         cmVVE                 : AProjekt^.HilfeKontextEditierenDialog;
-
-
-
         cmHML                 : AProjekt^.ScannProjektforCommands;
-
-
-
         cmProjektLaden        : AProjekt^.Laden;
-
         cmProjektSpeichern    : AProjekt^.Speichern;
-
         cmProjektDefinieren   : AProjekt^.Definieren;
-
         cmProjektSelektieren  : AProjekt^.Selektieren;
-
         cmProjektModus        : AProjekt^.SetProjektModus;
-
-
-
-
-
         cmClassenEditieren    : AProjekt^.ClassenEditieren;
-
-
-
-
-
         cmVVL                 : Wait('MenÅ cmVVL');
-
-
-
         cmVVDA                : Wait('MenÅ cmVVDA');
-
-
-
         cmVVDD                : Wait('MenÅ cmVVDD');
-
-
-
         cmVVDE                : Wait('MenÅ cmVVDE');
-
-
-
         cmVVI                 : Wait('MenÅ cmVVI');
-
-
-
         cmVVX                 : Wait('MenÅ cmVVX');
-
-
-
         cmVVS                 : Wait('MenÅ cmVVS');
-
         cmVVA                 : Wait('MenÅ cmVVA');
-
-
-
         cmVVD                 : Wait('MenÅ cmVVD');
-
-
-
         cmModuleHirachie      : Wait('cmModuleHirachie');
-
         cmModuleBAssistent    : Wait('cmModuleBAssistent');
-
-
-
-
-
         cmReadQuelle          : AProjekt^.ReadAppSources;
-
         cmAktualQuelle        : Wait('MenÅ cmAktualQuelle');
-
-
-
         cmVariablenEditieren  : AProjekt^.VariablenEditieren;
-
         cmConstantenEditieren : AProjekt^.ConstantenEditieren;
-
-
-
-
-
         cmEditAppQuelle       : If AProjekt^.EditAppQuelle(FName) then
-
                                   StartEditor(FName);
-
-
-
         cmMainEditieren       : AProjekt^.EditMain;
-
         cmWriteAppQuelle      : AProjekt^.WriteAppSources;
-
         cmRunAppQuelle        : AProjekt^.RunApp;
-
         cmCompileAppQuelle    : AProjekt^.CompileApp;
-
         cmMakeAndRun          : AProjekt^.MakeAndRun;
-
-
-
         cmMenusEditieren      : Begin
-
                                   MenuBar^.Hide;
-
                                   AProjekt^.EditMenu;
-
                                   MenuBar^.Show;
-
                                 End;
-
-
-
         cmSubsEditieren       : AProjekt^.EditiereSubroutinen;
-
         cmUnitEditieren       : AProjekt^.EditiereUnits;
-
-
-
         cmEditorSave          : Begin
-
                                   Event.What := evBroadCast;
-
                                   Event.Command := edBase + cmEdSave;
-
                                   PutEvent(Event);
-
                                   Exit
-
                                   (*IF NOT HandleBroadCast THEN
-
                                     ClearEvent(Event);*)
-
                                 End;
-
         cmEditorSaveAs        : Begin
-
                                   Event.What := evBroadCast;
-
                                   Event.Command := edBase + cmEdSaveAs;
-
                                   PutEvent(Event);
-
                                   Exit
-
                                   (*IF NOT HandleBroadCast THEN
-
                                     ClearEvent(Event);*)
-
                                 End;
-
-
-
         cmArbeitsverz         : AProjekt^.ChWorkDir;
-
-
-
         cmChangeDir           : ChangeDir;
-
         cmShowClip            : ShowClip;
-
-
-
         cmChangeDir           : ChangeDir;
-
-
-
         cmIfCursor            : BEGIN
-
                                   IfCursor := Not(IfCursor);
-
                                   CursorAus
-
                                 END;
-
-
-
 (* Editor: *)
-
         cmFileOpen            : Begin
-
                                   If FileOpen('Dateiauswahl', FName) then
-
                                     StartEditor(FName)
-
                                 End;
-
       else
-
         Exit
-
       END;
-
     End;
-
     evBroadCast: IF NOT HandleBroadCast THEN
-
                  Begin
-
                    If Event.Command = cmDosShell then
-
                    Begin
-
                      DosShell(PString(Event.InfoPtr)^);
-
                    End;
-
                    ClearEvent(Event);
-
                  End;
-
-
-
-    
-
-
-
   else
-
     Exit
-
   END;
-
-
-
-
-
-  
-
-
-
-
-
-  
-
   If WNo > 1 then EnableCommands ([cmEditorSave, cmEditorSaveAs])
-
   else            DisableCommands([cmEditorSave, cmEditorSaveAs]);
-
-
-
   ClearEvent(Event);
-
 END;
-
-
 
 Procedure TTVBUILDApp.InitMenuBar;
-
 Var R: TRect;
-
 BEGIN
-
   GetExtent(R);
-
   R.B.Y := R.A.Y + 1;
-
-
-
 (*  R.Grow(-1, 0);*)
-
   MenuExtent := R;
-
-
-
   MenuBar := New(PMenuBar, Init(R, NewMenu(
-
-
-
     NewSubMenu('~D~atei',    hcNoContext, NewMenu(
-
-
-
       NewItem('~I~nfo Åber Programm...',   '',  kbNoKey,
-
                                                 cmInfo,
-
                                                 hcNoContext,
-
       NewItem('~V~erzeichnis wechseln...', '',  kbNoKey,
-
                                                 cmChangeDir,
-
                                                 hcNoContext,
-
       NewLine(
-
       NewItem('~L~ade Projekt...',         '',  kbNoKey,
-
                                                 cmProjektLaden,
-
                                                 hcNoContext,
-
       NewItem('~S~peichere Project',       '',  kbNoKey,
-
                                                 cmProjektSpeichern,
-
                                                 hcNoContext,
-
       NewLine(
-
       NewItem('~E~nde',               'Alt-X',  kbAltX,
-
                                                 cmQuit,
-
                                                 hcNoContext,
-
       Nil)))))))),
-
-
-
     NewSubMenu('~A~pplikation',    hcNoContext, NewMenu(
-
-      
-
       NewItem('~D~efiniere Project...',    '',  kbNoKey,
-
                                                 cmProjektDefinieren,
-
                                                 hcNoContext,
-
       NewItem('~S~elektiere Projekt...',   '',  kbNoKey,
-
                                                 cmProjektSelektieren,
-
-                                                hcNoContext,
-
+                                                 hcNoContext,
       NewSubMenu('~M~odule',    hcNoContext, NewMenu(
-
-
-
         NewItem('~H~irachie...',           '',    kbNoKey,
-
                                                   cmModuleHirachie,
-
                                                   hcNoContext,
-
         NewItem('~B~uild assistent...',   '',     kbNoKey,
-
                                                   cmModuleBAssistent,
-
                                                   hcNoContext,
-
         Nil))),
-
       NewLine(
-
       NewItem('Lese ~P~rojekt aus Quelle', '',  kbNoKey,
-
                                                 cmReadQuelle,
-
                                                 hcNoContext,
-
       NewItem('Aktualisiere ~Q~uelle',     '',  kbNoKey,
-
                                                 cmAktualQuelle,
-
                                                 hcNoContext,
-
-
-
       NewItem('Quell~t~ext editieren',    'F6', kbF6,
-
                                                 cmEditAppQuelle,
-
                                                 hcNoContext,
-
-
-
       NewItem('~E~rzeuge Quelltexte',     'F7', kbF7,
-
                                                 cmWriteAppQuelle,
-
                                                 hcNoContext,
-
-
-
       NewLine(
-
       NewItem('~C~ompiliere Quelltexte',   '',  kbNoKey,
-
                                                 cmCompileAppQuelle,
-
                                                 hcNoContext,
-
-
-
       NewItem('~R~un Applikation',         '',  kbNoKey,
-
                                                 cmRunAppQuelle,
-
                                                 hcNoContext,
-
-
-
       NewLine(
-
       NewItem('Teste ~A~pplikation',    'F5',   kbF5,
-
                                                 cmMakeAndRun,
-
                                                 hcNoContext,
-
-
-
-
-
       Nil)))))))))))))),
-
-
-
-
-
     NewSubMenu('~E~ditor',                      hcEditor, NewMenu(
-
-
-
       NewItem('~L~aden...',             'F3',   kbNoKey,
-
                                                 cmFileOpen,
-
                                                 hcEditor,
-
       NewItem('~S~peichern',            'F2',   kbNoKey,
-
                                                 cmEditorSave,
-
                                                 hcEditor,
-
       NewItem('Speichern ~a~ls...',       '',   kbNoKey,
-
                                                 cmEditorSaveAs,
-
                                                 hcEditor,
-
       NewLine(
-
       NewItem('~C~lipboard',              '',   kbNoKey,
-
                                                 cmShowClip,
-
                                                 hcEditor,
-
       Nil)))))),
-
-
-
-
-
     NewSubMenu('Ein~s~tellungen',  hcEinstellungen, NewMenu(
-
       NewItem('~C~ursor',                     '',   kbNoKey,
-
                                                     cmIfCursor,
-
                                                     hcNoContext,
-
       NewItem('~F~arben...',                  '',   kbNoKey,
-
                                                     cmColors,
-
                                                     hcNoContext,
-
       NewLine(
-
       NewItem('~T~ile',                       '',   kbNoKey,
-
                                                     cmTile,
-
                                                     hcNoContext,
-
       NewItem('C~a~scade',                    '',   kbNoKey,
-
                                                     cmCascade,
-
                                                     hcNoContext,
-
       NewLine(
-
       NewItem('~A~rbeitsverz. fÅr Projekt',   '',   kbNoKey,
-
                                                     cmArbeitsverz,
-
                                                     hcNoContext,
-
       NewItem('~D~ateiname fÅr Projekt...',   '',   kbNoKey,
-
                                                     cmVVD,
-
                                                     hcNoContext,
-
       NewItem('~P~rojektmodus',               '',   kbNoKey,
-
                                                     cmProjektModus,
-
                                                     hcNoContext,
-
       nil)))))))))),
-
-
-
-
-
     NewSubMenu('~P~rojekt', hcNoContext, NewMenu(
-
       NewSubMenu('~K~lassen', hcNoContext, NewMenu(
-
         NewItem('~E~ditor...',                  '', kbNoKey,
-
                                                     cmClassenEditieren,
-
                                                     hcNoContext,
-
         nil)),
-
-
-
       NewSubMenu('~M~enÅ', hcNoContext, NewMenu(
-
         NewItem('~E~ditor...',                  '', kbNoKey,
-
                                                     cmMenusEditieren,
-
                                                     hcNoContext,
-
-
-
         NewItem('Event~b~ehandlung',            '', kbNoKey,
-
                                                     cmMenusEditieren,
-
                                                     hcNoContext,
-
         nil))),
-
-
-
-
-
       NewSubMenu('~D~ialoge', hcNoContext, NewMenu(
-
         NewItem('~E~ditor...',                  '', kbNoKey,
-
                                                     cmMenusEditieren,
-
                                                     hcNoContext,
-
-
-
         NewItem('Event~b~ehandlung',            '', kbNoKey,
-
                                                     cmMenusEditieren,
-
                                                     hcNoContext,
-
         nil))),
-
-
-
-
-
       NewSubMenu('~V~ariablen', hcNoContext, NewMenu(
-
         NewItem('~E~ditor...',                  '', kbNoKey,
-
                                                     cmVariablenEditieren,
-
                                                     hcNoContext,
-
         nil)),
-
-
-
       NewSubMenu('~C~onstanten', hcNoContext, NewMenu(
-
         NewItem('~E~ditor...',                  '', kbNoKey,
-
                                                     cmConstantenEditieren,
-
                                                     hcNoContext,
-
         nil)),
-
-
-
       NewSubMenu('~D~aten', hcNoContext, NewMenu(
-
         NewItem('~E~ditor...',                  '', kbNoKey,
-
                                                     cmMenusEditieren,
-
                                                     hcNoContext,
-
         nil)),
-
-
-
       NewSubMenu('~S~ub''s', hcNoContext, NewMenu(
-
         NewItem('~E~ditor...',                  '', kbNoKey,
-
                                                     cmSubsEditieren,
-
                                                     hcNoContext,
-
         nil)),
-
-
-
       NewSubMenu('~U~nit''s', hcNoContext, NewMenu(
-
         NewItem('~E~ditor...',                  '', kbNoKey,
-
                                                     cmUnitEditieren,
-
                                                     hcNoContext,
-
         nil)),
-
-
-
       NewSubMenu('~H~auptprogramm', hcNoContext, NewMenu(
-
         NewItem('~E~ditor...',                  '', kbNoKey,
-
                                                     cmMainEditieren,
-
                                                     hcNoContext,
-
         nil)),
-
-
-
-
-
       NewSubMenu('~H~ilfe - System', hcNoContext, NewMenu(
-
         NewItem('~E~ditor...',                  '', kbNoKey,
-
                                                     cmVVE,
-
                                                     hcNoContext,
-
-
-
         NewItem('~M~enÅ aus Quelle einlesen',   '', kbNoKey,
-
                                                     cmHML,
-
                                                     hcNoContext,
-
         nil))),
-
       nil))))))))))),
-
-
-
    NewSubMenu('~K~lassen', hcNoContext, NewMenu(
-
       NewSubMenu('~V~isuelle', hcNoContext, NewMenu(
-
         NewItem('~E~ditor...',                  '', kbNoKey,
-
                                                     cmClassenEditieren,
-
                                                     hcNoContext,
-
         nil)),
-
-
-
       NewSubMenu('~D~aten', hcNoContext, NewMenu(
-
         NewItem('~E~ditor...',                  '', kbNoKey,
-
                                                     cmMenusEditieren,
-
                                                     hcNoContext,
-
         nil)),
-
       nil))),
-
     nil)))))))));
-
-
-
 END;
-
-
 
 Procedure TTVBUILDApp.InitStatusLine;
-
 var
-
   R: TRect;
-
 BEGIN
-
   GetExtent(R);
-
   R.A.Y := R.B.Y - 1;
-
   New(StatusLine, Init(R,
-
     NewStatusDef(0, $FFFF,
-
       NewStatusKey('~Alt-X~ Ende', kbAltX,
-
                    cmQuit,
-
       NewStatusKey('~F10~ MenÅ', kbF10,
-
                    cmMenu,
-
       NewStatusKey('Quelle: ~F6~ Edit', kbF6,
-
                    cmEditAppQuelle,
-
       NewStatusKey('~F7~ Make', kbF7,
-
                    cmWriteAppQuelle,
-
       nil)))),
-
     nil)));
-
-
-
 END;
-
-
 
 Procedure TTVBUILDApp.OutOfMemory;
-
 BEGIN
-
   MessageBox('Nicht genug Speicher fÅr diese Operation.',
-
     nil, mfError + mfOkButton);
-
 END;
-
-
 
 PROCEDURE TTVBUILDApp.Idle;
-
 BEGIN
-
   TApplication.Idle;
-
   Heap^.Update;
-
 END;
 
-
-
-
-
-
-
 (* Hauptprogramm: *)
-
-
-
-
-
 Var TVBUILDApp : TTVBUILDApp;
-
-
-
-
-
 BEGIN
+{$IFDEF CURSOR}
   IfCursor := True;
-
   SaveCursor;
-
+{$ENDIF}
   RegisterStrings;
-
-
-
   TVBUILDApp.Init;
-
-
-
   InitKeyWords;
-
-
-
   TVBUILDApp.Run;
-
   TVBUILDApp.Done;
-
+{$IFDEF CURSOR}
   OrgCursor
-
+{$ENDIF}
 END.
