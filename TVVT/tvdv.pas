@@ -1,10 +1,21 @@
 Program TVDV;
 {$M 65520,65520,655360}
+
+{$X+}
+(*
+{$S+}
+{$O+}
+{$F+}
+{$G-}
+{$W+}
+*)
 (*{$DEFINE DEMO}*)
-(*{$DEFINE USEOVERLAY}*)
-(*{$DEFINE USEEMS}*)
-(*{$DEFINE USEXMS}*)
-(*{$DEFINE XHEAP}*)
+(*
+{$DEFINE USEOVERLAY}
+{$DEFINE USEEMS}
+{$DEFINE USEXMS}
+{$DEFINE XHEAP}
+*)
 (*{$DEFINE USECRT}*)
 Uses
    (*  TvGraph,*)
