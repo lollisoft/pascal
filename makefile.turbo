@@ -1,4 +1,4 @@
-OUTPUT=/EC:\\TP\\Builds
+OUTPUT=/EC:\\TP\\TPU
 TPUS=/UQ:\\develop\\Tools\\TP\\tvision
 
 DEBUG=/V /GD
