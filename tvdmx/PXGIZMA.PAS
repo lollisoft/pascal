@@ -306,9 +306,11 @@ begin
   Case ver of
     $03:	VerID := PARADOX35;  { It's really 3.0 }
     $04:	VerID := PARADOX35;
+{
     $05..09:	VerID := PARADOX40;
     $0A,$0B:	VerID := PARADOX50;
-   else		VerID :=  0;
+}
+	else		VerID :=  0;
     end;
   S.Seek($40);
   S.Read(i, sizeof(i));
@@ -368,9 +370,11 @@ begin
       While (pos('\', TableName) > 0) do Delete(TableName,1,pos('\', TableName));
     Case Fmt of
       PARADOX35:	TblFmt := 'Paradox 3.5';
+{
       PARADOX40:	TblFmt := 'Paradox 4.0';
       PARADOX50:	TblFmt := 'Paradox 5.0';
-     else		TblFmt := 'Unknown';
+}
+	  else		TblFmt := 'Unknown';
       end;
     If Coded then Encrypted := 'Yes' else Encrypted := 'No';
     Case SO of
