@@ -2231,6 +2231,7 @@ BEGIN
 
         cmProgramminfo        : ProgrammInformationDialog;
         cmMemory              : Memory;
+		cmHeapUpdate          : Idle;
         cmDatenAufgeben       : DatenAufgeben;
         cmChangeDir           : ChangeDir;
         cmScann               : Scann;

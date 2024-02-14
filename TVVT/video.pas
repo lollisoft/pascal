@@ -9,6 +9,7 @@ Uses
     Crt,
 {$ENDIF}
      App,
+	 TVDVCMDS,
      Drivers,
      GadGets,
      Dos,
@@ -2707,6 +2708,8 @@ var sr: PSearchRec;
 
 var h           : Integer;
 begin
+  Message(Application, evCommand, cmHeapUpdate, nil);
+
   New(sr);
   If System.MemAvail < 80000 then
   Begin
