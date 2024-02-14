@@ -1,0 +1,1 @@
+tpc /B /$X+ /$V- /EC:\TP\TPU /UQ:\Develop\Projects\PASCAL\TVDMX;C:\TP\TPU pxshop.pas
