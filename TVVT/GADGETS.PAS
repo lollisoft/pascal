@@ -1,13 +1,14 @@
 {************************************************}
 {                                                }
+{   Turbo Pascal 6.0                             }
 {   Turbo Vision Demo                            }
-{   Copyright (c) 1992 by Borland International  }
+{   Copyright (c) 1990 by Borland International  }
 {                                                }
 {************************************************}
 
 unit Gadgets;
 
-{$F+,O+,S-,D-,Q-}
+{$F+,O+,S-,D-}
 
 { Useful gadgets: clock and heap available viewer }
 
@@ -44,7 +45,7 @@ uses Drivers;
 
 constructor THeapView.Init(var Bounds: TRect);
 begin
-  inherited Init(Bounds);
+  TView.Init(Bounds);
   OldMem := 0;
 end;
 
@@ -79,7 +80,7 @@ end;
 
 constructor TClockView.Init(var Bounds: TRect);
 begin
-  inherited Init(Bounds);
+  TView.Init(Bounds);
   FillChar(LastTime, SizeOf(LastTime), #$FF);
   TimeStr := '';
   Refresh := 1;
