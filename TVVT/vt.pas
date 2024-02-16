@@ -18,7 +18,7 @@ Uses
      Dialogs,
      DEdit,
      MsgBox,
-     Video,
+     {Video,}
      Filefind,
      EStrings,
      StrTools;
@@ -143,6 +143,7 @@ Var     Trans,
         DoDecStelle : Integer;
 
 
+Procedure Wait(txt : string);
 
 Procedure VokabelnEditierenDialog;
 
@@ -156,6 +157,13 @@ Function TranslateDateiTest(Var Datei: TFtyp): Boolean;
 Function VokabelDateiTest(Var Datei: VFtyp): Boolean;
 
 Implementation
+
+var     A : Longint;
+
+Procedure Wait;
+begin
+  MessageBox(txt, nil, mfOkButton)
+end;
 
 
 Procedure VokabelDateiOeffnen;
