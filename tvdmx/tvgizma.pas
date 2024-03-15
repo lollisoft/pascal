@@ -24,6 +24,8 @@ uses
     Crt,
    {$ENDIF }
     Objects, Drivers, Memory, Dialogs, Menus,
+	     GadGets,
+
     HistList, Views, App, MsgBox, RSet, DmxGizma;
 
 const
@@ -48,6 +50,7 @@ type
 
 
     TAppA		=  OBJECT(TApplication)
+        Heap            : PHeapView;
 	Clock		: PTimeView;
 	SoundInd	: pstring;
 	VideoInd	: pstring;
@@ -426,6 +429,8 @@ end;
 
 
 constructor TAppA.Init;
+var
+  R: TRect;
 begin
   InitMemory;
   InitVideo;
@@ -449,6 +454,14 @@ begin
   InitSysError;
   InitHistory;
   TProgram.Init;
+
+  GetExtent(R);
+  R.B.X := R.B.X - 12;
+  R.A.X := R.B.X - 9;
+  R.B.Y := R.A.Y + 1;
+  Heap := New(PHeapView, Init(R));
+  Insert(Heap);
+
   InitClock;
   Insert(Clock);
   If (VideoInd <> nil) then Str(ScreenHeight:length(VideoInd^), VideoInd^);
@@ -632,6 +645,7 @@ begin
     PutEvent(E);
     end;
   If (Clock <> nil) then Clock^.Update;
+  If (Heap <> nil) then Heap^.Update;
 end;
 
 
