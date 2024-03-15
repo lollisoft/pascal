@@ -1,5 +1,6 @@
 Unit VT; (* Vokabeltrainer *)
 {$X+ $O+ $F+}
+{$M 65520,65520,655360}
 
 Interface
 
@@ -62,6 +63,8 @@ Type
     function Compare(Key1, Key2: Pointer): Integer; virtual;
     function KeyOf(Item: Pointer): Pointer; Virtual;
     Procedure Print(TransVColl: PVokabelCollection;
+                    TransTColl: PCollection); Virtual;
+    Procedure Display(TransVColl: PVokabelCollection;
                     TransTColl: PCollection); Virtual;
   End;
 
@@ -274,7 +277,6 @@ Destructor TTrans.Done;
 Begin
   TObject.Done
 End;
-
   
 Constructor TVokabel.Init(VokabelData: Vokabeltyp);
 Begin
@@ -400,6 +402,78 @@ Begin
     Writeln(Lst, #12)
   End
 End;
+
+Procedure TVokabelCollection.Display(TransVColl: PVokabelCollection;
+                                   TransTColl: PCollection);
+
+Var DZeile: Integer;
+    DSeite: Integer;
+
+Procedure DisplayZeile(Vokabel: PVokabel); Far;
+Var Zeile: String;
+Var A    : Integer;
+Begin
+
+  If DZeile = 0 then
+  Begin
+    Zeile := 'Seite: ' + LONGINTtoSTRING(DSeite, 10, 10);
+    While Length(Zeile) < 75 do
+    Zeile := ' ' + Zeile;
+
+    Writeln(Zeile);
+    Inc(DZeile, 2);
+    Inc(DSeite)
+  End;
+
+  If DZeile + Vokabel^.Vokabel^.Anzahl - 1 > 58 then
+  Begin
+    DZeile := 0;
+  End;
+
+  For A:= 0 to Vokabel^.Vokabel^.Anzahl - 1 do
+  Begin
+    Inc(DZeile);
+
+
+    Zeile := '';
+
+    If A = 0 then
+    Begin
+      Zeile := '     ' + Vokabel^.Vokabel^.Wort;
+
+      Zeile := Zeile + ' ';
+
+      While Length(Zeile) < 39 do Zeile := Zeile + '.'
+    End
+    Else
+      While Length(Zeile) < 39 do Zeile := Zeile + ' ';
+
+
+    Zeile := Zeile + ' ' +
+             PVokabel(
+             TransVColl^.At(
+             PTrans(
+             TransTColl^.At(Vokabel^.Vokabel^.ZL + A))^.Translate))^.Vokabel^.Wort;
+
+
+
+    Writeln(Zeile)
+  End;
+  If Vokabel^.Vokabel^.Anzahl > 1 then
+  Begin
+    Inc(DZeile);
+  End
+End;
+
+Begin
+  DZeile := 0;
+  DSeite := 1;
+  If Count <> 0 then
+  Begin
+    ForEach(@DisplayZeile);
+  End
+End;
+
 
 Function TVokabelCollection.Compare(Key1, Key2: Pointer): Integer;
 Begin
