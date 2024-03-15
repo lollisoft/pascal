@@ -1,9 +1,9 @@
 Program TVVT;
 (*{$DEFINE DEMO}*)
-(*{$DEFINE USEOVERLAY}*)
-(*{$DEFINE USEEMS}*)
-(*{$DEFINE USEXMS}*)
-(*{$DEFINE XHEAP}*)
+(*{$DEFINE USEOVERLAY} No longer used in this file *)
+(*{$DEFINE USEEMS}
+{$DEFINE USEXMS}
+{$DEFINE XHEAP} I have no idea if that makes sense in TP 7 protected mode *)
 (*{$DEFINE IDLEKEY}*)
 
 
@@ -47,7 +47,7 @@ Uses App,
 Const
 
     FileName           : String12 = '*.*';
-    VFileName          : String = 'LESSON01';
+    VFileName          : String = 'gesamt';
 
 
 Type
